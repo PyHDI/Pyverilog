@@ -1,0 +1,1 @@
+{% for scope in scopes %}{{ scope }}{% endfor %}

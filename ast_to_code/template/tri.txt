@@ -1,0 +1,1 @@
+tri {% if signed %}signed {% endif %}{% if width != '' %}{{ width }} {% endif %}{{ name }};

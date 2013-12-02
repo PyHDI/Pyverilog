@@ -1,0 +1,2 @@
+{% for param in params %}{{ param }}{% if loop.index < len_params %}, {% endif %}
+{% endfor %}

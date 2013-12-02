@@ -1,0 +1,5 @@
+generate
+{%- for item in items %}
+{{ item }}
+{%- endfor %}
+endgenerate 

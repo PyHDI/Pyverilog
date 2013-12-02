@@ -1,0 +1,2 @@
+for({{ pre }} {{ cond }}; {{ post }})
+{{ statement }}

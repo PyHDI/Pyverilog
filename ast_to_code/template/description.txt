@@ -1,0 +1,3 @@
+{% for definition in definitions %}
+{{ definition }}
+{% endfor %}

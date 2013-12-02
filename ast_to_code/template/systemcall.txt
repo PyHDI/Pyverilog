@@ -1,0 +1,1 @@
+${{ syscall }}{% if len_args > 0 %}({% endif %}{% for arg in args %}{{ arg }}{% if loop.index < len_args %}, {% endif %}{% endfor %}{% if len_args > 0 %}){% endif %}

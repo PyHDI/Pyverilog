@@ -1,0 +1,2 @@
+if({{ cond }}) {{ true_statement }} 
+{% if false_statement != '' %}else {{ false_statement }}{% endif %}

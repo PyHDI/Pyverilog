@@ -1,0 +1,1 @@
+{% for item in items %}{{ item }}{% if loop.index < len_items %} or {% endif %}{% endfor %}
