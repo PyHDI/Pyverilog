@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # preprocessor.py
 # 
-# Verilog HDL preprocessor with Pyverilog
+# Preprocessor
 #
 # Current version calls Icarus Verilog as preprocessor.
 # Please install Icarus Verilog on your environment.

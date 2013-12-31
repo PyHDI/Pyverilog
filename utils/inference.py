@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # inference.py
 #
-# Value Inference Library with Pyverilog
+# Value inference
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
@@ -12,12 +12,12 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
 
+from pyverilog.dataflow.dataflow import *
+
 if sys.version_info[0] >= 3:
     import pyverilog.utils.verror as verror
-    from pyverilog.utils.dataflow import *
 else:
     import verror as verror
-    from dataflow import *
 
 this = sys.modules[__name__]
 

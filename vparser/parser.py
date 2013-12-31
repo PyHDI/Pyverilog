@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # parser.py
 # 
-# Verilog code parser with Pyverilog
+# Parser
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0

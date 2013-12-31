@@ -14,10 +14,8 @@ import copy
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
 
 if sys.version_info[0] >= 3:
-    import pyverilog.utils.verror as verror
     from pyverilog.utils.scope import ScopeLabel, ScopeChain
 else:
-    import verror
     from scope import ScopeLabel, ScopeChain
 
 def toTermname(name):

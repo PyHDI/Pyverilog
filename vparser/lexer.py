@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # lexer.py
 # 
-# Verilog code lexical analyzer with Pyverilog
+# Lexical analyzer
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0

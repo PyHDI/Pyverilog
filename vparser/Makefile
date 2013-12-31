@@ -5,7 +5,7 @@ PREPROCESS=preprocessor.py
 LEXER=lexer.py
 PARSER=parser.py
 
-SRCS=../test/generate.v
+SRCS=../testcode/generate.v
 
 .PHONY: parse
 parse:
