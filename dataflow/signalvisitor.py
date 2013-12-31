@@ -21,10 +21,12 @@ if sys.version_info[0] >= 3:
     from pyverilog.dataflow.dataflow import *
     from pyverilog.dataflow.visit import *
     from pyverilog.dataflow.optimizer import VerilogOptimizer
+    import pyverilog.dataflow.reorder as reorder
 else:
     from dataflow import *
     from visit import *
     from optimizer import VerilogOptimizer
+    import reorder
 
 class SignalVisitor(NodeVisitor):
     def __init__(self, moduleinfotable, top):
@@ -472,20 +474,20 @@ class SignalVisitor(NodeVisitor):
             false_df = self.makeDFTree(node.false_value, scope)
             cond_df = self.makeDFTree(node.cond, scope)
             if isinstance(cond_df, DFBranch):
-                return tree_reorder.insertCond(cond_df, true_df, false_df)
+                return reorder.insertCond(cond_df, true_df, false_df)
             return DFBranch(cond_df, true_df, false_df)
 
         if isinstance(node, UnaryOperator):
             right_df = self.makeDFTree(node.right, scope)
             if isinstance(right_df, DFBranch):
-                return tree_reorder.insertUnaryOp(right_df, node.__class__.__name__)
+                return reorder.insertUnaryOp(right_df, node.__class__.__name__)
             return DFOperator((right_df,), node.__class__.__name__)
 
         if isinstance(node, Operator):
             left_df = self.makeDFTree(node.left, scope)
             right_df = self.makeDFTree(node.right, scope)
             if isinstance(left_df, DFBranch) or isinstance(right_df, DFBranch):
-                return tree_reorder.insertOp(left_df, right_df, node.__class__.__name__)
+                return reorder.insertOp(left_df, right_df, node.__class__.__name__)
             return DFOperator((left_df, right_df,), node.__class__.__name__)
 
         if isinstance(node, Partselect):
@@ -494,7 +496,7 @@ class SignalVisitor(NodeVisitor):
             lsb_df = self.makeDFTree(node.lsb, scope)
 
             if isinstance(var_df, DFBranch):
-                return tree_reorder.insertPartselect(var_df, msb_df, lsb_df)
+                return reorder.insertPartselect(var_df, msb_df, lsb_df)
             return DFPartselect(var_df, msb_df, lsb_df)
 
         if isinstance(node, Pointer):
@@ -513,7 +515,7 @@ class SignalVisitor(NodeVisitor):
                 nextnodes.append(self.makeDFTree(n, scope))
             for n in nextnodes:
                 if isinstance(n, DFBranch):
-                    return tree_reorder.insertConcat(tuple(nextnodes))
+                    return reorder.insertConcat(tuple(nextnodes))
             return DFConcat(tuple(nextnodes))
 
         if isinstance(node, Repeat):

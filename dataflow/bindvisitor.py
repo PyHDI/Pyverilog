@@ -23,11 +23,13 @@ if sys.version_info[0] >= 3:
     from pyverilog.dataflow.visit import *
     from pyverilog.dataflow.optimizer import VerilogOptimizer
     import pyverilog.dataflow.reorder as reorder
+    import pyverilog.dataflow.replace as replace
 else:
     from dataflow import *
     from visit import *
     from optimizer import VerilogOptimizer
     import reorder
+    import replace
 
 class BindVisitor(NodeVisitor):
     def __init__(self, moduleinfotable, top, frames, noreorder=False):
@@ -1062,7 +1064,7 @@ class BindVisitor(NodeVisitor):
          rest_condlist, 
          rest_flowlist, 
          match_flowlist) = self.diffBranchTree(merged_tree, condlist, flowlist)
-         return tree_replace.replaceUndefined(merged_tree, tree.name)
+         return replace.replaceUndefined(merged_tree, tree.name)
 
     def resolveBlockingAssign(self, tree, scope):
         if tree is None: return None
