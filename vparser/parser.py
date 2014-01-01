@@ -884,8 +884,8 @@ class VerilogParser(PLYParser):
         p[0] = (p[1],)
 
     def p_repeat(self, p):
-        'repeat : expression concat'
-        p[0] = Repeat(p[2], p[1])
+        'repeat : LBRACE expression concat RBRACE'
+        p[0] = Repeat(p[3], p[2])        
 
     def p_partselect(self, p):
         'partselect : identifier LBRACKET expression COLON expression RBRACKET'

@@ -6,7 +6,6 @@ module TOP(CLK, RST_X, IN, OUT);
   reg [7:0] state;
   reg [7:0] nstate;
   reg [7:0] cnt;
-  reg [7:0] ncnt;
 
   integer i;
 
@@ -30,11 +29,9 @@ module TOP(CLK, RST_X, IN, OUT);
       cnt <= 0;
     end else begin
       state <= nstate;
-      cnt <= ncnt;
+      cnt <= cnt + 1;
     end
   end
   
 endmodule
-  
 
-  
