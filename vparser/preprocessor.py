@@ -40,7 +40,7 @@ class VerilogPreprocessor(object):
         subprocess.call(cmd, shell=True)
 
 if __name__ == '__main__':
-    filelist = ('../test/generate.v',)
+    filelist = ('../testcode/test.v',)
     pp_outputfile = 'pp.out'
     vp = VerilogPreprocessor(filelist, pp_outputfile, include=('./'))
     vp.preprocess()

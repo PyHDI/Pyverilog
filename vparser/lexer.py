@@ -262,7 +262,7 @@ if __name__ == '__main__':
         sys.write(msg + "\n")
         sys.exit()
 
-    filename = '../test/generate.v'
+    filename = '../testcode/test.v'
     text = open(filename, 'r').read()
 
     lexer = VerilogLexer(error_func = my_error_func)
