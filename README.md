@@ -31,7 +31,7 @@ Software Requirements
 
 * Python (2.7, 3.3 or later)
 * Icarus Verilog (0.9.6 or later)
-   - vparser.preprocessor.py uses 'iverilog -E' command insted of the preprocessor.
+   - vparser.preprocessor.py uses 'iverilog -E' command instead of the preprocessor.
    - 'apt-get install iverilog'
 * Graphviz and Pygraphviz (Python3 does not support Pygraphviz)
    - graphgen.py in dataflow and controlflow.py in controlflow (without --nograph option) use Pygraphviz with Python 2.7.
