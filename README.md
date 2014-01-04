@@ -29,17 +29,19 @@ You can create your own design analyzer, code translator and code generator of V
 Software Requirements
 ------------------------------
 
-* Python (2.7 and 3.3 or later)
-* Graphviz and Pygraphviz (Python3 does not support)
-   - graphgen.py in controlflow and controlflow.py in controlflow (without --nograph option) use Pygraphviz with Python 2.7.
-   - If you do not use graphgen.py and controlflow.py without --nograph option, Python 3 is OK.
-* Jinja2 (2.7 or later)
-   - pip3 install jinja2
+* Python (2.7, 3.3 or later)
 * Icarus Verilog (0.9.6 or later)
-   - apt-get install iverilog
+   - vparser.preprocessor.py uses 'iverilog -E' command insted of the preprocessor
+   - 'apt-get install iverilog'
+* Graphviz and Pygraphviz (Python3 does not support Pygraphviz)
+   - graphgen.py in dataflow and controlflow.py in controlflow (without --nograph option) use Pygraphviz with Python 2.7.
+   - If you do not use graphgen.py and controlflow.py (without --nograph) option, Python 3 is OK.
+* Jinja2 (2.7 or later)
+   - ast\_code\_generator requires jinja2 module
+   - 'pip3 install jinja2'
 
 
-Functions 
+Tools
 ------------------------------
 
 This software includes various tools for Verilog HDL design.
