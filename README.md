@@ -37,7 +37,7 @@ Software Requirements
    - graphgen.py in dataflow and controlflow.py in controlflow (without --nograph option) use Pygraphviz with Python 2.7.
    - If you do not use graphgen.py and controlflow.py (without --nograph) option, Python 3 is OK.
 * Jinja2 (2.7 or later)
-   - ast\_code\_generator requires jinja2 module
+   - ast\_code\_generator requires jinja2 module.
    - 'pip3 install jinja2'
 
 
