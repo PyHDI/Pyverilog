@@ -2,7 +2,7 @@ PYTHON=python3.3
 #OPT=-m pdb
 
 CODEGEN=codegen.py
-SRCS=../testcode/generate.v
+SRCS=../testcode/test.v
 
 .PHONY: codegen
 codegen:
