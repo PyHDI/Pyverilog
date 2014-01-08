@@ -8,7 +8,7 @@ E-mail: takamaeda\_at\_arch.cs.titech.ac.jp
 
 
 License
-------------------------------
+==============================
 Apache License 2.0
 (http://www.apache.org/licenses/LICENSE-2.0)
 
@@ -17,7 +17,7 @@ The license of PLY is BSD.
 
 
 What's Pyverilog?
-------------------------------
+==============================
 
 Pyverilog is open-source hardware design processing toolkit for Verilog HDL.
 All source codes are written in Python.
@@ -27,7 +27,7 @@ You can create your own design analyzer, code translator and code generator of V
 
 
 Software Requirements
-------------------------------
+==============================
 
 * Python (2.7, 3.3 or later)
 * Icarus Verilog (0.9.6 or later)
@@ -42,7 +42,7 @@ Software Requirements
 
 
 Tools
-------------------------------
+==============================
 
 This software includes various tools for Verilog HDL design.
 
@@ -53,7 +53,7 @@ This software includes various tools for Verilog HDL design.
 
 
 Getting Started
-------------------------------
+==============================
 
 First, please prepare a Verilog HDL source file as below. The file name is 'test.v'.
 This sample design adds the input value internally whtn the enable signal is asserted. Then is outputs its partial value to the LED.
@@ -88,7 +88,8 @@ module top
 endmodule
 ```
 
-**Code parser**
+Code parser
+------------------------------
 
 Let's try syntax analysis. Please type the command as below.
 
@@ -207,7 +208,8 @@ Source:
                           IntConst: 0
 ```
 
-**Dataflow analyzer**
+Dataflow analyzer
+------------------------------
 
 Let's try dataflow analysis. Please type the command as below.
 
@@ -245,7 +247,8 @@ Then you got a png file (out.png). The picture shows that the definition of 'led
 
 ![out.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045641.png)
 
-**Control-flow analyzer**
+Control-flow analyzer
+------------------------------
 
 Let's try control-flow analysis. Please type the command as below.
 
@@ -274,7 +277,8 @@ You got also a png file (top_state.png). The picture shows that the graphical st
 
 ![top_state.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png)
 
-**Code generator**
+Code generator
+------------------------------
  
 Finally, let's try code generation. Please prepare a Python script as below. The file name is 'test.py'.
 A Verilog HDL code is represented by using the AST classes defined in 'vparser.ast'.
@@ -321,7 +325,7 @@ endmodule
 
 
 Related Project and Site
-------------------------------
+==============================
 
 [PyCoRAM](http://shtaxxx.github.io/PyCoRAM/)
 - Python-based Implementation of CoRAM Memory Architecture for AXI4 Interconnection on FPGAs
