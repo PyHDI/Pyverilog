@@ -9,6 +9,7 @@
 
 import sys
 import os
+import re
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
 
@@ -64,6 +65,10 @@ class BindVisitor(NodeVisitor):
     ############################################################################
     def start_visit(self):
         return self.visit(self.moduleinfotable.getDefinition(self.top))
+
+    def visit_ModuleDef(self, node):
+        self.default_nettype = node.default_nettype
+        self.generic_visit(node)
 
     def visit_Input(self, node):
         self.addTerm(node)
@@ -1215,12 +1220,12 @@ class BindVisitor(NodeVisitor):
         if isinstance(left, Identifier):
             name = self.searchTerminal(left.name, scope)
             if name is None:
-                if self.default_nettype == 'none':
-                    raise verror.FormatError()
-                if self.default_nettype == 'wire':
-                    self.addTerm(Wire(left.name), rscope=scope)
-                if self.default_nettype == 'reg':
-                    self.addTerm(Reg(left.name), rscope=scope)
+                m = re.search('none', self.default_nettype)
+                if m: raise verror.FormatError("No such signal: %s" % left.name)
+                m = re.search('wire', self.default_nettype)
+                if m: self.addTerm(Wire(left.name), rscope=scope)
+                m = re.search('reg', self.default_nettype)
+                if m: self.addTerm(Reg(left.name), rscope=scope)
                 name = self.searchTerminal(left.name, scope)
             if left.scope is not None:
                 name = left.scope + ScopeLabel(left.name, 'signal')

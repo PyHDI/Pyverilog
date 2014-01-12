@@ -68,11 +68,12 @@ class Description(Node):
 
 class ModuleDef(Node):
     attr_names = ('name',)
-    def __init__(self, name, paramlist, portlist, items):
+    def __init__(self, name, paramlist, portlist, items, default_nettype='wire'):
         self.name = name
         self.paramlist = paramlist
         self.portlist = portlist
         self.items = items
+        self.default_nettype = default_nettype
     def children(self):
         nodelist = []
         if self.paramlist is not None: nodelist.append(self.paramlist)

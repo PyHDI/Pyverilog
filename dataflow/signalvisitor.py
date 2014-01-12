@@ -215,7 +215,7 @@ class SignalVisitor(NodeVisitor):
             if len(case.cond) > 1:
                 cond = Eq(comp, case.cond[0]) 
                 for c in case.cond[1:]:
-                    cond = Lor(tmp, Eq(comp, c))
+                    cond = Lor(cond, Eq(comp, c))
             else:
                 cond = Eq(comp, case.cond[0])
         label = self.labels.get( self.frames.getLabelKey('if') )

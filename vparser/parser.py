@@ -57,6 +57,9 @@ class VerilogParser(PLYParser):
 
     def get_directives(self):
         return self.lexer.get_directives()
+
+    def get_default_nettype(self):
+        return self.lexer.get_default_nettype()
         
     # Returns AST
     def parse(self, text, debug=0):
@@ -101,7 +104,8 @@ class VerilogParser(PLYParser):
     ######################################################################
     def p_moduledef(self,p):
         'moduledef : MODULE modulename paramlist portlist items ENDMODULE'
-        p[0] = ModuleDef(name=p[2], paramlist=p[3], portlist=p[4], items=p[5])
+        p[0] = ModuleDef(name=p[2], paramlist=p[3], portlist=p[4], items=p[5],
+                         default_nettype=self.get_default_nettype())
 
     def p_modulename(self, p):
         'modulename : ID'

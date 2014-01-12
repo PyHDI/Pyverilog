@@ -1,8 +1,10 @@
+//`default_nettype none
 
 module TOP(CLK, RST, LED);
   input CLK, RST;
   output [7:0] LED;
   reg [7:0] cnt;
+  //wire enable;
   localparam DELAYSIZE = 5;
   always @(posedge CLK) begin
     if(RST) begin
@@ -11,6 +13,7 @@ module TOP(CLK, RST, LED);
       cnt <= #DELAYSIZE cnt==255? 0 : cnt + 1;
     end
   end
-  assign LED = cnt;
+  assign enable = cnt == 'hff;
+  assign LED = enable? 'hff : 0;
 endmodule
 
