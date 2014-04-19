@@ -2,9 +2,9 @@ Pyverilog
 ==============================
 Python-based Hardware Design Processing Toolkit for Verilog HDL
 
-Copyright (C) 2013, Shinya Takamaeda-Yamazaki
+Copyright (C) 2014, Shinya Takamaeda-Yamazaki
 
-E-mail: takamaeda\_at\_arch.cs.titech.ac.jp
+E-mail: shinya\_at\_is.naist.jp
 
 
 License
