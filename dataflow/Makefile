@@ -1,4 +1,4 @@
-PYTHON=python3.3
+PYTHON=python3
 #PYTHON=python2.7
 PYTHON27=python2.7
 #OPT=-m pdb

@@ -1,4 +1,4 @@
-PYTHON=python3.3
+PYTHON=python3
 #OPT=-m pdb
 
 CODEGEN=codegen.py

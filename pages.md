@@ -1,21 +1,3 @@
-Pyverilog
-==============================
-Python-based Hardware Design Processing Toolkit for Verilog HDL
-
-Copyright (C) 2013, Shinya Takamaeda-Yamazaki
-
-E-mail: takamaeda\_at\_arch.cs.titech.ac.jp
-
-
-License
-==============================
-Apache License 2.0
-(http://www.apache.org/licenses/LICENSE-2.0)
-
-This software package includes PLY-3.4 in "vparser/ply".
-The license of PLY is BSD.
-
-
 What's Pyverilog?
 ==============================
 
@@ -333,4 +315,21 @@ Related Project and Site
 [shtaxxx.hatenablog.com](http://shtaxxx.hatenablog.com/entry/2014/01/01/045856)
 - Blog entry for introduction and examples of Pyverilog (in Japansese)
 
+
+License
+==============================
+
+Apache License 2.0
+(http://www.apache.org/licenses/LICENSE-2.0)
+
+This software package includes PLY-3.4.
+The license of PLY is BSD.
+
+
+Copyright and Contact
+==============================
+
+Copyright (C) 2013, Shinya Takamaeda-Yamazaki
+
+E-mail: takamaeda\_at\_arch.cs.titech.ac.jp
 
