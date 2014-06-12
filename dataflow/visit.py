@@ -179,7 +179,7 @@ class DefinitionInfo(object):
 
 class DefinitionInfoTable(object):
     def __init__(self):
-        self.dict = {}
+        self.dict = collections.OrderedDict()
         self.current = None
     def addDefinition(self, name, definition):
         if name in self.dict:
@@ -264,8 +264,8 @@ class Frame(object):
         self.variables = Variables()
         self.functions = FunctionInfoTable()
         self.tasks = TaskInfoTable()
-        self.blockingassign = {}
-        self.nonblockingassign = {}
+        self.blockingassign = collections.OrderedDict()
+        self.nonblockingassign = collections.OrderedDict()
 
         self.modulename = modulename
 
@@ -541,28 +541,28 @@ class FrameTable(object):
         return tuple(ret)
         
     def getAllSignals(self):
-        ret = {}
+        ret = collections.OrderedDict()
         for dk, dv in self.dict.items():
             ret.update(
                 map_key((lambda x: dk+ScopeLabel(x,'signal')), dv.getSignals()))
         return ret
 
     def getAllConsts(self):
-        ret = {}
+        ret = collections.OrderedDict()
         for dk, dv in self.dict.items():
             ret.update(
                 map_key((lambda x: dk+ScopeLabel(x,'signal')), dv.getConsts()))
         return ret
 
     def getAllFunctions(self):
-        ret = {}
+        ret = collections.OrderedDict()
         for dk, dv in self.dict.items():
             ret.update(
                 map_key((lambda x: dk+ScopeLabel(x,'function')), dv.getFunctions()))
         return ret
 
     def getAllTasks(self):
-        ret = {}
+        ret = collections.OrderedDict()
         for dk, dv in self.dict.items():
             ret.update(
                 map_key((lambda x: dk+ScopeLabel(x,'task')), dv.getTasks()))
@@ -640,9 +640,9 @@ class FrameTable(object):
 
     def getPreviousNonblockingAssign(self):
         previous = self.dict[self.current].previous
-        if len(previous) == 0: return {}
+        if len(previous) == 0: return collections.OrderedDict()
         previous_frame = self.dict[previous]
-        if not previous_frame.isAlways(): return {}
+        if not previous_frame.isAlways(): return collections.OrderedDict()
         return previous_frame.getNonblockingAssigns()
 
     def searchConstantDefinition(self, key, name):

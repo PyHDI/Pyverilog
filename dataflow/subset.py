@@ -9,6 +9,7 @@
 
 import sys
 import os
+import collections
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
 
@@ -47,7 +48,7 @@ class VerilogSubset(VerilogDataflowMerge):
         if term is None: raise verror.DefinitionError('No such signal')
         bindlist = self.getBindlist(termname)
         nextsources = visited_sources.copy()
-        ret_binds = {}
+        ret_binds = collections.OrderedDict()
         for bind in bindlist:
             if not termname in ret_binds:
                 ret_binds[termname] = []
@@ -70,7 +71,7 @@ class VerilogSubset(VerilogDataflowMerge):
 
     ############################################################################
     def getBindSourceSubset(self, targets):
-        visited_binddict = {}
+        visited_binddict = collections.OrderedDict()
         visited_sources = set()
         for target in targets:
             termname = util.toTermname(target)
@@ -90,11 +91,11 @@ class VerilogSubset(VerilogDataflowMerge):
         return self._discretion(visited_binddict, visited_sources)
 
     def _discretion(self, visited_binddict, visited_sources):
-        terms = {}
-        parameter = {}
-        assign = {}
-        always_clockedge = {}
-        always_combination = {}
+        terms = collections.OrderedDict()
+        parameter = collections.OrderedDict()
+        assign = collections.OrderedDict()
+        always_clockedge = collections.OrderedDict()
+        always_combination = collections.OrderedDict()
 
         # discretion the signal desclaration
         for source in visited_sources:
