@@ -329,7 +329,7 @@ The license of PLY is BSD.
 Copyright and Contact
 ==============================
 
-Copyright (C) 2014, Shinya Takamaeda-Yamazaki
+Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 
 E-mail: shinya\_at\_is.naist.jp
 
