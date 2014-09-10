@@ -16,5 +16,6 @@ setup(name='pyverilog',
                  'pyverilog.testcode', ],
       package_data={ 'pyverilog.ast_code_generator' : ['template/*'], 
                      'pyverilog.testcode' : ['*'], },
+      data_files=[ ('pyverilog', [ 'README.md', ] ) ] 
 )
 
