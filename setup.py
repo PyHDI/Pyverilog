@@ -1,21 +1,18 @@
 from setuptools import setup, find_packages
 
+import pyverilog.utils.version
+import re
+
+m = re.search(r'(\d+\.\d+\.\d+)', pyverilog.utils.version.VERSION)
+version = m.group(1) if m is not None else '0.0.0'
+
 setup(name='pyverilog',
-      version='0.8.0',
-      description='Verilog HDL Design Analysis Toolkit',
+      version=version,
+      description='Python-based Hardware Design Processing Toolkit for Verilog HDL',
       author='Shinya Takamaeda-Yamazaki',
       url='http://shtaxxx.github.io/Pyverilog/',
-      package_dir={ 'pyverilog': '' },
-      packages=[ 'pyverilog',
-                 'pyverilog.utils',
-                 'pyverilog.vparser',
-                 'pyverilog.vparser.ply',
-                 'pyverilog.dataflow',
-                 'pyverilog.controlflow',
-                 'pyverilog.ast_code_generator',
-                 'pyverilog.testcode', ],
+      packages=find_packages(),
       package_data={ 'pyverilog.ast_code_generator' : ['template/*'], 
-                     'pyverilog.testcode' : ['*'], },
-      data_files=[ ('pyverilog', ['README.md',]) ],
+                     'pyverilog' : ['testcode/*'], },
 )
 
