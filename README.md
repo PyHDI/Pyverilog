@@ -45,18 +45,13 @@ Installation
 ==============================
 
 If you want to use Pyverilog as a general library, you can install on your environment by using setup.py.
-
 If Python 2.7 is used,
 
-```
-python setup.py install
-```
+    python setup.py install
 
 If Python 3.x is used,
 
-```
-python3 setup.py install
-```
+    python3 setup.py install
 
 
 Tools
