@@ -1,8 +1,7 @@
 What's Pyverilog?
 ==============================
 
-Pyverilog is open-source hardware design processing toolkit for Verilog HDL.
-All source codes are written in Python.
+Pyverilog is an open-source hardware design processing toolkit for Verilog HDL. All source codes are written in Python.
 
 Pyverilog includes **(1) code parser, (2) dataflow analyzer, (3) control-flow analyzer and (4) code generator**.
 You can create your own design analyzer, code translator and code generator of Verilog HDL based on this toolkit.
@@ -13,14 +12,14 @@ Software Requirements
 
 * Python (2.7, 3.3 or later)
 * Icarus Verilog (0.9.6 or later)
-   - vparser.preprocessor.py uses 'iverilog -E' command instead of the preprocessor.
+   - pyverilog.vparser.preprocessor.py uses 'iverilog -E' command as the preprocessor.
    - 'apt-get install iverilog'
 * Graphviz and Pygraphviz (Python3 does not support Pygraphviz)
-   - graphgen.py in dataflow and controlflow.py in controlflow (without --nograph option) use Pygraphviz with Python 2.7.
-   - If you do not use graphgen.py and controlflow.py (without --nograph) option, Python 3 is OK.
+   - pyverilog.dataflow.graphgen and pyverilog.controlflow.controlflow (without --nograph option) use Pygraphviz (on Python 2.7).
+   - If you do not use graphgen and controlflow (without --nograph) option, Python 3.x is fine.
 * Jinja2 (2.7 or later)
    - ast\_code\_generator requires jinja2 module.
-   - 'pip3 install jinja2'
+   - 'pip3 install jinja2' (for Python 3.x) or 'pip install jinja2' (for Python 2.7)
 
 
 Tools
@@ -322,8 +321,7 @@ License
 Apache License 2.0
 (http://www.apache.org/licenses/LICENSE-2.0)
 
-This software package includes PLY-3.4.
-The license of PLY is BSD.
+This software package includes PLY-3.4 in "vparser/ply". The license of PLY is BSD.
 
 
 Copyright and Contact
