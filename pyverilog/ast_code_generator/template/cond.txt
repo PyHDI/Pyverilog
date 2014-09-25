@@ -1,1 +1,1 @@
-({{ cond }})? {{ true_value }} : {{ false_value }}
+(({{ cond }})? {{ true_value }} : {{ false_value }})
