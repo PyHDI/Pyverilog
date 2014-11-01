@@ -1730,7 +1730,9 @@ if __name__ == '__main__':
     if len(filelist) == 0:
         showVersion()
 
-    codeparser = VerilogCodeParser(filelist, preprocess_include=options.include, preprocess_define=options.define)
+    codeparser = VerilogCodeParser(filelist, 
+                                   preprocess_include=options.include,
+                                   preprocess_define=options.define)
     ast = codeparser.parse()
     directives = codeparser.get_directives()
 

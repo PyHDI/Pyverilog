@@ -309,6 +309,10 @@ if __name__ == '__main__':
                          default=False,help="Non graph generation")
     optparser.add_option("--nolabel",action="store_true",dest="nolabel",
                          default=False,help="State Machine Graph without Labels")
+    optparser.add_option("-I","--include",dest="include",action="append",
+                         default=[],help="Include path")
+    optparser.add_option("-D",dest="define",action="append",
+                         default=[],help="Macro Definition")
     (options, args) = optparser.parse_args()
 
     filelist = args
@@ -321,7 +325,9 @@ if __name__ == '__main__':
     if len(filelist) == 0:
         showVersion()
 
-    analyzer = VerilogDataflowAnalyzer(filelist, options.topmodule)
+    analyzer = VerilogDataflowAnalyzer(filelist, options.topmodule,
+                                       preprocess_include=options.include,
+                                       preprocess_define=options.define)
     analyzer.generate()
 
     directives = analyzer.get_directives()

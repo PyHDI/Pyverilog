@@ -12,6 +12,7 @@ import os
 import subprocess
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
+sys.setrecursionlimit(16 * 1024)
 
 import pyverilog
 import pyverilog.utils
@@ -28,12 +29,16 @@ else:
     from bindvisitor import BindVisitor
 
 class VerilogDataflowAnalyzer(VerilogCodeParser):
-    def __init__(self, filelist, topmodule='TOP', noreorder=False, nobind=False):
+    def __init__(self, filelist, topmodule='TOP', noreorder=False, nobind=False,
+                 preprocess_include=None,
+                 preprocess_define=None):
         self.topmodule = topmodule
         self.terms = {}
         self.binddict = {}
         self.frametable = None
-        VerilogCodeParser.__init__(self, filelist)
+        VerilogCodeParser.__init__(self, filelist,
+                                   preprocess_include=preprocess_include,
+                                   preprocess_define=preprocess_define)
         self.noreorder = noreorder
         self.nobind = nobind
         
@@ -106,6 +111,10 @@ if __name__ == '__main__':
                          default=False,help="No binding traversal, Default=False")
     optparser.add_option("--noreorder",action="store_true",dest="noreorder",
                          default=False,help="No reordering of binding dataflow, Default=False")
+    optparser.add_option("-I","--include",dest="include",action="append",
+                         default=[],help="Include path")
+    optparser.add_option("-D",dest="define",action="append",
+                         default=[],help="Macro Definition")
     (options, args) = optparser.parse_args()
 
     filelist = args
@@ -119,8 +128,10 @@ if __name__ == '__main__':
         showVersion()
 
     verilogdataflowanalyzer = VerilogDataflowAnalyzer(filelist, options.topmodule,
-                                                          noreorder=options.noreorder,
-                                                          nobind=options.nobind)
+                                                      noreorder=options.noreorder,
+                                                      nobind=options.nobind,
+                                                      preprocess_include=options.include,
+                                                      preprocess_define=options.define)
     verilogdataflowanalyzer.generate()
 
     directives = verilogdataflowanalyzer.get_directives()

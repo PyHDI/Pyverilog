@@ -354,14 +354,14 @@ class Frame(object):
     ############################################################################
     def setBlockingAssign(self, dst, bind):
         if not dst in self.blockingassign:
-            self.blockingassign[dst] = (copy.deepcopy(bind),)
+            self.blockingassign[dst] = (bind,)
             return
         current = self.blockingassign[dst]
         for c_i, c in enumerate(current):
             if c.msb == bind.msb and c.msb == bind.msb and c.ptr == bind.ptr:
-                self.blockingassign[dst][c_i].tree = copy.deepcopy(bind.tree)
+                self.blockingassign[dst][c_i].tree = bind.tree
                 return
-        self.blockingassign[dst] = current + (copy.deepcopy(bind),)
+        self.blockingassign[dst] = current + (bind,)
             
     def getBlockingAssign(self, dst):
         if dst in self.blockingassign: return self.blockingassign[dst]
