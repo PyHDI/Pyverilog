@@ -1142,8 +1142,8 @@ class BindVisitor(NodeVisitor):
                 return reorder.insertPointer(resolved_var, resolved_ptr)
             return DFPointer(resolved_var, resolved_ptr)
 
-        raise verror.FormartError("unsupported DFNode type: %s %s" %
-                                  (str(type(tree)), str(tree)))
+        raise verror.FormatError("unsupported DFNode type: %s %s" %
+                                 (str(type(tree)), str(tree)))
 
     def getFitTree(self, bindlist, msb, lsb):
         optimized_msb = self.optimize(msb)
@@ -1265,8 +1265,8 @@ class BindVisitor(NodeVisitor):
                 return (name, None, None, ptr)
             return (name, ptr, copy.deepcopy(ptr), None)
 
-        raise verror.FormartError("unsupported AST node type: %s %s" %
-                                  (str(type(left)), str(left)))
+        raise verror.FormatError("unsupported AST node type: %s %s" %
+                                 (str(type(left)), str(left)))
 
     ############################################################################
     def setDataflow(self, dst, raw_tree, condlist, flowlist, 

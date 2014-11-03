@@ -424,7 +424,7 @@ class VerilogOptimizer(object):
         if isinstance(tree, DFSyscall):
             return DFSyscall(tree.syscall, tuple([ self.optimizeHierarchy(n) for n in tree.nextnodes ]))
 
-        raise FormartError('Can not merge due to unrecognized type of tree')
+        raise FormatError('Can not merge due to unrecognized type of tree')
 
     def takePoint(self, nextnodes, ptr):
         return self.takePart(nextnodes, ptr, ptr)
