@@ -12,7 +12,7 @@ def read(filename):
 
 setup(name='pyverilog',
       version=version,
-      description='Python-based Hardware Design Processing Toolkit for Verilog HDL',
+      description='Python-based Hardware Design Processing Toolkit for Verilog HDL: Parser, Dataflow Analyzer, Controlflow Analyzer and Code Generator',
       long_description=read('README.md'),
       keywords = 'Verilog HDL, Lexer, Parser, Dataflow Analyzer, Control-flow Analyzer, Code Generator, Visualizer',
       author='Shinya Takamaeda-Yamazaki',
