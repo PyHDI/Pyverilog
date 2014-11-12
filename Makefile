@@ -6,3 +6,7 @@ all:
 clean:
 	make clean -C ./pyverilog
 	rm -rf *.pyc __pycache__ pyverilog.egg-info build dist
+
+.PHONY: release
+release:
+	pandoc README.md -t rst > README.rst
