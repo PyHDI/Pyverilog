@@ -271,10 +271,6 @@ select 'led' as the target. Please type the command as below.
 Then you got a png file (out.png). The picture shows that the definition
 of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
 
-.. figure:: http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045641.png
-   :alt: out.png
-
-   out.png
 Control-flow analyzer
 ---------------------
 
@@ -306,10 +302,6 @@ state machine.
 You got also a png file (top\_state.png). The picture shows that the
 graphical structure of the state machine.
 
-.. figure:: http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png
-   :alt: top\_state.png
-
-   top\_state.png
 Code generator
 --------------
 
