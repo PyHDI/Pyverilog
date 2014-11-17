@@ -64,9 +64,9 @@ class VerilogActiveConditionAnalyzer(VerilogControlflowAnalyzer):
         active_conditions = []
         fsm_sig_width = self.getWidth(fsm_sig)
         for condlist, func in sorted(funcdict.items(), key=lambda x:len(x[0])):
-            node = state_transition.walkCondlist(condlist, fsm_sig, fsm_sig_width)
+            node = transition.walkCondlist(condlist, fsm_sig, fsm_sig_width)
             state_node_list = []
-            if isinstance(node, state_transition.StateNodeList):
+            if isinstance(node, transition.StateNodeList):
                 for n in node.nodelist: state_node_list.append(n)
             elif node:
                 state_node_list.append(node)

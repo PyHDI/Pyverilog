@@ -305,6 +305,8 @@ if __name__ == '__main__':
                          default="TOP",help="Top module, Default=TOP")
     optparser.add_option("-s","--search",dest="searchtarget",action="append",
                          default=[],help="Search Target Signal")
+    optparser.add_option("--graphformat",dest="graphformat",
+                         default="png",help="Graph file format, Default=png")
     optparser.add_option("--nograph",action="store_true",dest="nograph",
                          default=False,help="Non graph generation")
     optparser.add_option("--nolabel",action="store_true",dest="nolabel",
@@ -350,7 +352,7 @@ if __name__ == '__main__':
         print('# DELAY CNT: %d' % fsm.delaycnt)
         fsm.view()
         if not options.nograph:
-            fsm.tograph(filename=util.toFlatname(signame)+'.png', nolabel=options.nolabel)
+            fsm.tograph(filename=util.toFlatname(signame)+'.'+options.graphformat, nolabel=options.nolabel)
         loops = fsm.get_loop()
         print('Loop')
         for loop in loops:
