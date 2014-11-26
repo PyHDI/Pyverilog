@@ -44,7 +44,9 @@ class Node(object):
     def __ne__(self, other):
         return not self.__eq__(other)
     def __hash__(self):
-        return hash( self.attr_names + self.children() )
+        s = hash(tuple([getattr(self, a) for a in self.attr_names]))
+        c = hash(self.children())
+        return hash((s, c))
         
 ################################################################################
 class Source(Node):
