@@ -1,6 +1,8 @@
 PYTHON=python3
 #PYTHON=python2.7
 #OPT=-m pdb
+#OPT=-m cProfile -s time
+#OPT=-m cProfile -o profile.rslt
 
 ANALYZER=controlflow_analyzer.py
 ACTIVE=active_analyzer.py

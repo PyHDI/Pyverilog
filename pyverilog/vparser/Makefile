@@ -1,5 +1,7 @@
 PYTHON = python3
 #OPT=-m pdb
+#OPT=-m cProfile -s time
+#OPT=-m cProfile -o profile.rslt
 
 PREPROCESS=preprocessor.py
 LEXER=lexer.py

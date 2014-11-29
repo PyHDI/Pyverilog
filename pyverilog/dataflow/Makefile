@@ -2,6 +2,8 @@ PYTHON=python3
 #PYTHON=python2.7
 PYTHON27=python2.7
 #OPT=-m pdb
+#OPT=-m cProfile -s time
+#OPT=-m cProfile -o profile.rslt
 
 ANALYZER=dataflow_analyzer.py
 MERGE=merge.py
