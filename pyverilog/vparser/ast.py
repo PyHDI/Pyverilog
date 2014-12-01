@@ -240,28 +240,6 @@ class Decl(Node):
         if self.list is not None: nodelist.extend(self.list)
         return tuple(nodelist)
 
-class WireDeclAssign(Node):
-    attr_names = ()
-    def __init__(self, wire, assign):
-        self.wire = wire
-        self.assign = assign
-    def children(self):
-        nodelist = []
-        if self.wire is not None: nodelist.append(self.wire)
-        if self.assign is not None: nodelist.append(self.assign)
-        return tuple(nodelist)
-
-class RegDeclAssign(Node):
-    attr_names = ()
-    def __init__(self, reg, assign):
-        self.reg = reg
-        self.assign = assign
-    def children(self):
-        nodelist = []
-        if self.reg is not None: nodelist.append(self.reg)
-        if self.assign is not None: nodelist.append(self.assign)
-        return tuple(nodelist)
-
 class Concat(Node):
     attr_names = ()
     def __init__(self, list):

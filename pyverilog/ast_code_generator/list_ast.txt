@@ -28,8 +28,6 @@ Ioport
 Parameter
 Localparam
 Decl
-WireDeclAssign
-RegDeclAssign
 Concat
 LConcat
 Repeat

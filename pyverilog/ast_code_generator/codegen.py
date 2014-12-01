@@ -353,26 +353,6 @@ class ASTCodeGenerator(ConvertVisitor):
         rslt = template.render(template_dict)
         return rslt
 
-    def visit_WireDeclAssign(self, node):
-        filename = getfilename(node)
-        template = self.env.get_template(filename)
-        template_dict = {
-            'decl' : self.visit(node.wire),
-            'assign' : self.visit(node.assign),
-            }
-        rslt = template.render(template_dict)
-        return rslt
-
-    def visit_RegDeclAssign(self, node):
-        filename = getfilename(node)
-        template = self.env.get_template(filename)
-        template_dict = {
-            'decl' : self.visit(node.reg),
-            'assign' : self.visit(node.assign),
-            }
-        rslt = template.render(template_dict)
-        return rslt
-
     def visit_Concat(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
