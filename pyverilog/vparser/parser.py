@@ -394,11 +394,11 @@ class VerilogParser(PLYParser):
         return decls
 
     def decl_typecheck(self, sigtypes, length=None):
-        if length is not None and 'input' in sigtypes:
+        if length and 'input' in sigtypes:
             raise ParseError("Syntax Error")
-        if length is not None and 'output' in sigtypes:
+        if length and 'output' in sigtypes:
             raise ParseError("Syntax Error")
-        if length is not None and 'inout' in sigtypes:
+        if length and 'inout' in sigtypes:
             raise ParseError("Syntax Error")
         if len(sigtypes) == 1 and 'signed' in sigtypes:
             raise ParseError("Syntax Error")
@@ -1649,7 +1649,7 @@ class VerilogParser(PLYParser):
     ######################################################################
     def p_error(self, p):
         print("Syntax error")
-        if p is not None:
+        if p:
             self._parse_error(
                 'before: %s' % p.value, 
                 self._coord(p.lineno))

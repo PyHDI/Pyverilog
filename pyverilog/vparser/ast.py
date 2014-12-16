@@ -56,7 +56,7 @@ class Source(Node):
         self.description = description
     def children(self):
         nodelist = []
-        if self.description is not None: nodelist.append(self.description)
+        if self.description: nodelist.append(self.description)
         return tuple(nodelist)
 
 class Description(Node):
@@ -65,7 +65,7 @@ class Description(Node):
         self.definitions = definitions
     def children(self):
         nodelist = []
-        if self.definitions is not None: nodelist.extend(self.definitions)
+        if self.definitions: nodelist.extend(self.definitions)
         return tuple(nodelist)
 
 class ModuleDef(Node):
@@ -78,9 +78,9 @@ class ModuleDef(Node):
         self.default_nettype = default_nettype
     def children(self):
         nodelist = []
-        if self.paramlist is not None: nodelist.append(self.paramlist)
-        if self.portlist is not None: nodelist.append(self.portlist)
-        if self.items is not None: nodelist.extend(self.items)
+        if self.paramlist: nodelist.append(self.paramlist)
+        if self.portlist: nodelist.append(self.portlist)
+        if self.items: nodelist.extend(self.items)
         return tuple(nodelist)
 
 class Paramlist(Node):
@@ -89,7 +89,7 @@ class Paramlist(Node):
         self.params = params
     def children(self):
         nodelist = []
-        if self.params is not None: nodelist.extend(self.params)
+        if self.params: nodelist.extend(self.params)
         return tuple(nodelist)
 
 class Portlist(Node):
@@ -98,7 +98,7 @@ class Portlist(Node):
         self.ports = ports
     def children(self):
         nodelist = []
-        if self.ports is not None: nodelist.extend(self.ports)
+        if self.ports: nodelist.extend(self.ports)
         return tuple(nodelist)
 
 class Port(Node):
@@ -109,7 +109,7 @@ class Port(Node):
         self.type = type
     def children(self):
         nodelist = []
-        if self.width is not None: nodelist.append(self.width)
+        if self.width: nodelist.append(self.width)
         return tuple(nodelist)
 
 class Width(Node):
@@ -119,8 +119,8 @@ class Width(Node):
         self.lsb = lsb
     def children(self):
         nodelist = []
-        if self.msb is not None: nodelist.append(self.msb)
-        if self.lsb is not None: nodelist.append(self.lsb)
+        if self.msb: nodelist.append(self.msb)
+        if self.lsb: nodelist.append(self.lsb)
         return tuple(nodelist)
 class Length(Width): pass
 
@@ -131,7 +131,7 @@ class Identifier(Node):
         self.scope = scope
     def children(self):
         nodelist = []
-        if self.scope is not None: nodelist.append(self.scope)
+        if self.scope: nodelist.append(self.scope)
         return tuple(nodelist)
     def __repr__(self):
         if self.scope is None:
@@ -144,7 +144,7 @@ class Value(Node):
         self.value = value
     def children(self):
         nodelist = []
-        if self.value is not None: nodelist.append(self.value)
+        if self.value: nodelist.append(self.value)
         return tuple(nodelist)
 
 class Constant(Value):
@@ -165,11 +165,11 @@ class Variable(Value):
     attr_names = ('name', 'signed')
     def __init__(self, name, width=None, signed=False):
         self.name = name
-        self.width = width if width is not None else Width(IntConst('0'),IntConst('0'))
+        self.width = width if width else Width(IntConst('0'),IntConst('0'))
         self.signed = signed
     def children(self):
         nodelist = []
-        if self.width is not None: nodelist.append(self.width)
+        if self.width: nodelist.append(self.width)
         return tuple(nodelist)
         
 class Input(Variable): pass
@@ -187,8 +187,8 @@ class WireArray(Variable):
         self.signed = signed
     def children(self):
         nodelist = []
-        if self.width is not None: nodelist.append(self.width)
-        if self.length is not None: nodelist.append(self.length)
+        if self.width: nodelist.append(self.width)
+        if self.length: nodelist.append(self.length)
         return tuple(nodelist)
 class RegArray(Variable):
     attr_names = ('name', 'signed')
@@ -199,8 +199,8 @@ class RegArray(Variable):
         self.signed = signed
     def children(self):
         nodelist = []
-        if self.width is not None: nodelist.append(self.width)
-        if self.length is not None: nodelist.append(self.length)
+        if self.width: nodelist.append(self.width)
+        if self.length: nodelist.append(self.length)
         return tuple(nodelist)
 class Integer(Variable): pass
 class Real(Variable): pass
@@ -213,8 +213,8 @@ class Ioport(Node):
         self.second = second
     def children(self):
         nodelist = []
-        if self.first is not None: nodelist.append(self.first)
-        if self.second is not None: nodelist.append(self.second)
+        if self.first: nodelist.append(self.first)
+        if self.second: nodelist.append(self.second)
         return tuple(nodelist)
 
 class Parameter(Node):
@@ -222,12 +222,12 @@ class Parameter(Node):
     def __init__(self, name, value, width=None, signed=False):
         self.name = name
         self.value = value
-        self.width = width #if width is not None else Width(msb=IntConst('31'),lsb=IntConst('0'))
+        self.width = width #if width else Width(msb=IntConst('31'),lsb=IntConst('0'))
         self.signed = signed
     def children(self):
         nodelist = []
-        if self.value is not None: nodelist.append(self.value)
-        if self.width is not None: nodelist.append(self.width)
+        if self.value: nodelist.append(self.value)
+        if self.width: nodelist.append(self.width)
         return tuple(nodelist)
 class Localparam(Parameter): pass
 
@@ -237,7 +237,7 @@ class Decl(Node):
         self.list = list
     def children(self):
         nodelist = []
-        if self.list is not None: nodelist.extend(self.list)
+        if self.list: nodelist.extend(self.list)
         return tuple(nodelist)
 
 class Concat(Node):
@@ -246,7 +246,7 @@ class Concat(Node):
         self.list = list
     def children(self):
         nodelist = []
-        if self.list is not None: nodelist.extend(self.list)
+        if self.list: nodelist.extend(self.list)
         return tuple(nodelist)
 class LConcat(Concat): pass
 
@@ -257,8 +257,8 @@ class Repeat(Node):
         self.times = times
     def children(self):
         nodelist = []
-        if self.value is not None: nodelist.append(self.value)
-        if self.times is not None: nodelist.append(self.times)
+        if self.value: nodelist.append(self.value)
+        if self.times: nodelist.append(self.times)
         return tuple(nodelist)
 
 class Partselect(Node):
@@ -269,9 +269,9 @@ class Partselect(Node):
         self.lsb = lsb
     def children(self):
         nodelist = []
-        if self.var is not None: nodelist.append(self.var)
-        if self.msb is not None: nodelist.append(self.msb)
-        if self.lsb is not None: nodelist.append(self.lsb)
+        if self.var: nodelist.append(self.var)
+        if self.msb: nodelist.append(self.msb)
+        if self.lsb: nodelist.append(self.lsb)
         return tuple(nodelist)
 
 class Pointer(Node):
@@ -281,8 +281,8 @@ class Pointer(Node):
         self.ptr = ptr
     def children(self):
         nodelist = []
-        if self.var is not None: nodelist.append(self.var)
-        if self.ptr is not None: nodelist.append(self.ptr)
+        if self.var: nodelist.append(self.var)
+        if self.ptr: nodelist.append(self.ptr)
         return tuple(nodelist)
 
 class Lvalue(Node):
@@ -291,7 +291,7 @@ class Lvalue(Node):
         self.var = var
     def children(self):
         nodelist = []
-        if self.var is not None: nodelist.append(self.var)
+        if self.var: nodelist.append(self.var)
         return tuple(nodelist)
 
 class Rvalue(Node):
@@ -300,7 +300,7 @@ class Rvalue(Node):
         self.var = var
     def children(self):
         nodelist = []
-        if self.var is not None: nodelist.append(self.var)
+        if self.var: nodelist.append(self.var)
         return tuple(nodelist)
 
 ################################################################################
@@ -311,8 +311,8 @@ class Operator(Node):
         self.right = right
     def children(self):
         nodelist = []
-        if self.left is not None: nodelist.append(self.left)
-        if self.right is not None: nodelist.append(self.right)
+        if self.left: nodelist.append(self.left)
+        if self.right: nodelist.append(self.right)
         return tuple(nodelist)
     def __repr__(self):
         ret = '('+self.__class__.__name__
@@ -326,7 +326,7 @@ class UnaryOperator(Operator):
         self.right = right
     def children(self):
         nodelist = []
-        if self.right is not None: nodelist.append(self.right)
+        if self.right: nodelist.append(self.right)
         return tuple(nodelist)
 
 ################################################################################
@@ -392,9 +392,9 @@ class Cond(Operator):
         self.false_value = false_value
     def children(self):
         nodelist = []
-        if self.cond is not None: nodelist.append(self.cond)
-        if self.true_value is not None: nodelist.append(self.true_value)
-        if self.false_value is not None: nodelist.append(self.false_value)
+        if self.cond: nodelist.append(self.cond)
+        if self.true_value: nodelist.append(self.true_value)
+        if self.false_value: nodelist.append(self.false_value)
         return tuple(nodelist)
 
 ################################################################################
@@ -407,10 +407,10 @@ class Assign(Node):
         self.rdelay = rdelay
     def children(self):
         nodelist = []
-        if self.left is not None: nodelist.append(self.left)
-        if self.right is not None: nodelist.append(self.right)
-        if self.ldelay is not None: nodelist.append(self.ldelay)
-        if self.rdelay is not None: nodelist.append(self.rdelay)
+        if self.left: nodelist.append(self.left)
+        if self.right: nodelist.append(self.right)
+        if self.ldelay: nodelist.append(self.ldelay)
+        if self.rdelay: nodelist.append(self.rdelay)
         return tuple(nodelist)
 
 class Always(Node):
@@ -420,8 +420,8 @@ class Always(Node):
         self.statement = statement
     def children(self):
         nodelist = []
-        if self.sens_list is not None: nodelist.append(self.sens_list)
-        if self.statement is not None: nodelist.append(self.statement)
+        if self.sens_list: nodelist.append(self.sens_list)
+        if self.statement: nodelist.append(self.statement)
         return tuple(nodelist)
 
 class SensList(Node):
@@ -430,7 +430,7 @@ class SensList(Node):
         self.list = list
     def children(self):
         nodelist = []
-        if self.list is not None: nodelist.extend(self.list)
+        if self.list: nodelist.extend(self.list)
         return tuple(nodelist)
 
 class Sens(Node):
@@ -440,7 +440,7 @@ class Sens(Node):
         self.type = type # 'posedge', 'negedge', 'level', 'all' (*)
     def children(self):
         nodelist = []
-        if self.sig is not None: nodelist.append(self.sig)
+        if self.sig: nodelist.append(self.sig)
         return tuple(nodelist)
 
 class Substitution(Node):
@@ -452,10 +452,10 @@ class Substitution(Node):
         self.rdelay = rdelay
     def children(self):
         nodelist = []
-        if self.left is not None: nodelist.append(self.left)
-        if self.right is not None: nodelist.append(self.right)
-        if self.ldelay is not None: nodelist.append(self.ldelay)
-        if self.rdelay is not None: nodelist.append(self.rdelay)
+        if self.left: nodelist.append(self.left)
+        if self.right: nodelist.append(self.right)
+        if self.ldelay: nodelist.append(self.ldelay)
+        if self.rdelay: nodelist.append(self.rdelay)
         return tuple(nodelist)
 class BlockingSubstitution(Substitution): pass
 class NonblockingSubstitution(Substitution): pass
@@ -468,9 +468,9 @@ class IfStatement(Node):
         self.false_statement = false_statement
     def children(self):
         nodelist = []
-        if self.cond is not None: nodelist.append(self.cond)
-        if self.true_statement is not None: nodelist.append(self.true_statement)
-        if self.false_statement is not None: nodelist.append(self.false_statement)
+        if self.cond: nodelist.append(self.cond)
+        if self.true_statement: nodelist.append(self.true_statement)
+        if self.false_statement: nodelist.append(self.false_statement)
         return tuple(nodelist)
 
 class ForStatement(Node):
@@ -482,10 +482,10 @@ class ForStatement(Node):
         self.statement = statement
     def children(self):
         nodelist = []
-        if self.pre is not None: nodelist.append(self.pre)
-        if self.cond is not None: nodelist.append(self.cond)
-        if self.post is not None: nodelist.append(self.post)
-        if self.statement is not None: nodelist.append(self.statement)
+        if self.pre: nodelist.append(self.pre)
+        if self.cond: nodelist.append(self.cond)
+        if self.post: nodelist.append(self.post)
+        if self.statement: nodelist.append(self.statement)
         return tuple(nodelist)
 
 class WhileStatement(Node):
@@ -495,8 +495,8 @@ class WhileStatement(Node):
         self.statement = statement
     def children(self):
         nodelist = []
-        if self.cond is not None: nodelist.append(self.cond)
-        if self.statement is not None: nodelist.append(self.statement)
+        if self.cond: nodelist.append(self.cond)
+        if self.statement: nodelist.append(self.statement)
         return tuple(nodelist)
 
 class CaseStatement(Node):
@@ -506,8 +506,8 @@ class CaseStatement(Node):
         self.caselist = caselist
     def children(self):
         nodelist = []
-        if self.comp is not None: nodelist.append(self.comp)
-        if self.caselist is not None: nodelist.extend(self.caselist)
+        if self.comp: nodelist.append(self.comp)
+        if self.caselist: nodelist.extend(self.caselist)
         return tuple(nodelist)
 
 class Case(Node):
@@ -517,8 +517,8 @@ class Case(Node):
         self.statement = statement
     def children(self):
         nodelist = []
-        if self.cond is not None: nodelist.extend(self.cond)
-        if self.statement is not None: nodelist.append(self.statement)
+        if self.cond: nodelist.extend(self.cond)
+        if self.statement: nodelist.append(self.statement)
         return tuple(nodelist)
 
 class Block(Node):
@@ -528,7 +528,7 @@ class Block(Node):
         self.scope = scope
     def children(self):
         nodelist = []
-        if self.statements is not None: nodelist.extend(self.statements)
+        if self.statements: nodelist.extend(self.statements)
         return tuple(nodelist)
 
 class Initial(Node):
@@ -537,7 +537,7 @@ class Initial(Node):
         self.statement = statement
     def children(self):
         nodelist = []
-        if self.statement is not None: nodelist.append(self.statement)
+        if self.statement: nodelist.append(self.statement)
         return tuple(nodelist)
 
 class EventStatement(Node): 
@@ -546,7 +546,7 @@ class EventStatement(Node):
         self.senslist = senslist
     def children(self):
         nodelist = []
-        if self.senslist is not None: nodelist.append(self.senslist)
+        if self.senslist: nodelist.append(self.senslist)
         return tuple(nodelist)
 
 class WaitStatement(Node):
@@ -556,8 +556,8 @@ class WaitStatement(Node):
         self.statement = statement
     def children(self):
         nodelist = []
-        if self.cond is not None: nodelist.append(self.cond)
-        if self.statement is not None: nodelist.append(self.statement)
+        if self.cond: nodelist.append(self.cond)
+        if self.statement: nodelist.append(self.statement)
         return tuple(nodelist)
 
 class ForeverStatement(Node):
@@ -566,7 +566,7 @@ class ForeverStatement(Node):
         self.statement = statement
     def children(self):
         nodelist = []
-        if self.statement is not None: nodelist.append(self.statement)
+        if self.statement: nodelist.append(self.statement)
         return tuple(nodelist)
 
 class DelayStatement(Node):
@@ -575,7 +575,7 @@ class DelayStatement(Node):
         self.delay = delay
     def children(self):
         nodelist = []
-        if self.delay is not None: nodelist.append(self.delay)
+        if self.delay: nodelist.append(self.delay)
         return tuple(nodelist)
 
 class Instance(Node):
@@ -587,8 +587,8 @@ class Instance(Node):
         self.parameterlist = parameterlist
     def children(self):
         nodelist = []
-        if self.portlist is not None: nodelist.extend(self.portlist)
-        if self.parameterlist is not None: nodelist.extend(self.parameterlist)
+        if self.portlist: nodelist.extend(self.portlist)
+        if self.parameterlist: nodelist.extend(self.parameterlist)
         return tuple(nodelist)
 
 class ParamArg(Node):
@@ -598,7 +598,7 @@ class ParamArg(Node):
         self.argname = argname
     def children(self):
         nodelist = []
-        if self.argname is not None: nodelist.append(self.argname)
+        if self.argname: nodelist.append(self.argname)
         return tuple(nodelist)
 
 class PortArg(Node):
@@ -608,7 +608,7 @@ class PortArg(Node):
         self.argname = argname
     def children(self):
         nodelist = []
-        if self.argname is not None: nodelist.append(self.argname)
+        if self.argname: nodelist.append(self.argname)
         return tuple(nodelist)
 
 class Function(Node):
@@ -619,8 +619,8 @@ class Function(Node):
         self.statement = statement
     def children(self):
         nodelist = []
-        if self.retwidth is not None: nodelist.append(self.retwidth)
-        if self.statement is not None: nodelist.extend(self.statement)
+        if self.retwidth: nodelist.append(self.retwidth)
+        if self.statement: nodelist.extend(self.statement)
         return tuple(nodelist)
     def __repr__(self):
         return self.name.__repr__()
@@ -632,8 +632,8 @@ class FunctionCall(Node):
         self.args = args
     def children(self):
         nodelist = []
-        if self.name is not None: nodelist.append(self.name)
-        if self.args is not None: nodelist.extend(self.args)
+        if self.name: nodelist.append(self.name)
+        if self.args: nodelist.extend(self.args)
         return tuple(nodelist)
     def __repr__(self):
         return self.name.__repr__()
@@ -645,7 +645,7 @@ class Task(Node):
         self.statement = statement
     def children(self):
         nodelist = []
-        if self.statement is not None: nodelist.extend(self.statement)
+        if self.statement: nodelist.extend(self.statement)
         return tuple(nodelist)
 
 #class TaskCall(Node):
@@ -655,8 +655,8 @@ class Task(Node):
 #        self.args = args
 #    def children(self):
 #        nodelist = []
-#        if self.name is not None: nodelist.append(self.name)
-#        if self.args is not None: nodelist.extend(self.args)
+#        if self.name: nodelist.append(self.name)
+#        if self.args: nodelist.extend(self.args)
 #        return tuple(nodelist)
 
 class GenerateStatement(Node):
@@ -665,7 +665,7 @@ class GenerateStatement(Node):
         self.items = items
     def children(self):
         nodelist = []
-        if self.items is not None: nodelist.extend(self.items)
+        if self.items: nodelist.extend(self.items)
         return tuple(nodelist)
 
 class SystemCall(Node):
@@ -675,7 +675,7 @@ class SystemCall(Node):
         self.args = args
     def children(self):
         nodelist = []
-        if self.args is not None: nodelist.extend(self.args)
+        if self.args: nodelist.extend(self.args)
         return tuple(nodelist)
     def __repr__(self):
         ret = []
@@ -703,7 +703,7 @@ class IdentifierScope(Node):
         self.labellist = labellist
     def children(self):
         nodelist = []
-        if self.labellist is not None: nodelist.extend(self.labellist)
+        if self.labellist: nodelist.extend(self.labellist)
         return tuple(nodelist)
 
 class Pragma(Node):
@@ -712,7 +712,7 @@ class Pragma(Node):
         self.entry = entry
     def children(self):
         nodelist = []
-        if self.entry is not None: nodelist.append(self.entry)
+        if self.entry: nodelist.append(self.entry)
         return tuple(nodelist)
 
 class PragmaEntry(Node):
@@ -722,7 +722,7 @@ class PragmaEntry(Node):
         self.value = value
     def children(self):
         nodelist = []
-        if self.value is not None: nodelist.append(self.value)
+        if self.value: nodelist.append(self.value)
         return tuple(nodelist)
 
 class Disable(Node):
@@ -740,7 +740,7 @@ class ParallelBlock(Node):
         self.scope = scope
     def children(self):
         nodelist = []
-        if self.statements is not None: nodelist.extend(self.statements)
+        if self.statements: nodelist.extend(self.statements)
         return tuple(nodelist)
 
 class SingleStatement(Node):
@@ -749,6 +749,6 @@ class SingleStatement(Node):
         self.statement = statement
     def children(self):
         nodelist = []
-        if self.statement is not None: nodelist.append(self.statement)
+        if self.statement: nodelist.append(self.statement)
         return tuple(nodelist)
 
