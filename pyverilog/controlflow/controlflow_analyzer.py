@@ -96,7 +96,7 @@ class VerilogControlflowAnalyzer(VerilogSubset):
 
     def isFsmVar(self, termname):
         for v in self.fsm_vars:
-            if re.search(v, str(termname).lower()): return True
+            if re.search(v.lower(), str(termname).lower()): return True
         return False
 
     def getWidth(self, termname):
