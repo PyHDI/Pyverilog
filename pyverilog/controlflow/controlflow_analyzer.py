@@ -342,9 +342,10 @@ if __name__ == '__main__':
     resolved_terms = optimizer.getResolvedTerms()
     resolved_binddict = optimizer.getResolvedBinddict()
     constlist = optimizer.getConstlist()
-
+    fsm_vars = tuple(['fsm', 'state', 'count', 'cnt', 'step', 'mode'] + options.searchtarget)
+    
     canalyzer = VerilogControlflowAnalyzer(options.topmodule, terms, binddict,
-                                          resolved_terms, resolved_binddict, constlist)
+                                           resolved_terms, resolved_binddict, constlist, fsm_vars)
     fsms = canalyzer.getFiniteStateMachines()
 
     for signame, fsm in fsms.items():
