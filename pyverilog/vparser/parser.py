@@ -111,6 +111,10 @@ class VerilogParser(PLYParser):
         'modulename : ID'
         p[0] = p[1]
 
+    def p_modulename_or(self, p):
+        'modulename : SENS_OR' # or primitive
+        p[0] = p[1]
+
     def p_paramlist(self, p):
         'paramlist : DELAY LPAREN params RPAREN'
         p[0] = Paramlist(params=p[3])
@@ -1309,6 +1313,10 @@ class VerilogParser(PLYParser):
     ######################################################################
     def p_instance(self, p):
         'instance : ID parameterlist ID LPAREN instance_ports RPAREN SEMICOLON'
+        p[0] = Instance(p[1], p[3], p[5], p[2])
+
+    def p_instance_or(self, p):
+        'instance : SENS_OR parameterlist ID LPAREN instance_ports RPAREN SEMICOLON'
         p[0] = Instance(p[1], p[3], p[5], p[2])
 
     def p_parameterlist(self, p):
