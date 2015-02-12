@@ -589,15 +589,17 @@ class InstanceList(Node):
     
 class Instance(Node):
     attr_names = ('name', 'module')
-    def __init__(self, module, name, portlist, parameterlist):
+    def __init__(self, module, name, portlist, parameterlist, array=None):
         self.module = module
         self.name = name
         self.portlist = portlist
         self.parameterlist = parameterlist
+        self.array = array
     def children(self):
         nodelist = []
         if self.portlist: nodelist.extend(self.portlist)
         if self.parameterlist: nodelist.extend(self.parameterlist)
+        if self.array: nodelist.append(self.array)
         return tuple(nodelist)
 
 class ParamArg(Node):
