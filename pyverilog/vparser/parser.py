@@ -1312,12 +1312,30 @@ class VerilogParser(PLYParser):
 
     ######################################################################
     def p_instance(self, p):
-        'instance : ID parameterlist ID LPAREN instance_ports RPAREN SEMICOLON'
-        p[0] = Instance(p[1], p[3], p[5], p[2])
+        'instance : ID parameterlist instance_bodylist SEMICOLON'
+        instancelist = []
+        for instance_name, instance_ports in p[3]:
+            instancelist.append( Instance(p[1], instance_name, instance_ports, p[2]) )
+        p[0] = InstanceList( tuple(instancelist) )
 
     def p_instance_or(self, p):
-        'instance : SENS_OR parameterlist ID LPAREN instance_ports RPAREN SEMICOLON'
-        p[0] = Instance(p[1], p[3], p[5], p[2])
+        'instance : SENS_OR parameterlist instance_bodylist SEMICOLON'
+        instancelist = []
+        for instance_name, instance_ports in p[3]:
+            instancelist.append( Instance(p[1], instance_name, instance_ports, p[2]) )
+        p[0] = InstanceList( tuple(instancelist) )
+
+    def p_instance_bodylist(self, p):
+        'instance_bodylist : instance_bodylist COMMA instance_body'
+        p[0] = p[1] + (p[3],)
+        
+    def p_instance_bodylist_one(self, p):
+        'instance_bodylist : instance_body'
+        p[0] = (p[1],)
+        
+    def p_instance_body(self, p):
+        'instance_body : ID LPAREN instance_ports RPAREN'
+        p[0] = (p[1], p[3],)
 
     def p_parameterlist(self, p):
         'parameterlist : DELAY LPAREN param_args RPAREN'

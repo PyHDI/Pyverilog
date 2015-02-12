@@ -578,6 +578,15 @@ class DelayStatement(Node):
         if self.delay: nodelist.append(self.delay)
         return tuple(nodelist)
 
+class InstanceList(Node):
+    attr_names = ()
+    def __init__(self, list):
+        self.list = list
+    def children(self):
+        nodelist = []
+        if self.list: nodelist.extend(self.list)
+        return tuple(nodelist)
+    
 class Instance(Node):
     attr_names = ('name', 'module')
     def __init__(self, module, name, portlist, parameterlist):
