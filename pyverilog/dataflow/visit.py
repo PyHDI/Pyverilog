@@ -25,6 +25,20 @@ map_key   = lambda f,d: collections.OrderedDict([ (f(k),v) for k,v in d.items() 
 map_value = lambda f,d: collections.OrderedDict([ (k,f(v)) for k,v in d.items() ])
 
 ################################################################################
+# Primitive list
+################################################################################
+primitives = {
+    'and' : Uand,
+    'nand': Unand,
+    'or' : Uor,
+    'nor' : Unor,
+    'xor' : Uxor,
+    'xnor' : Uxnor,
+    'not' : Unot,
+    'buf' : None
+}
+
+################################################################################
 # Base Visitor
 ################################################################################
 class NodeVisitor(object):

@@ -117,6 +117,8 @@ class SignalVisitor(NodeVisitor):
         #self.frames.setCurrent(current)
 
     def visit_Instance(self, node):
+        if node.module in primitives: return
+        
         current = self.stackInstanceFrame(node.name, node.module)
 
         self.setInstanceSimpleConstantTerms()

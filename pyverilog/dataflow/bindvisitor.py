@@ -135,7 +135,24 @@ class BindVisitor(NodeVisitor):
         self.generic_visit(node)
         self.frames.unsetTaskDef()
 
+    def _visit_Instance_primitive(self, node):
+        primitive_type = primitives[node.module]
+        left = node.portlist[0].argname
+        right = None
+        if primitive_type == None:
+            right = Partselect(node.portlist[1].argname, IntConst('0'), IntConst('0'))
+        elif primitive_type == Unot:
+            right = Ulnot(Partselect(node.portlist[1].argname, IntConst('0'), IntConst('0')))
+        else:
+            concat_list = [Partselect(p.argname, IntConst('0'), IntConst('0')) for p in node.portlist[1:]]
+            right = primitive_type(Concat(concat_list))
+        self.addBind(left, right, bindtype='assign')
+        
     def visit_Instance(self, node):
+        if node.module in primitives:
+            self._visit_Instance_primitive(node)
+            return
+        
         current = self.stackInstanceFrame(node.name, node.module)
 
         scope = self.frames.getCurrent()

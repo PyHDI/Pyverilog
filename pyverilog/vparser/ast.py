@@ -648,16 +648,16 @@ class Task(Node):
         if self.statement: nodelist.extend(self.statement)
         return tuple(nodelist)
 
-#class TaskCall(Node):
-#    attr_names = ()
-#    def __init__(self, name, args):
-#        self.name = name
-#        self.args = args
-#    def children(self):
-#        nodelist = []
-#        if self.name: nodelist.append(self.name)
-#        if self.args: nodelist.extend(self.args)
-#        return tuple(nodelist)
+class TaskCall(Node):
+    attr_names = ()
+    def __init__(self, name, args):
+        self.name = name
+        self.args = args
+    def children(self):
+        nodelist = []
+        if self.name: nodelist.append(self.name)
+        if self.args: nodelist.extend(self.args)
+        return tuple(nodelist)
 
 class GenerateStatement(Node):
     attr_names = ()
