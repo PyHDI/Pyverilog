@@ -1316,14 +1316,14 @@ class VerilogParser(PLYParser):
         instancelist = []
         for instance_name, instance_ports, instance_array in p[3]:
             instancelist.append( Instance(p[1], instance_name, instance_ports, p[2], instance_array) )
-        p[0] = InstanceList( tuple(instancelist) )
+        p[0] = InstanceList(p[1], p[2], tuple(instancelist))
 
     def p_instance_or(self, p):
         'instance : SENS_OR parameterlist instance_bodylist SEMICOLON'
         instancelist = []
         for instance_name, instance_ports, instance_array in p[3]:
             instancelist.append( Instance(p[1], instance_name, instance_ports, p[2], instance_array) )
-        p[0] = InstanceList( tuple(instancelist) )
+        p[0] = InstanceList(p[1], p[2], tuple(instancelist))
 
     def p_instance_bodylist(self, p):
         'instance_bodylist : instance_bodylist COMMA instance_body'

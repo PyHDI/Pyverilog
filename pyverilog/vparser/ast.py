@@ -579,12 +579,15 @@ class DelayStatement(Node):
         return tuple(nodelist)
 
 class InstanceList(Node):
-    attr_names = ()
-    def __init__(self, list):
-        self.list = list
+    attr_names = ('module',)
+    def __init__(self, module, parameterlist, instances):
+        self.module = module
+        self.parameterlist = parameterlist
+        self.instances = instances
     def children(self):
         nodelist = []
-        if self.list: nodelist.extend(self.list)
+        if self.parameterlist: nodelist.extend(self.parameterlist)
+        if self.instances: nodelist.extend(self.instances)
         return tuple(nodelist)
     
 class Instance(Node):
@@ -597,9 +600,9 @@ class Instance(Node):
         self.array = array
     def children(self):
         nodelist = []
-        if self.portlist: nodelist.extend(self.portlist)
-        if self.parameterlist: nodelist.extend(self.parameterlist)
         if self.array: nodelist.append(self.array)
+        if self.parameterlist: nodelist.extend(self.parameterlist)
+        if self.portlist: nodelist.extend(self.portlist)
         return tuple(nodelist)
 
 class ParamArg(Node):

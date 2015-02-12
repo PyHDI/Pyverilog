@@ -746,18 +746,31 @@ class ASTCodeGenerator(ConvertVisitor):
         rslt = template.render(template_dict)
         return rslt
         
+    def visit_InstanceList(self, node):
+        filename = getfilename(node)
+        template = self.env.get_template(filename)
+        parameterlist = [ self.visit(param) for param in node.parameterlist ]
+        instances = [ self.visit(instance) for instance in node.instances ]
+        template_dict = {
+            'module' : node.module,
+            'parameterlist' : parameterlist,
+            'len_parameterlist' : len(parameterlist),
+            'instances' : instances,
+            'len_instances' : len(instances),
+            }
+        rslt = template.render(template_dict)
+        return rslt
+
     def visit_Instance(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
+        array = '' if node.array is None else self.visit(node.array)
         portlist = [ self.visit(port) for port in node.portlist ]
-        parameterlist = [ self.visit(param) for param in node.parameterlist ]
         template_dict = {
-            'module' : node.module,
             'name' : node.name,
+            'array' : array,
             'portlist' : portlist,
             'len_portlist' : len(portlist),
-            'parameterlist' : parameterlist,
-            'len_parameterlist' : len(parameterlist),
             }
         rslt = template.render(template_dict)
         return rslt

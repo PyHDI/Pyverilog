@@ -135,25 +135,29 @@ class BindVisitor(NodeVisitor):
         self.generic_visit(node)
         self.frames.unsetTaskDef()
 
-    def _visit_Instance_primitive(self, node):
-        primitive_type = primitives[node.module]
-        left = node.portlist[0].argname
-        right = None
-        if primitive_type == None:
-            right = Partselect(node.portlist[1].argname, IntConst('0'), IntConst('0'))
-        elif primitive_type == Unot:
-            right = Ulnot(Partselect(node.portlist[1].argname, IntConst('0'), IntConst('0')))
-        else:
-            concat_list = [Partselect(p.argname, IntConst('0'), IntConst('0')) for p in node.portlist[1:]]
-            right = primitive_type(Concat(concat_list))
-        self.addBind(left, right, bindtype='assign')
+    def visit_InstanceList(self, node):
+        for i in node.instances:
+            self.visit(i)
         
     def visit_Instance(self, node):
-        if node.module in primitives:
-            self._visit_Instance_primitive(node)
-            return
+        if node.array: return self._visit_Instance_array(node)
+        nodename = node.name
+        return self._visit_Instance_body(node, nodename)
+    
+    def _visit_Instance_array(self, node):
+        current = self.frames.getCurrent()
+        msb = self.optimize(self.getTree(node.array.msb, current)).value
+        lsb = self.optimize(self.getTree(node.array.lsb, current)).value
+        num_of_pins = msb + 1 - lsb
         
-        current = self.stackInstanceFrame(node.name, node.module)
+        for i in range(lsb, msb+1):
+            nodename = node.name + '_' + str(i)
+            self._visit_Instance_body(node, nodename, arrayindex=i)
+        
+    def _visit_Instance_body(self, node, nodename, arrayindex=None):
+        if node.module in primitives: return self._visit_Instance_primitive(node, arrayindex)
+        
+        current = self.stackInstanceFrame(nodename, node.module)
 
         scope = self.frames.getCurrent()
 
@@ -164,7 +168,7 @@ class BindVisitor(NodeVisitor):
             paramname = paramnames[paramnames_i] if param.paramname is None else param.paramname
             if paramname not in paramnames:
                 raise verror.FormatError("No such parameter: %s in %s" % 
-                                         (paramname, node.name))
+                                         (paramname, nodename))
             name = scope + ScopeLabel(paramname, 'signal')
             self.setConstant(name, value)
             definition = Parameter(paramname, str(value.value))
@@ -175,8 +179,8 @@ class BindVisitor(NodeVisitor):
         for ioport_i, port in enumerate(node.portlist):
             if port.portname is not None and not (port.portname in ioports):
                 raise verror.FormatError("No such port: %s in %s" %
-                                         (port.argname.name, node.name))
-            self.addInstancePortBind(port, ioports[ioport_i])
+                                          (port.argname.name, nodename))
+            self.addInstancePortBind(port, ioports[ioport_i], arrayindex)
 
         new_current = self.frames.getCurrent()
         self.copyFrameInfo(new_current)
@@ -184,6 +188,24 @@ class BindVisitor(NodeVisitor):
         self.visit(self.moduleinfotable.getDefinition(node.module))
         self.frames.setCurrent(current)
 
+    def _visit_Instance_primitive(self, node, arrayindex=None):
+        primitive_type = primitives[node.module]
+        left = node.portlist[0].argname
+        if arrayindex is not None:
+            left = Pointer(left, IntConst(str(arrayindex)))
+        right = None
+        if primitive_type == None:
+            right = (Pointer(node.portlist[1].argname, IntConst('0')) if arrayindex is None else
+                     Pointer(node.portlist[1].argname, IntConst(str(arrayindex))))
+        elif primitive_type == Unot:
+            right = (Ulnot(Pointer(node.portlist[1].argname, IntConst('0'))) if arrayindex is None else
+                     Ulnot(Pointer(node.portlist[1].argname, IntConst(str(arrayindex)))))
+        else:
+            concat_list = ([Pointer(p.argname, IntConst('0')) for p in node.portlist[1:]] if arrayindex is None else
+                           [Pointer(p.argname, IntConst(str(arrayindex))) for p in node.portlist[1:]])
+            right = primitive_type(Concat(concat_list))
+        self.addBind(left, right, bindtype='assign')
+        
     def visit_Initial(self, node):
         pass
         #label = self.labels.get( self.frames.getLabelKey('initial') )
@@ -806,11 +828,10 @@ class BindVisitor(NodeVisitor):
 
         self.addDataflow(dst, param.argname, lscope, rscope, None, 'parameter')
 
-    def addInstancePortBind(self, port, instportname=None):
+    def addInstancePortBind(self, port, instportname=None, arrayindex=None):
         lscope = self.frames.getCurrent()
         rscope = lscope[:-1]
         portname = instportname if port.portname is None else port.portname
-
         ldst = self.getDestinations(portname, lscope)
         if ldst[0][0] is None:
             raise verror.DefinitionError('No such port: %s' % portname)
@@ -819,15 +840,21 @@ class BindVisitor(NodeVisitor):
         for t in termtype:
             if t == 'Input':
                 if port.argname is None: continue
-                self.addDataflow(ldst, port.argname, lscope, rscope)
+                portarg = (port.argname if arrayindex is None else
+                           Pointer(port.argname, IntConst(str(arrayindex))))
+                self.addDataflow(ldst, portarg, lscope, rscope)
             elif t == 'Output':
                 if port.argname is None: continue
-                rdst = self.getDestinations(port.argname, rscope)
+                portarg = (port.argname if arrayindex is None else
+                           Pointer(port.argname, IntConst(str(arrayindex))))
+                rdst = self.getDestinations(portarg, rscope)
                 self.addDataflow(rdst, portname, rscope, lscope)
             elif t == 'Inout':
                 if port.argname is None: continue
-                self.addDataflow(ldst, port.argname, lscope, rscope)
-                rdst = self.getDestinations(port.argname, rscope)
+                portarg = (port.argname if arrayindex is None else
+                           Pointer(port.argname, IntConst(str(arrayindex))))
+                self.addDataflow(ldst, portarg, lscope, rscope)
+                rdst = self.getDestinations(portarg, rscope)
                 self.addDataflow(rdst, portname, rscope, lscope)
 
     ############################################################################

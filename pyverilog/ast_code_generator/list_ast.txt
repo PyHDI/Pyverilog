@@ -87,6 +87,7 @@ Initial
 WaitStatement
 ForeverStatement
 DelayStatement
+InstanceList
 Instance
 ParamArg
 PortArg

@@ -60,6 +60,9 @@ class ModuleVisitor(NodeVisitor):
     def visit_Initial(self, node):
         pass
 
+    def visit_InstanceList(self, node):
+        pass
+
     def visit_Instance(self, node):
         pass
 

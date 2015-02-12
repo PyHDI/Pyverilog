@@ -3,7 +3,9 @@ module TOP
    input [3:0] VAL,
    output [3:0] LED0,
    output [3:0] LED1,
-   output [3:0] LED2
+   output [3:0] LED2,
+   output [3:0] LED3,
+   input [3:0] in0, in1, in2
    );
 
   SUB 
@@ -17,7 +19,9 @@ module TOP
     # (.MODE(0))
     inst_sub4[3:0] (VAL, LED1),
     inst_sub5[3:0] (VAL, LED2);
-    
+
+  and U0[3:0] (LED3, in0, in1, in2);
+  
 endmodule
 
 module SUB #

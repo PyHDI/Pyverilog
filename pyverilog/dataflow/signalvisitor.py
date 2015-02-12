@@ -116,10 +116,28 @@ class SignalVisitor(NodeVisitor):
         #self.generic_visit(node)
         #self.frames.setCurrent(current)
 
+    def visit_InstanceList(self, node):
+        for i in node.instances:
+            self.visit(i)
+
     def visit_Instance(self, node):
-        if node.module in primitives: return
+        if node.array: return self._visit_Instance_array(node)
+        nodename = node.name
+        return self._visit_Instance_body(node, nodename)
         
-        current = self.stackInstanceFrame(node.name, node.module)
+    def _visit_Instance_array(self, node):
+        current = self.frames.getCurrent()
+        msb = self.optimize(self.getTree(node.array.msb, current)).value
+        lsb = self.optimize(self.getTree(node.array.lsb, current)).value
+        
+        for i in range(lsb, msb+1):
+            nodename = node.name + '_' + str(i)
+            self._visit_Instance_body(node, nodename)
+            
+    def _visit_Instance_body(self, node, nodename):
+        if node.module in primitives: return self._visit_Instance_primitive(node)
+
+        current = self.stackInstanceFrame(nodename, node.module)
 
         self.setInstanceSimpleConstantTerms()
 
@@ -130,7 +148,7 @@ class SignalVisitor(NodeVisitor):
             paramname = paramnames[paramnames_i] if param.paramname is None else param.paramname 
             if paramname not in paramnames:
                 raise verror.FormatError("No such parameter: %s in %s" % 
-                                         (paramname, node.name))
+                                         (paramname, nodename))
             value = self.optimize(self.getTree(param.argname, current))
             name, definition = self.searchConstantDefinition(scope, paramname)
             self.setConstant(name, value)
@@ -141,6 +159,9 @@ class SignalVisitor(NodeVisitor):
         self.visit(self.moduleinfotable.getDefinition(node.module))
         self.frames.setCurrent(current)
 
+    def _visit_Instance_primitive(self, node):
+        pass
+            
     def visit_Always(self, node):
         label = self.labels.get( self.frames.getLabelKey('always') )
         current = self.frames.addFrame(ScopeLabel(label, 'always'), 

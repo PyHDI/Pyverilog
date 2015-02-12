@@ -1,12 +1,5 @@
-{{ module }}
-{%- if len_parameterlist > 0 %}
- #({% for param in parameterlist %}
-   {{ param }}{%- if loop.index < len_parameterlist -%}, {%- endif -%}
-   {% endfor %}
-   )
-{%- endif %}
-{{ name }}
+{{ name }}{{ array }}
   ({% for port in portlist %}
    {{ port }}{%- if loop.index < len_portlist -%}, {%- endif -%}
    {% endfor %}
-   );
+   )
