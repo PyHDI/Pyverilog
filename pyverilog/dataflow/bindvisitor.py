@@ -145,6 +145,9 @@ class BindVisitor(NodeVisitor):
         return self._visit_Instance_body(node, nodename)
     
     def _visit_Instance_array(self, node):
+        if node.name == '':
+            raise verror.FormatError("Module %s requires an instance name" % node.module)
+        
         current = self.frames.getCurrent()
         msb = self.optimize(self.getTree(node.array.msb, current)).value
         lsb = self.optimize(self.getTree(node.array.lsb, current)).value
@@ -157,6 +160,9 @@ class BindVisitor(NodeVisitor):
     def _visit_Instance_body(self, node, nodename, arrayindex=None):
         if node.module in primitives: return self._visit_Instance_primitive(node, arrayindex)
         
+        if nodename == '':
+            raise verror.FormatError("Module %s requires an instance name" % node.module)
+
         current = self.stackInstanceFrame(nodename, node.module)
 
         scope = self.frames.getCurrent()

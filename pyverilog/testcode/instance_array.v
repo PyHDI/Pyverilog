@@ -1,11 +1,10 @@
 module TOP
   (
    input [3:0] VAL,
-   output [3:0] LED0,
-   output [3:0] LED1,
-   output [3:0] LED2,
-   output [3:0] LED3,
-   input [3:0] in0, in1, in2
+   input [3:0] in0, in1, in2,
+   input in3, in4, in5,
+   output [3:0] LED0, LED1, LED2, LED3,
+   output LED4, LED5
    );
 
   SUB 
@@ -21,7 +20,7 @@ module TOP
     inst_sub5[3:0] (VAL, LED2);
 
   and U0[3:0] (LED3, in0, in1, in2);
-  
+  and (LED4, in3, in4, in5), (LED5, in3, in4, in5);
 endmodule
 
 module SUB #

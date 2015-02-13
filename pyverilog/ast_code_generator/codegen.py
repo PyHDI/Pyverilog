@@ -36,6 +36,11 @@ class ConvertVisitor(object):
 def getfilename(node):
     return node.__class__.__name__.lower() + '.txt'
 
+def escape(s):
+    if s.startswith('\\'):
+        return s + ' '
+    return s
+
 class ASTCodeGenerator(ConvertVisitor):
     def __init__(self):
         self.env = Environment(loader=FileSystemLoader(DEFAULT_TEMPLATE_DIR))
@@ -63,7 +68,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         paramlist = self.visit(node.paramlist)
         template_dict = {
-            'modulename' : node.name,
+            'modulename' : escape(node.name),
             'paramlist' : '' if len(node.paramlist.params) == 0 else paramlist,
             'portlist' : self.visit(node.portlist),
             'items' : [ self.visit(item) for item in node.items ],
@@ -97,7 +102,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -126,7 +131,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'scope' : '' if node.scope is None else self.visit(node.scope),
             }
         rslt = template.render(template_dict)
@@ -181,7 +186,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'width' : '' if node.width is None else self.visit(node.width),
             'signed' : node.signed,
             }
@@ -192,7 +197,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'width' : '' if node.width is None else self.visit(node.width),
             'signed' : node.signed,
             }
@@ -203,7 +208,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'width' : '' if node.width is None else self.visit(node.width),
             'signed' : node.signed,
             }
@@ -214,7 +219,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'width' : '' if node.width is None else self.visit(node.width),
             'signed' : node.signed,
             }
@@ -225,7 +230,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'width' : '' if node.width is None else self.visit(node.width),
             'signed' : node.signed,
             }
@@ -236,7 +241,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'width' : '' if node.width is None else self.visit(node.width),
             'signed' : node.signed,
             }
@@ -247,7 +252,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'width' : '' if node.width is None else self.visit(node.width),
             'signed' : node.signed,
             }
@@ -258,7 +263,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'width' : '' if node.width is None else self.visit(node.width),
             'length' : self.visit(node.length),
             'signed' : node.signed,
@@ -270,7 +275,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'width' : '' if node.width is None else self.visit(node.width),
             'length' : self.visit(node.length),
             'signed' : node.signed,
@@ -282,7 +287,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'signed' : node.signed,
             }
         rslt = template.render(template_dict)
@@ -292,7 +297,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -301,7 +306,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -312,7 +317,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template_dict = {
             'first' : node.first.__class__.__name__.lower(),
             'second' : '' if node.second is None else node.second.__class__.__name__.lower(),
-            'name' : node.first.name,
+            'name' : escape(node.first.name),
             'width' : '' if node.first.width is None else self.visit(node.first.width),
             }
         rslt = template.render(template_dict)
@@ -323,7 +328,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         value = self.visit(node.value)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'width' : '' if node.width is None or (value.startswith('"') and value.endswith('"')) else self.visit(node.width),
             'value' : value,
             'signed' : node.signed,
@@ -336,7 +341,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         value = self.visit(node.value)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'width' : '' if node.width is None or (value.startswith('"') and value.endswith('"')) else self.visit(node.width),
             'value' : value,
             'signed' : node.signed,
@@ -694,7 +699,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'scope' : '' if node.scope is None else node.scope,
+            'scope' : '' if node.scope is None else escape(node.scope),
             'statements' : [ self.visit(statement) for statement in node.statements ],
             }
         rslt = template.render(template_dict)
@@ -752,7 +757,7 @@ class ASTCodeGenerator(ConvertVisitor):
         parameterlist = [ self.visit(param) for param in node.parameterlist ]
         instances = [ self.visit(instance) for instance in node.instances ]
         template_dict = {
-            'module' : node.module,
+            'module' : escape(node.module),
             'parameterlist' : parameterlist,
             'len_parameterlist' : len(parameterlist),
             'instances' : instances,
@@ -767,7 +772,7 @@ class ASTCodeGenerator(ConvertVisitor):
         array = '' if node.array is None else self.visit(node.array)
         portlist = [ self.visit(port) for port in node.portlist ]
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'array' : array,
             'portlist' : portlist,
             'len_portlist' : len(portlist),
@@ -779,7 +784,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'paramname' : '' if node.paramname is None else node.paramname,
+            'paramname' : '' if node.paramname is None else escape(node.paramname),
             'argname' : '' if node.argname is None else self.visit(node.argname),
             }
         rslt = template.render(template_dict)
@@ -789,7 +794,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'portname' : '' if node.portname is None else node.portname,
+            'portname' : '' if node.portname is None else escape(node.portname),
             'argname' : '' if node.argname is None else self.visit(node.argname),
             }
         rslt = template.render(template_dict)
@@ -800,7 +805,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         statement = [ self.visit(s) for s in node.statement ]
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'retwidth' : self.visit(node.retwidth),
             'statement' : statement,
             }
@@ -823,7 +828,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'statement' : self.visit(node.statement),
             }
         rslt = template.render(template_dict)
@@ -855,7 +860,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         args = [ self.visit(arg) for arg in node.args ]
         template_dict = {
-            'syscall' : node.syscall,
+            'syscall' : escape(node.syscall),
             'args' : args,
             'len_args' : len(args),
             }
@@ -866,7 +871,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'loop' : '' if node.loop is None else self.visit(node.loop),
             }
         rslt = template.render(template_dict)
@@ -895,7 +900,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.name,
+            'name' : escape(node.name),
             'value' : '' if node.value is None else self.visit(node.value),
             }
         rslt = template.render(template_dict)
@@ -905,7 +910,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'name' : node.dest,
+            'name' : escape(node.dest),
             }        
         rslt = template.render(template_dict)
         return rslt
@@ -914,7 +919,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'scope' : '' if node.scope is None else node.scope,
+            'scope' : '' if node.scope is None else escape(node.scope),
             'statements' : [ self.visit(statement) for statement in node.statements ],
             }
         rslt = template.render(template_dict)

@@ -191,8 +191,7 @@ class VerilogLexer(object):
     string_char = r"""([^"\\\n]|"""+escape_sequence+')'    
     string_literal = '"'+string_char+'*"'
 
-    #identifier = r"""[a-zA-Z_][a-zA-Z_0-9$]*"""
-    identifier = r"""([a-zA-Z_]|\\.)([a-zA-Z_0-9$]|\\.)*"""
+    identifier = r"""(([a-zA-Z_])([a-zA-Z_0-9$])*)|((\\\S)(\S)*)"""
 
     @TOKEN(string_literal)
     def t_STRING_LITERAL(self, t):
