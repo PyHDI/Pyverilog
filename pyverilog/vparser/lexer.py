@@ -1,9 +1,12 @@
 #-------------------------------------------------------------------------------
 # lexer.py
-# 
+#
 # Lexical analyzer
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
+#
+# edited by ryosuke fukatani
+#
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
 
@@ -45,9 +48,9 @@ class VerilogLexer(object):
         'MODULE', 'ENDMODULE', 'BEGIN', 'END', 'GENERATE', 'ENDGENERATE', 'GENVAR',
         'FUNCTION', 'ENDFUNCTION', 'TASK', 'ENDTASK',
         'INPUT', 'INOUT', 'OUTPUT', 'TRI', 'REG', 'WIRE', 'INTEGER', 'REAL', 'SIGNED',
-        'PARAMETER', 'LOCALPARAM', 
+        'PARAMETER', 'LOCALPARAM',
         'ASSIGN', 'ALWAYS', 'SENS_OR', 'POSEDGE', 'NEGEDGE', 'INITIAL',
-        'IF', 'ELSE', 'FOR', 'WHILE', 'CASE', 'ENDCASE', 'DEFAULT',
+        'IF', 'ELSE', 'FOR', 'WHILE', 'CASE', 'CASEX', 'ENDCASE', 'DEFAULT',
         'WAIT', 'FOREVER', 'DISABLE', 'FORK', 'JOIN',
         )
 
@@ -62,7 +65,7 @@ class VerilogLexer(object):
         'PLUS','MINUS','POWER','TIMES','DIVIDE','MOD',
         'NOT', 'OR', 'NOR', 'AND', 'NAND', 'XOR', 'XNOR',
         'LOR', 'LAND', 'LNOT',
-        'LSHIFTA', 'RSHIFTA', 'LSHIFT', 'RSHIFT', 
+        'LSHIFTA', 'RSHIFTA', 'LSHIFT', 'RSHIFT',
         'LT', 'GT', 'LE', 'GE', 'EQ', 'NE', 'EQL', 'NEL',
         'COND', # ?
         'EQUALS',
@@ -78,7 +81,7 @@ class VerilogLexer(object):
         'INTNUMBER_OCT', 'SIGNED_INTNUMBER_OCT',
         'INTNUMBER_BIN', 'SIGNED_INTNUMBER_BIN',
         'LPAREN','RPAREN', 'LBRACKET', 'RBRACKET', 'LBRACE', 'RBRACE',
-        'DELAY', 'DOLLER', 
+        'DELAY', 'DOLLER',
         )
 
     skipped = (
@@ -188,7 +191,7 @@ class VerilogLexer(object):
     octal_escape = r"""([0-7]{1,3})"""
     hex_escape = r"""(x[0-9a-fA-F]+)"""
     escape_sequence = r"""(\\("""+simple_escape+'|'+octal_escape+'|'+hex_escape+'))'
-    string_char = r"""([^"\\\n]|"""+escape_sequence+')'    
+    string_char = r"""([^"\\\n]|"""+escape_sequence+')'
     string_literal = '"'+string_char+'*"'
 
     identifier = r"""(([a-zA-Z_])([a-zA-Z_0-9$])*)|((\\\S)(\S)*)"""
@@ -201,36 +204,36 @@ class VerilogLexer(object):
     def t_FLOATNUMBER(self, t):
         return t
 
-    @TOKEN(bin_number)
-    def t_INTNUMBER_BIN(self, t):
-        return t
-
     @TOKEN(signed_bin_number)
     def t_SIGNED_INTNUMBER_BIN(self, t):
         return t
 
-    @TOKEN(octal_number)
-    def t_INTNUMBER_OCT(self, t):
+    @TOKEN(bin_number)
+    def t_INTNUMBER_BIN(self, t):
         return t
 
     @TOKEN(signed_octal_number)
     def t_SIGNED_INTNUMBER_OCT(self, t):
         return t
 
-    @TOKEN(hex_number)
-    def t_INTNUMBER_HEX(self, t):
-         return t
+    @TOKEN(octal_number)
+    def t_INTNUMBER_OCT(self, t):
+        return t
 
     @TOKEN(signed_hex_number)
     def t_SIGNED_INTNUMBER_HEX(self, t):
          return t
 
-    @TOKEN(decimal_number)
-    def t_INTNUMBER_DEC(self, t):
-        return t
+    @TOKEN(hex_number)
+    def t_INTNUMBER_HEX(self, t):
+         return t
 
     @TOKEN(signed_decimal_number)
     def t_SIGNED_INTNUMBER_DEC(self, t):
+        return t
+
+    @TOKEN(decimal_number)
+    def t_INTNUMBER_DEC(self, t):
         return t
 
     @TOKEN(identifier)
@@ -258,7 +261,7 @@ class VerilogLexer(object):
             if self.lexer.lexdata[i] == '\n': break
             i -= 1
         return (token.lexpos - i) + 1
-    
+
     def _make_tok_location(self, token):
         return (token.lineno, self._find_tok_column(token))
 

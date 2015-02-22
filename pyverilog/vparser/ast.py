@@ -1,9 +1,10 @@
 #-------------------------------------------------------------------------------
 # ast.py
-# 
+#
 # Verilog HDL AST classes with Pyverilog
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
+# edited by ryosuke fukatani
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
 
@@ -47,7 +48,7 @@ class Node(object):
         s = hash(tuple([getattr(self, a) for a in self.attr_names]))
         c = hash(self.children())
         return hash((s, c))
-        
+
 ################################################################################
 class Source(Node):
     attr_names = ('name',)
@@ -171,7 +172,7 @@ class Variable(Value):
         nodelist = []
         if self.width: nodelist.append(self.width)
         return tuple(nodelist)
-        
+
 class Input(Variable): pass
 class Output(Variable): pass
 class Inout(Variable): pass
@@ -347,11 +348,11 @@ class Power(Operator): pass
 class Times(Operator): pass
 class Divide(Operator): pass
 class Mod(Operator): pass
-################################################################################    
+################################################################################
 # Level 3
 class Plus(Operator): pass
 class Minus(Operator): pass
-################################################################################    
+################################################################################
 # Level 4
 class Sll(Operator): pass
 class Srl(Operator): pass
@@ -510,6 +511,8 @@ class CaseStatement(Node):
         if self.caselist: nodelist.extend(self.caselist)
         return tuple(nodelist)
 
+class CasexStatement(CaseStatement): pass
+
 class Case(Node):
     attr_names = ()
     def __init__(self, cond, statement):
@@ -540,7 +543,7 @@ class Initial(Node):
         if self.statement: nodelist.append(self.statement)
         return tuple(nodelist)
 
-class EventStatement(Node): 
+class EventStatement(Node):
     attr_names = ()
     def __init__(self, senslist):
         self.senslist = senslist
@@ -589,7 +592,7 @@ class InstanceList(Node):
         if self.parameterlist: nodelist.extend(self.parameterlist)
         if self.instances: nodelist.extend(self.instances)
         return tuple(nodelist)
-    
+
 class Instance(Node):
     attr_names = ('name', 'module')
     def __init__(self, module, name, portlist, parameterlist, array=None):
