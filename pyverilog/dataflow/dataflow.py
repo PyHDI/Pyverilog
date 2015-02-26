@@ -1,9 +1,10 @@
 #-------------------------------------------------------------------------------
 # dataflow.py
-# 
+#
 # Basic classes of Data flow nodes
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
+# modified by ryoduke fukatani
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
 
@@ -47,7 +48,7 @@ class DFNode(object):
     def tostr(self): pass
     def tocode(self, dest='dest'): return self.__repr__()
     def tolabel(self): return self.__repr__()
-    def children(self): 
+    def children(self):
         nodelist = []
         return tuple(nodelist)
     def __eq__(self, other):
@@ -69,8 +70,8 @@ class DFTerminal(DFNode):
         return ret[:-1]
     def tostr(self):
         ret = '(Terminal '
-        for n in self.name:      
-            ret += str(n) + '.'            
+        for n in self.name:
+            ret += str(n) + '.'
         return ret[0:-1] + ')'
     def tocode(self, dest='dest'):
         #ret = ''
@@ -207,7 +208,7 @@ class DFOperator(DFNotTerminal):
         return self.operator == other.operator and self.nextnodes == other.nextnodes
     def __hash__(self):
         return hash((self.operator, tuple(self.nextnodes)))
-    
+
 class DFPartselect(DFNotTerminal):
     attr_names = ()
     def __init__(self, var, msb, lsb):
@@ -312,8 +313,8 @@ class DFBranch(DFNotTerminal):
         return 'Branch'
     def tostr(self):
         ret = '(Branch'
-        if self.condnode is not None: ret += ' Cond:' + self.condnode.tostr() 
-        if self.truenode is not None: ret += ' True:' + self.truenode.tostr() 
+        if self.condnode is not None: ret += ' Cond:' + self.condnode.tostr()
+        if self.truenode is not None: ret += ' True:' + self.truenode.tostr()
         if self.falsenode is not None: ret += ' False:'+ self.falsenode.tostr()
         ret += ')'
         return ret
@@ -334,7 +335,7 @@ class DFBranch(DFNotTerminal):
         ret = 'if('
         if self.condnode is not None: ret += self.condnode.tocode(dest)
         ret += ') begin\n'
-        if self.truenode is not None: 
+        if self.truenode is not None:
             if isinstance(self.truenode, DFBranch):
                 ret += self.truenode.tocode(dest, always=always)
             elif always == 'clockedge':
@@ -342,7 +343,7 @@ class DFBranch(DFNotTerminal):
             elif always == 'combination':
                 ret += dest + ' = ' + self.truenode.tocode(dest) + ';\n'
         ret += 'end\n'
-        if self.falsenode is not None: 
+        if self.falsenode is not None:
             ret += 'else begin\n'
             if isinstance(self.falsenode, DFBranch):
                 ret += self.falsenode.tocode(dest, always=always)
@@ -462,7 +463,7 @@ class DFDelay(DFNotTerminal):
         return 'Delay'
     def tostr(self):
         ret = '(Delay '
-        if self.nextnode is not None: ret += self.nextnode.tostr() 
+        if self.nextnode is not None: ret += self.nextnode.tostr()
         ret += ')'
         return ret
     def tocode(self, dest='dest'):
@@ -522,8 +523,8 @@ class Term(object):
         return str(self.name)
     def tostr(self):
         ret = '(Term name:' + str(self.name) + ' type:' + str(self.termtype)
-        if self.msb is not None: ret += ' msb:' + self.msb.tostr() 
-        if self.lsb is not None: ret += ' lsb:' + self.lsb.tostr() 
+        if self.msb is not None: ret += ' msb:' + self.msb.tostr()
+        if self.lsb is not None: ret += ' lsb:' + self.lsb.tostr()
         if self.lenmsb is not None: ret += ' lenmsb:' + self.lenmsb.tostr()
         if self.lenlsb is not None: ret += ' lenlsb:' + self.lenlsb.tostr()
         ret += ')'
@@ -641,7 +642,7 @@ class Bind(object):
         code = 'localparam ' + dest
         code += ' = ' + self.tree.tocode(dest) + ';\n'
         return code
-            
+
     def _assign(self):
         dest = self.getdest()
         code = 'assign ' + dest
@@ -652,10 +653,10 @@ class Bind(object):
         dest = self.getdest()
         code = 'always @('
         if self.alwaysinfo.clock_edge is not None and self.alwaysinfo.clock_name is not None:
-            code += self.alwaysinfo.clock_edge + ' ' 
+            code += self.alwaysinfo.clock_edge + ' '
             code += util.toFlatname(self.alwaysinfo.clock_name)
         if self.alwaysinfo.reset_edge is not None and self.alwaysinfo.reset_name is not None:
-            code += ' or '            
+            code += ' or '
             code += self.alwaysinfo.reset_edge + ' '
             code += util.toFlatname(self.alwaysinfo.reset_name)
         code += ') begin\n'
@@ -681,7 +682,7 @@ class Bind(object):
         code += 'end\n'
         code += '\n'
         return code
-    
+
     def isClockEdge(self):
         if self.alwaysinfo is None: return False
         return self.alwaysinfo.isClockEdge()
@@ -752,7 +753,7 @@ class DataFlow(object):
         currentbindlist = self.binddict[name]
         c_i = 0
         for c in currentbindlist:
-            if c.msb == bind.msb and c.msb == bind.msb and c.ptr == bind.ptr:
+            if c.msb == bind.msb and c.lsb == bind.lsb and c.ptr == bind.ptr:
                 self.binddict[name][c_i].tree = bind.tree
                 return
             c_i += 1
