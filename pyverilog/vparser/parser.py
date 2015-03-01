@@ -4,7 +4,7 @@
 # Parser
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
-# edited by ryosuke fukatani
+# modified by ryosuke fukatani
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
 
@@ -1532,6 +1532,10 @@ class VerilogParser(PLYParser):
 
     def p_systemcall(self, p):
         'systemcall : DOLLER ID LPAREN sysargs RPAREN'
+        p[0] = SystemCall(p[2], p[4])
+
+    def p_systemcall_signed(self, p):#for $signed system task
+        'systemcall : DOLLER SIGNED LPAREN sysargs RPAREN'
         p[0] = SystemCall(p[2], p[4])
 
     def p_sysargs(self, p):
