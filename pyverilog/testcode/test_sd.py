@@ -20,14 +20,12 @@ import unittest
 
 class TestSequenceFunctions(unittest.TestCase):
     def setUp(self):
-        path_clone = sys.path
-        pop_target = []
-        for i,path in enumerate(path_clone):
-            if path == 'C:\\Python27\\lib\\site-packages\\pyverilog-0.9.0-py2.7.egg':
-                pop_target.append(i)
-        for i in reversed(pop_target):
-            sys.path.pop(i)
-        reload(pyverilog.dataflow.dataflow_analyzer)
+        pass
+
+    def test_supply(self):
+        terms, binddict = self.dataflow_wrapper("supply.v")
+        expect_bind = set(['(Bind dest:TOP.AAA tree:(IntConst 1))','(Bind dest:TOP.VDD tree:(IntConst 1))','(Bind dest:TOP.VSS tree:(IntConst 0))'])
+        self.assertEqual(self.binddict2strset(binddict), expect_bind)
 
     def test_signed(self):
         terms, binddict = self.dataflow_wrapper("signed.v")
@@ -103,6 +101,12 @@ class TestSequenceFunctions(unittest.TestCase):
                     print(bvi.tostr())
 
         return terms, binddict
+
+    def binddict2strset(self, binddict):
+        bind_set = set([])
+        for item in binddict.items():
+            bind_set.add(item[1][0])
+        return set([bind.tostr() for bind in bind_set])
 
 if __name__ == '__main__':
     unittest.main()

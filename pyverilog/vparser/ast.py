@@ -231,6 +231,7 @@ class Parameter(Node):
         if self.width: nodelist.append(self.width)
         return tuple(nodelist)
 class Localparam(Parameter): pass
+class Supply(Parameter) : pass
 
 class Decl(Node):
     attr_names = ()

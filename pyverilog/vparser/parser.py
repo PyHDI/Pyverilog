@@ -238,6 +238,14 @@ class VerilogParser(PLYParser):
         'sigtype : SIGNED'
         p[0] = p[1]
 
+    def p_sigtype_supply0(self, p):
+        'sigtype : SUPPLY0'
+        p[0] = p[1]
+
+    def p_sigtype_supply1(self, p):
+        'sigtype : SUPPLY1'
+        p[0] = p[1]
+
     def p_ioports(self, p):
         'ioports : ioports COMMA ioport'
         if isinstance(p[3], str):
@@ -396,6 +404,10 @@ class VerilogParser(PLYParser):
                 decls.append( Reg(name=name, width=width, signed=signed) )
         if 'tri' in sigtypes:
             decls.append( Tri(name=name, width=width, signed=signed) )
+        if 'supply0' in sigtypes:
+            decls.append( Supply(name=name,value=IntConst('0'), width=width, signed=signed) )
+        if 'supply1' in sigtypes:
+            decls.append( Supply(name=name,value=IntConst('1'), width=width, signed=signed) )
         return decls
 
     def decl_typecheck(self, sigtypes, length=None):
@@ -487,6 +499,10 @@ class VerilogParser(PLYParser):
         if 'input' in sigtypes and 'reg' in sigtypes:
             raise ParseError("Syntax Error")
         if 'inout' in sigtypes and 'reg' in sigtypes:
+            raise ParseError("Syntax Error")
+        if 'supply0' in sigtypes and len(sigtypes) != 1:
+            raise ParseError("Syntax Error")
+        if 'supply1' in sigtypes and len(sigtypes) != 1:
             raise ParseError("Syntax Error")
 
     def p_declassign(self, p):

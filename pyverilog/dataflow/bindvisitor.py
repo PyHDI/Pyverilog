@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # bindvisitor.py
-# 
+#
 # Binding visitor
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
@@ -108,6 +108,12 @@ class BindVisitor(NodeVisitor):
         if len(self.dataflow.getBindlist(name)) == 0:
             self.addBind(node.name, node.value, bindtype='parameter')
 
+    def visit_Supply(self, node):
+        self.addTerm(node)
+        current = self.frames.getCurrent()
+        name = current + ScopeLabel(node.name, 'signal')
+        self.addBind(node.name, node.value, bindtype='parameter')
+
     def visit_Localparam(self, node):
         self.addTerm(node)
         current = self.frames.getCurrent()
@@ -138,28 +144,28 @@ class BindVisitor(NodeVisitor):
     def visit_InstanceList(self, node):
         for i in node.instances:
             self.visit(i)
-        
+
     def visit_Instance(self, node):
         if node.array: return self._visit_Instance_array(node)
         nodename = node.name
         return self._visit_Instance_body(node, nodename)
-    
+
     def _visit_Instance_array(self, node):
         if node.name == '':
             raise verror.FormatError("Module %s requires an instance name" % node.module)
-        
+
         current = self.frames.getCurrent()
         msb = self.optimize(self.getTree(node.array.msb, current)).value
         lsb = self.optimize(self.getTree(node.array.lsb, current)).value
         num_of_pins = msb + 1 - lsb
-        
+
         for i in range(lsb, msb+1):
             nodename = node.name + '_' + str(i)
             self._visit_Instance_body(node, nodename, arrayindex=i)
-        
+
     def _visit_Instance_body(self, node, nodename, arrayindex=None):
         if node.module in primitives: return self._visit_Instance_primitive(node, arrayindex)
-        
+
         if nodename == '':
             raise verror.FormatError("Module %s requires an instance name" % node.module)
 
@@ -173,7 +179,7 @@ class BindVisitor(NodeVisitor):
             value = self.optimize(self.getTree(param.argname, current))
             paramname = paramnames[paramnames_i] if param.paramname is None else param.paramname
             if paramname not in paramnames:
-                raise verror.FormatError("No such parameter: %s in %s" % 
+                raise verror.FormatError("No such parameter: %s in %s" %
                                          (paramname, nodename))
             name = scope + ScopeLabel(paramname, 'signal')
             self.setConstant(name, value)
@@ -211,7 +217,7 @@ class BindVisitor(NodeVisitor):
                            [Pointer(p.argname, IntConst(str(arrayindex))) for p in node.portlist[1:]])
             right = primitive_type(Concat(concat_list))
         self.addBind(left, right, bindtype='assign')
-        
+
     def visit_Initial(self, node):
         pass
         #label = self.labels.get( self.frames.getLabelKey('initial') )
@@ -227,8 +233,8 @@ class BindVisitor(NodeVisitor):
                                       generate=self.frames.isGenerate(),
                                       always=True)
 
-        (clock_name, clock_edge, 
-         reset_name, reset_edge, 
+        (clock_name, clock_edge,
+         reset_name, reset_edge,
          senslist) = self._createAlwaysinfo(node, current)
 
         self.frames.setAlwaysInfo(clock_name, clock_edge,
@@ -317,10 +323,10 @@ class BindVisitor(NodeVisitor):
         current = self.stackNextFrame(label, 'if',
                                       frametype='ifthen',
                                       condition=node.cond,
-                                      functioncall=self.frames.isFunctioncall(), 
+                                      functioncall=self.frames.isFunctioncall(),
                                       taskcall=self.frames.isTaskcall(),
-                                      generate=self.frames.isGenerate(), 
-                                      always=self.frames.isAlways(), 
+                                      generate=self.frames.isGenerate(),
+                                      always=self.frames.isAlways(),
                                       initial=self.frames.isInitial())
 
         self.copyPreviousNonblockingAssign(current + ScopeLabel(label, 'if'))
@@ -334,8 +340,8 @@ class BindVisitor(NodeVisitor):
         label = self._toELSE(label)
         current = self.stackNextFrame(label, 'if',
                                       frametype='ifelse',
-                                      condition=node.cond, 
-                                      functioncall=self.frames.isFunctioncall(), 
+                                      condition=node.cond,
+                                      functioncall=self.frames.isFunctioncall(),
                                       taskcall=self.frames.isTaskcall(),
                                       generate=self.frames.isGenerate(),
                                       always=self.frames.isAlways(),
@@ -365,15 +371,15 @@ class BindVisitor(NodeVisitor):
         label = self.labels.get( self.frames.getLabelKey('if') )
         current = self.stackNextFrame(label, 'if',
                                       frametype='ifthen',
-                                      condition=cond, 
-                                      functioncall=self.frames.isFunctioncall(), 
+                                      condition=cond,
+                                      functioncall=self.frames.isFunctioncall(),
                                       taskcall=self.frames.isTaskcall(),
-                                      generate=self.frames.isGenerate(), 
-                                      always=self.frames.isAlways(), 
+                                      generate=self.frames.isGenerate(),
+                                      always=self.frames.isAlways(),
                                       initial=self.frames.isInitial())
 
         self.copyPreviousNonblockingAssign(current + ScopeLabel(label, 'if'))
-        
+
         myframes.append( self.frames.getCurrent() )
 
         if case.statement is not None:
@@ -384,14 +390,14 @@ class BindVisitor(NodeVisitor):
 
         label = self._toELSE(label)
         current = self.stackNextFrame(label, 'if',
-                                      frametype='ifelse', 
-                                      condition=cond, 
-                                      functioncall=self.frames.isFunctioncall(), 
+                                      frametype='ifelse',
+                                      condition=cond,
+                                      functioncall=self.frames.isFunctioncall(),
                                       taskcall=self.frames.isTaskcall(),
-                                      generate=self.frames.isGenerate(), 
-                                      always=self.frames.isAlways(), 
+                                      generate=self.frames.isGenerate(),
+                                      always=self.frames.isAlways(),
                                       initial=self.frames.isInitial())
-        
+
         self.copyPreviousNonblockingAssign(current + ScopeLabel(label, 'if'))
 
         myframes.append( current + ScopeLabel(label, 'if') )
@@ -424,11 +430,11 @@ class BindVisitor(NodeVisitor):
 
             ## main-statement
             current = self.stackNextFrame(label, 'for',
-                                          frametype='for', 
-                                          functioncall=self.frames.isFunctioncall(), 
+                                          frametype='for',
+                                          functioncall=self.frames.isFunctioncall(),
                                           taskcall=self.frames.isTaskcall(),
-                                          generate=self.frames.isGenerate(), 
-                                          always=self.frames.isAlways(), 
+                                          generate=self.frames.isGenerate(),
+                                          always=self.frames.isAlways(),
                                           initial=self.frames.isInitial(),
                                           loop=loop, loop_iter=self.frames.getForIter())
 
@@ -464,11 +470,11 @@ class BindVisitor(NodeVisitor):
 
             ## main-statement
             current = self.stackNextFrame(label, 'while',
-                                          frametype='while', 
-                                          functioncall=self.frames.isFunctioncall(), 
+                                          frametype='while',
+                                          functioncall=self.frames.isFunctioncall(),
                                           taskcall=self.frames.isTaskcall(),
-                                          generate=self.frames.isGenerate(), 
-                                          always=self.frames.isAlways(), 
+                                          generate=self.frames.isGenerate(),
+                                          always=self.frames.isAlways(),
                                           initial=self.frames.isInitial(),
                                           loop=loop)
 
@@ -496,7 +502,7 @@ class BindVisitor(NodeVisitor):
                                       functioncall=self.frames.isFunctioncall(),
                                       taskcall=self.frames.isTaskcall(),
                                       generate=self.frames.isGenerate(),
-                                      always=self.frames.isAlways(), 
+                                      always=self.frames.isAlways(),
                                       initial=self.frames.isInitial())
 
         self.generic_visit(node)
@@ -520,7 +526,7 @@ class BindVisitor(NodeVisitor):
 
     def visit_SystemCall(self, node):
         print("Warning: Isolated system call is not supported: %s" % node.syscall)
-    
+
     ############################################################################
     def optimize(self, node):
         return self.optimizer.optimize(node)
@@ -532,9 +538,9 @@ class BindVisitor(NodeVisitor):
         return current
 
     def stackNextFrame(self, label, scopetype,
-                       frametype='none', 
-                       alwaysinfo=None, condition=None, 
-                       module=False, functioncall=False, taskcall=False, 
+                       frametype='none',
+                       alwaysinfo=None, condition=None,
+                       module=False, functioncall=False, taskcall=False,
                        generate=False, always=False, initial=False, loop=None, loop_iter=None):
         current = self.frames.getCurrent()
         scopelabel = ScopeLabel(label, scopetype, loop)
@@ -543,7 +549,7 @@ class BindVisitor(NodeVisitor):
             current = self.frames.addFrame(scopelabel,
                                            frametype=frametype,
                                            alwaysinfo=alwaysinfo, condition=condition,
-                                           module=module, functioncall=functioncall, taskcall=taskcall, 
+                                           module=module, functioncall=functioncall, taskcall=taskcall,
                                            generate=generate, always=always, initial=initial,
                                            loop=loop, loop_iter=loop_iter)
         self.frames.setCurrent(nextscope)
@@ -561,7 +567,7 @@ class BindVisitor(NodeVisitor):
                 self.dataflow.addTerm(name, term)
 
         for name, definitions in self.frames.getConsts(current).items():
-            if len(definitions) > 1: 
+            if len(definitions) > 1:
                 raise verror.FormatError("Multiple definitions for Constant")
             for definition in definitions:
                 cterm = self.makeConstantTerm(name, definition, current)
@@ -619,8 +625,8 @@ class BindVisitor(NodeVisitor):
                 condlist, flowlist = self.getCondflow(scope)
                 alwaysinfo = bind.alwaysinfo
                 raw_tree = bind.tree
-                new_bind = self.makeBind(name, msb, lsb, ptr, part_msb, part_lsb, 
-                                         raw_tree, condlist, flowlist, 
+                new_bind = self.makeBind(name, msb, lsb, ptr, part_msb, part_lsb,
+                                         raw_tree, condlist, flowlist,
                                          alwaysinfo=alwaysinfo)
                 self.dataflow.addBind(name, new_bind)
 
@@ -665,7 +671,7 @@ class BindVisitor(NodeVisitor):
         return self.dataflow.getBindlist(name)
 
     def renameVar(self, name):
-        renamedvar = (name[:-1] + 
+        renamedvar = (name[:-1] +
                       ScopeLabel('_rn' + str(self.renamecnt) +
                                  '_' + name[-1].scopename, 'signal'))
         self.renamecnt += 1
@@ -703,7 +709,7 @@ class BindVisitor(NodeVisitor):
         matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
         constdef = self.frames.getConstantDefinition(matchedchain, name)
         return constdef
-        
+
     def searchScopeTerminal(self, blocklabel, name, current):
         currentmodule = self.getModuleScopeChain(current)
         localchain = currentmodule + self.toScopeChain(blocklabel, current)
@@ -745,7 +751,7 @@ class BindVisitor(NodeVisitor):
         if self.dataflow.hasTask(varname):
             return self.dataflow.getTaskPorts(varname)
         raise verror.DefinitionError('No such task: %s' % varname)
-    
+
     def searchTerminal(self, name, scope):
         if len(scope) == 0: return None
         varname = scope + ScopeLabel(name, 'signal')
@@ -829,7 +835,7 @@ class BindVisitor(NodeVisitor):
     def addInstanceParameterBind(self, param, name=None):
         lscope = self.frames.getCurrent()
         rscope = lscope[:-1]
-        paramname = name if param.paramname is None else param.paramname 
+        paramname = name if param.paramname is None else param.paramname
         dst = self.getDestinations(paramname, lscope)
 
         self.addDataflow(dst, param.argname, lscope, rscope, None, 'parameter')
@@ -887,7 +893,7 @@ class BindVisitor(NodeVisitor):
                 else:
                     self.resetConstant(name)
 
-    ############################################################################        
+    ############################################################################
     def getCondflow(self, scope):
         condlist = self.getCondlist(scope)
         condlist = self.resolveCondlist(condlist, scope)
@@ -900,7 +906,7 @@ class BindVisitor(NodeVisitor):
         while s is not None:
             frame = self.frames.dict[s]
             cond = frame.getCondition()
-            if cond is not None: 
+            if cond is not None:
                 ret.append(self.makeDFTree(cond, self.reduceIfScope(s)))
             if frame.isModule(): break
             if frame.isFunctioncall(): break
@@ -941,7 +947,7 @@ class BindVisitor(NodeVisitor):
                     raise verror.DefinitionError('No such signal: %s' % node.name)
                 return DFTerminal(name)
             name = self.searchTerminal(node.name, scope)
-            if name is None: 
+            if name is None:
                 raise verror.DefinitionError('No such signal: %s' % node.name)
             return DFTerminal(name)
 
@@ -988,8 +994,8 @@ class BindVisitor(NodeVisitor):
             var_df = self.makeDFTree(node.var, scope)
             ptr_df = self.makeDFTree(node.ptr, scope)
 
-            if (isinstance(var_df, DFTerminal) and 
-                (signaltype.isRegArray(self.getTermtype(var_df.name)) or 
+            if (isinstance(var_df, DFTerminal) and
+                (signaltype.isRegArray(self.getTermtype(var_df.name)) or
                  signaltype.isWireArray(self.getTermtype(var_df.name)))):
                 return DFPointer(var_df, ptr_df)
             return DFPartselect(var_df, ptr_df, copy.deepcopy(ptr_df))
@@ -1021,8 +1027,8 @@ class BindVisitor(NodeVisitor):
             self.frames.setCurrent(scope)
 
             current = self.frames.addFrame(
-                ScopeLabel(label, 'functioncall'), 
-                functioncall=True, generate=self.frames.isGenerate(), 
+                ScopeLabel(label, 'functioncall'),
+                functioncall=True, generate=self.frames.isGenerate(),
                 always=self.frames.isAlways())
 
             varname = self.frames.getCurrent() + ScopeLabel(func.name,'signal')
@@ -1033,7 +1039,7 @@ class BindVisitor(NodeVisitor):
             funcargs = node.args
 
             if len(funcports) != len(funcargs):
-                raise verror.FormatError("%s takes exactly %d arguments. (%d given)" % 
+                raise verror.FormatError("%s takes exactly %d arguments. (%d given)" %
                                          (func.name.name, len(funcports), len(funcargs)))
             for port in funcports:
                 self.addTerm( Wire(port.name, port.width) )
@@ -1060,7 +1066,7 @@ class BindVisitor(NodeVisitor):
 
             current = self.frames.addFrame(
                 ScopeLabel(label, 'taskcall'),
-                taskcall=True, generate=self.frames.isGenerate(), 
+                taskcall=True, generate=self.frames.isGenerate(),
                 always=self.frames.isAlways())
 
             varname = self.frames.getCurrent() + ScopeLabel(task.name,'signal')
@@ -1069,7 +1075,7 @@ class BindVisitor(NodeVisitor):
             taskargs = node.args
 
             if len(taskports) != len(taskargs):
-                raise verror.FormatError("%s takes exactly %d arguments. (%d given)" % 
+                raise verror.FormatError("%s takes exactly %d arguments. (%d given)" %
                                          (task.name.name, len(taskports), len(taskargs)))
             for port in taskports:
                 self.addTerm( Wire(port.name, port.width) )
@@ -1115,19 +1121,19 @@ class BindVisitor(NodeVisitor):
          msb, lsb = self.getTermWidth(tree.name)
          merged_tree = self.getFitTree(current_bindlist, msb, lsb)
          condlist, flowlist = self.getCondflow(scope)
-         (merged_tree, 
-         rest_condlist, 
-         rest_flowlist, 
+         (merged_tree,
+         rest_condlist,
+         rest_flowlist,
          match_flowlist) = self.diffBranchTree(merged_tree, condlist, flowlist)
          return replace.replaceUndefined(merged_tree, tree.name)
 
     def resolveBlockingAssign(self, tree, scope):
         if tree is None: return None
 
-        if isinstance(tree, DFConstant): 
+        if isinstance(tree, DFConstant):
             return tree
 
-        if isinstance(tree, DFEvalValue): 
+        if isinstance(tree, DFEvalValue):
             return tree
 
         if isinstance(tree, DFTerminal):
@@ -1170,19 +1176,19 @@ class BindVisitor(NodeVisitor):
             resolved_lsb = self.resolveBlockingAssign(tree.lsb, scope)
             resolved_var = self.resolveBlockingAssign(tree.var, scope)
             if isinstance(resolved_var, DFBranch):
-                return reorder.insertPartselect(resolved_var, 
+                return reorder.insertPartselect(resolved_var,
                                                      resolved_msb, resolved_lsb)
             return DFPartselect(resolved_var, resolved_msb, resolved_lsb)
 
         if isinstance(tree, DFPointer):
             resolved_ptr = self.resolveBlockingAssign(tree.ptr, scope)
-            if (isinstance(tree.var, DFTerminal) and 
+            if (isinstance(tree.var, DFTerminal) and
                 signaltype.isRegArray(self.getTermtype(tree.var.name))):
                 current_bindlist = self.frames.getBlockingAssign(tree.var.name, scope)
                 if len(current_bindlist) == 0: return DFPointer(tree.var, resolved_ptr)
                 new_tree = DFPointer(tree.var, resolved_ptr)
                 for bind in current_bindlist:
-                    new_tree = DFBranch(DFOperator((bind.ptr, resolved_ptr), 'Eq'), 
+                    new_tree = DFBranch(DFOperator((bind.ptr, resolved_ptr), 'Eq'),
                                         bind.tree, new_tree)
                 print(("Warning: "
                        "Overwrting Blocking Assignment with Reg Array is not supported"))
@@ -1201,7 +1207,7 @@ class BindVisitor(NodeVisitor):
         for bind in bindlist:
             if bind.msb is None and bind.lsb is None:
                 return bind.tree
-            if (self.optimize(bind.msb) == optimized_msb and 
+            if (self.optimize(bind.msb) == optimized_msb and
                 self.optimize(bind.lsb) == optimized_lsb):
                 return bind.tree
         return self.getMergedTree(bindlist)
@@ -1214,12 +1220,12 @@ class BindVisitor(NodeVisitor):
             lsb = 0 if x.lsb is None else x.lsb.value
             ptr = 0 if not isinstance(x.ptr, DFEvalValue) else x.ptr.value
             term = self.getTerm(x.dest)
-            length = (abs(self.optimize(term.msb).value - 
+            length = (abs(self.optimize(term.msb).value -
                           self.optimize(term.lsb).value) + 1)
             return ptr * length + lsb
         for bind in sorted(bindlist, key=bindkey):
             lsb = 0 if bind.lsb is None else bind.lsb.value
-            if last_ptr != (-1 if not isinstance(bind.ptr, DFEvalValue) 
+            if last_ptr != (-1 if not isinstance(bind.ptr, DFEvalValue)
                              else bind.ptr.value):
                 continue
             if last_msb + 1 < lsb:
@@ -1236,13 +1242,13 @@ class BindVisitor(NodeVisitor):
         part_offset = DFIntConst('0')
         for name, msb, lsb, ptr in reversed(dst):
             if len(dst) == 1:
-                ret.append((name, msb, lsb, ptr, None, None))    
+                ret.append((name, msb, lsb, ptr, None, None))
                 continue
 
             if msb is None and lsb is None:
                 msb, lsb = self.getTermWidth(name)
             diff = reorder.reorder( DFOperator((msb, lsb), 'Minus') )
-            part_lsb = part_offset 
+            part_lsb = part_offset
             part_msb = reorder.reorder(DFOperator((part_offset, diff), 'Plus'))
             part_offset = reorder.reorder(
                 DFOperator((part_msb, DFIntConst('1')), 'Plus'))
@@ -1259,7 +1265,7 @@ class BindVisitor(NodeVisitor):
             for n in left.list:
                 dst.extend(list(self.getDsts(n, scope)))
             return tuple(dst)
-        ret = (self.getDst(left, scope),) 
+        ret = (self.getDst(left, scope),)
         return ret
 
     def getDst(self, left, scope):
@@ -1310,7 +1316,7 @@ class BindVisitor(NodeVisitor):
             if left.var.scope is not None:
                 name = left.var.scope + ScopeLabel(left.var.name, 'signal')
             ptr = self.optimize(self.makeDFTree(left.ptr, scope))
-            if (signaltype.isRegArray(self.getTermtype(name)) or 
+            if (signaltype.isRegArray(self.getTermtype(name)) or
                 signaltype.isWireArray(self.getTermtype(name))):
                 return (name, None, None, ptr)
             return (name, ptr, copy.deepcopy(ptr), None)
@@ -1319,25 +1325,25 @@ class BindVisitor(NodeVisitor):
                                  (str(type(left)), str(left)))
 
     ############################################################################
-    def setDataflow(self, dst, raw_tree, condlist, flowlist, 
+    def setDataflow(self, dst, raw_tree, condlist, flowlist,
                     alwaysinfo=None, bindtype=None):
 
         for name, msb, lsb, ptr, part_msb, part_lsb in dst:
             bind = self.makeBind(name, msb, lsb, ptr, part_msb, part_lsb,
-                                 raw_tree, condlist, flowlist, 
+                                 raw_tree, condlist, flowlist,
                                  num_dst=len(dst),
-                                 alwaysinfo=alwaysinfo, 
+                                 alwaysinfo=alwaysinfo,
                                  bindtype=bindtype)
 
             self.dataflow.addBind(name, bind)
 
             if alwaysinfo is not None:
                 self.setNonblockingAssign(name, dst, raw_tree,
-                                          msb, lsb, ptr, 
+                                          msb, lsb, ptr,
                                           part_msb, part_lsb,
                                           alwaysinfo)
-    
-    def setDataflow_rename(self, dst, raw_tree, condlist, flowlist, 
+
+    def setDataflow_rename(self, dst, raw_tree, condlist, flowlist,
                            scope, alwaysinfo=None):
         renamed_dst = self.getRenamedDst(dst)
         self.setRenamedTree(renamed_dst, raw_tree, alwaysinfo)
@@ -1382,20 +1388,20 @@ class BindVisitor(NodeVisitor):
             msb, lsb = self.getTermWidth(name)
             self.setConstantTerm(name, Term(name, set(['Rename']), msb, lsb))
 
-    def setRenamedFlow(self, dst, renamed_dst, condlist, flowlist, 
+    def setRenamedFlow(self, dst, renamed_dst, condlist, flowlist,
                        scope, alwaysinfo=None):
         term_i = 0
         for name, msb, lsb, ptr, part_msb, part_lsb in dst:
             renamed_term = DFTerminal(renamed_dst[term_i][0])
-            renamed_bind = self.makeBind(name, msb, lsb, ptr, part_msb, part_lsb, 
-                                         renamed_term, condlist, flowlist, 
+            renamed_bind = self.makeBind(name, msb, lsb, ptr, part_msb, part_lsb,
+                                         renamed_term, condlist, flowlist,
                                          num_dst=len(dst), alwaysinfo=alwaysinfo)
             self.dataflow.addBind(name, renamed_bind)
             self.frames.setBlockingAssign(name, renamed_bind, scope)
             term_i+=1
 
-    ############################################################################    
-    def makeBind(self, name, msb, lsb, ptr, part_msb, part_lsb, 
+    ############################################################################
+    def makeBind(self, name, msb, lsb, ptr, part_msb, part_lsb,
                  raw_tree, condlist, flowlist,
                  num_dst=1, alwaysinfo=None, bindtype=None):
 
@@ -1407,8 +1413,8 @@ class BindVisitor(NodeVisitor):
 
         if len(current_bindlist) > 0:
             for current_bind in current_bindlist:
-                if ( current_bind.msb == msb and 
-                     current_bind.lsb == lsb and 
+                if ( current_bind.msb == msb and
+                     current_bind.lsb == lsb and
                      current_bind.ptr == ptr ):
                     current_tree = current_bind.tree
                     current_msb = current_bind.msb
@@ -1421,12 +1427,12 @@ class BindVisitor(NodeVisitor):
         rest_flowlist = flowlist
 
         match_flowlist = ()
-        if ( current_msb == msb and 
-             current_lsb == lsb and 
+        if ( current_msb == msb and
+             current_lsb == lsb and
              current_ptr == ptr ):
-            (rest_tree, 
-            rest_condlist, 
-            rest_flowlist, 
+            (rest_tree,
+            rest_condlist,
+            rest_flowlist,
             match_flowlist) = self.diffBranchTree(current_tree, condlist, flowlist)
 
         add_tree = self.makeBranchTree(rest_condlist, rest_flowlist, raw_tree)
@@ -1436,7 +1442,7 @@ class BindVisitor(NodeVisitor):
 
         tree = reorder.reorder(
             self.appendBranchTree(current_tree, match_flowlist, add_tree))
-        
+
         if num_dst > 1: tree = reorder.reorder(
             DFPartselect(tree, part_msb, part_lsb))
 
@@ -1446,13 +1452,13 @@ class BindVisitor(NodeVisitor):
     def diffBranchTree(self, tree, condlist, flowlist, matchflowlist=()):
         if len(condlist) == 0:
             return (tree, condlist, flowlist, matchflowlist)
-        if not isinstance(tree, DFBranch): 
+        if not isinstance(tree, DFBranch):
             return (tree, condlist, flowlist, matchflowlist)
         if condlist[0] != tree.condnode:
             return (tree, condlist, flowlist, matchflowlist)
         if flowlist[0]:
             return self.diffBranchTree(
-                tree.truenode, condlist[1:], flowlist[1:], 
+                tree.truenode, condlist[1:], flowlist[1:],
                 matchflowlist+(flowlist[0],))
         else:
             return self.diffBranchTree(
@@ -1466,12 +1472,12 @@ class BindVisitor(NodeVisitor):
             else: return DFBranch(condlist[0], None, node)
         else:
             if flowlist[0]: return DFBranch(
-                condlist[0], 
+                condlist[0],
                 self.makeBranchTree(condlist[1:], flowlist[1:], node),
                 None)
             else: return DFBranch(
-                condlist[0], 
-                None, 
+                condlist[0],
+                None,
                 self.makeBranchTree(condlist[1:], flowlist[1:], node))
 
     def appendBranchTree(self, base, pos, tree):
@@ -1482,9 +1488,9 @@ class BindVisitor(NodeVisitor):
         else:
             if pos[0]: return DFBranch(
                 base.condnode,
-                self.appendBranchTree(base.truenode, pos[1:], tree), 
+                self.appendBranchTree(base.truenode, pos[1:], tree),
                 base.falsenode)
             else: return DFBranch(
-                base.condnode, 
-                base.truenode, 
+                base.condnode,
+                base.truenode,
                 self.appendBranchTree(base.falsenode, pos[1:], tree))
