@@ -1095,9 +1095,9 @@ class BindVisitor(NodeVisitor):
 
         if isinstance(node, SystemCall):
             if node.syscall == 'unsigned':
-                return self.makeDFTree(node.args[0])
+                return self.makeDFTree(node.args[0], scope)
             if node.syscall == 'signed':
-                return self.makeDFTree(node.args[0])
+                return self.makeDFTree(node.args[0], scope)
             return DFIntConst('0')
 
         raise verror.FormatError("unsupported AST node type: %s %s" %

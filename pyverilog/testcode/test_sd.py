@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # test_sd.py
 #
-# Lexical analyzer
+#
 #
 # Copyright (C) 2015, ryosuke fukatani
 # License: Apache 2.0
@@ -31,6 +31,11 @@ class TestSequenceFunctions(unittest.TestCase):
         terms, binddict = self.dataflow_wrapper("signed.v")
         self.assertEqual(binddict.values()[0][0].tostr(),
         "(Bind dest:TOP.cnt tree:(Branch Cond:(Terminal TOP.RST) True:(IntConst 'd0) False:(Operator Plus Next:(Terminal TOP.cnt),(IntConst 1'sd1))))")
+
+    def test_signed_task(self):
+        terms, binddict = self.dataflow_wrapper("signed_task.v")
+        self.assertEqual(binddict.values()[0][0].tostr(),
+        "(Bind dest:TOP.cnt tree:(Branch Cond:(Terminal TOP.RST) True:(Terminal TOP.cnt) False:(Terminal TOP.cnt)))")
 
     def test_casex(self):
         self.dataflow_wrapper("casex.v")
