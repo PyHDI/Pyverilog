@@ -1,9 +1,10 @@
 #-------------------------------------------------------------------------------
 # parser.py
-# 
+#
 # Parser
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
+# edited by ryosuke fukatani
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
 
@@ -51,7 +52,7 @@ class VerilogParser(PLYParser):
         #self.parser = ply.yacc.yacc(module=self)
         ## Use this if you want to build the parser using LALR(1) instead of SLR
         self.parser = ply.yacc.yacc(module=self, method="LALR")
-        
+
     def _lexer_error_func(self, msg, line, column):
         self._parse_error(msg, self._coord(line, column))
 
@@ -60,7 +61,7 @@ class VerilogParser(PLYParser):
 
     def get_default_nettype(self):
         return self.lexer.get_default_nettype()
-        
+
     # Returns AST
     def parse(self, text, debug=0):
         return self.parser.parse(text, lexer=self.lexer, debug=debug)
@@ -325,7 +326,7 @@ class VerilogParser(PLYParser):
 
     def p_width(self,p):
         'width : LBRACKET expression COLON expression RBRACKET'
-        p[0] = Width(p[2], p[4]) 
+        p[0] = Width(p[2], p[4])
 
     def p_length(self,p):
         'length : LBRACKET expression COLON expression RBRACKET'
@@ -784,7 +785,7 @@ class VerilogParser(PLYParser):
     def p_expression_greatereq(self, p):
         'expression : expression GE expression'
         p[0] = GreaterEq(p[1], p[3])
-    
+
     ######################################################################
     # Level 7
     def p_expression_eq(self, p):
@@ -893,7 +894,7 @@ class VerilogParser(PLYParser):
 
     def p_repeat(self, p):
         'repeat : LBRACE expression concat RBRACE'
-        p[0] = Repeat(p[3], p[2])        
+        p[0] = Repeat(p[3], p[2])
 
     def p_partselect(self, p):
         'partselect : identifier LBRACKET expression COLON expression RBRACKET'
@@ -1047,6 +1048,7 @@ class VerilogParser(PLYParser):
     def p_basic_statement(self, p):
         """basic_statement : if_statement
         | case_statement
+        | casex_statement
         | for_statement
         | while_statement
         | event_statement
@@ -1247,6 +1249,10 @@ class VerilogParser(PLYParser):
         'case_statement : CASE LPAREN case_comp RPAREN casecontent_statements ENDCASE'
         p[0] = CaseStatement(p[3], p[5])
 
+    def p_casex_statement(self, p):
+        'casex_statement : CASEX LPAREN case_comp RPAREN casecontent_statements ENDCASE'
+        p[0] = CasexStatement(p[3], p[5])
+
     def p_case_comp(self, p):
         'case_comp : expression'
         p[0] = p[1]
@@ -1328,11 +1334,11 @@ class VerilogParser(PLYParser):
     def p_instance_bodylist(self, p):
         'instance_bodylist : instance_bodylist COMMA instance_body'
         p[0] = p[1] + (p[3],)
-        
+
     def p_instance_bodylist_one(self, p):
         'instance_bodylist : instance_body'
         p[0] = (p[1],)
-        
+
     def p_instance_body(self, p):
         'instance_body : ID LPAREN instance_ports RPAREN'
         p[0] = (p[1], p[3], None)
@@ -1358,11 +1364,11 @@ class VerilogParser(PLYParser):
     def p_instance_bodylist_noname(self, p):
         'instance_bodylist_noname : instance_bodylist_noname COMMA instance_body_noname'
         p[0] = p[1] + (p[3],)
-        
+
     def p_instance_bodylist_one_noname(self, p):
         'instance_bodylist_noname : instance_body_noname'
         p[0] = (p[1],)
-        
+
     def p_instance_body_noname(self, p):
         'instance_body_noname : LPAREN instance_ports RPAREN'
         p[0] = ('', p[2], None)
@@ -1475,7 +1481,7 @@ class VerilogParser(PLYParser):
         p[0] = (p[1],)
 
     def p_generate_item(self, p):
-        """generate_item : standard_item 
+        """generate_item : standard_item
         | generate_if
         | generate_for
         """
@@ -1582,6 +1588,7 @@ class VerilogParser(PLYParser):
         | for_statement
         | while_statement
         | case_statement
+        | casex_statement
         | block
         | namedblock
         """
@@ -1641,6 +1648,7 @@ class VerilogParser(PLYParser):
         | for_statement
         | while_statement
         | case_statement
+        | casex_statement
         | block
         | namedblock
         """
@@ -1684,11 +1692,11 @@ class VerilogParser(PLYParser):
         'single_statement : disable SEMICOLON'
         p[0] = SingleStatement(p[1])
 
-    ## fix me: to support task-call-statement 
+    ## fix me: to support task-call-statement
     #def p_single_statement_taskcall(self, p):
     #    'single_statement : functioncall SEMICOLON'
     #    p[0] = SingleStatement(p[1])
-    
+
     #def p_single_statement_taskcall_empty(self, p):
     #    'single_statement : taskcall SEMICOLON'
     #    p[0] = SingleStatement(p[1])
@@ -1707,7 +1715,7 @@ class VerilogParser(PLYParser):
         print("Syntax error")
         if p:
             self._parse_error(
-                'before: %s' % p.value, 
+                'before: %s' % p.value,
                 self._coord(p.lineno))
         else:
             self._parse_error('At end of input', '')
@@ -1744,7 +1752,7 @@ class VerilogCodeParser(object):
         rm = 'rm -f ' + self.preprocess_output
         subprocess.call(rm, shell=True)
         return text
-    
+
     def parse(self, preprocess_output='preprocess.output', debug=0):
         text = self.preprocess()
         ast = self.parser.parse(text, debug=debug)
@@ -1766,7 +1774,7 @@ if __name__ == '__main__':
         print(VERSION)
         print(USAGE)
         sys.exit()
-    
+
     optparser = OptionParser()
     optparser.add_option("-v","--version",action="store_true",dest="showversion",
                          default=False,help="Show the version")
@@ -1786,7 +1794,7 @@ if __name__ == '__main__':
     if len(filelist) == 0:
         showVersion()
 
-    codeparser = VerilogCodeParser(filelist, 
+    codeparser = VerilogCodeParser(filelist,
                                    preprocess_include=options.include,
                                    preprocess_define=options.define)
     ast = codeparser.parse()
