@@ -54,21 +54,27 @@ class NodeVisitor(object):
 # Signal/Object Management Classes
 ################################################################################
 class AlwaysInfo(object):
-    def __init__(self, clock_name='', clock_edge=None,
-                 reset_name='', reset_edge=None, senslist=()):
+    def __init__(self, clock_name='', clock_edge=None, clock_bit=0,
+                 reset_name='', reset_edge=None, reset_bit=0, senslist=()):
         self.clock_name = clock_name
         self.clock_edge = clock_edge
+        self.clock_bit = clock_bit
         self.reset_name = reset_name
         self.reset_edge = reset_edge
+        self.reset_bit = reset_bit
         self.senslist = senslist
     def getClockName(self):
         return self.clock_name
     def getClockEdge(self):
         return self.clock_edge
+    def getClockBit(self):
+        return self.clock_bit
     def getResetName(self):
         return self.reset_name
     def getResetEdge(self):
         return self.reset_edge
+    def getResetBit(self):
+        return self.reset_bit
     def isClockEdge(self):
         if self.clock_name != '' and self.clock_edge == 'posedge': return True
         if self.clock_name != '' and self.clock_edge == 'negedge': return True
@@ -316,10 +322,10 @@ class Frame(object):
     def setNext(self, nextframe):
         self.next.append(nextframe)
 
-    def setAlwaysInfo(self, clock_name, clock_edge, 
-                      reset_name, reset_edge, senslist):
-        self.alwaysinfo = AlwaysInfo(clock_name, clock_edge,
-                                     reset_name, reset_edge, senslist)        
+    def setAlwaysInfo(self, clock_name, clock_edge, clock_bit,
+                      reset_name, reset_edge, reset_bit, senslist):
+        self.alwaysinfo = AlwaysInfo(clock_name, clock_edge, clock_bit,
+                                     reset_name, reset_edge, reset_bit, senslist)
 
     def addSignal(self, node):
         self.variables.addSignal(node.name, node)
@@ -415,10 +421,10 @@ class FrameTable(object):
         if scopename is None: return self.current
         return self.current + scopename
 
-    def addFrame(self, scopename, 
-                 frametype='none', 
-                 alwaysinfo=None, condition=None, 
-                 module=False, functioncall=False, taskcall=False, 
+    def addFrame(self, scopename,
+                 frametype='none',
+                 alwaysinfo=None, condition=None,
+                 module=False, functioncall=False, taskcall=False,
                  generate=False, always=False, initial=False, loop=None, loop_iter=None,
                  modulename=None):
 
@@ -429,10 +435,10 @@ class FrameTable(object):
         previous = self.current
         if len(previous) > 0:
             self.dict[previous].setNext(scopechain)
-        self.dict[scopechain] = Frame(scopechain, previous, frametype=frametype, 
-                                      alwaysinfo=alwaysinfo, condition=condition, 
-                                      module=module, functioncall=functioncall, 
-                                      taskcall=taskcall, generate=generate, 
+        self.dict[scopechain] = Frame(scopechain, previous, frametype=frametype,
+                                      alwaysinfo=alwaysinfo, condition=condition,
+                                      module=module, functioncall=functioncall,
+                                      taskcall=taskcall, generate=generate,
                                       always=always, initial=initial, loop=loop, loop_iter=loop_iter,
                                       modulename=modulename)
         self.current = scopechain
@@ -496,10 +502,10 @@ class FrameTable(object):
     def getForIter(self):
         return self.for_iter
 
-    def setAlwaysInfo(self, clock_name, clock_edge, 
-                      reset_name, reset_edge, senslist):
-        self.dict[self.current].setAlwaysInfo(clock_name, clock_edge, 
-                                              reset_name, reset_edge, senslist)
+    def setAlwaysInfo(self, clock_name, clock_edge, clock_bit,
+                      reset_name, reset_edge, reset_bit, senslist):
+        self.dict[self.current].setAlwaysInfo(clock_name, clock_edge, clock_bit,
+                                              reset_name, reset_edge, reset_bit, senslist)
 
     def setCurrent(self, current):
         self.current = current

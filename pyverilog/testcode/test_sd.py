@@ -40,6 +40,11 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_casex(self):
         self.dataflow_wrapper("casex.v")
 
+    def test_ptr_clock_reset(self):
+        terms, binddict = self.dataflow_wrapper("ptr_clock_reset.v")
+        self.assertEqual(binddict.values()[0][0].getClockBit(), 2)
+        self.assertEqual(binddict.values()[0][0].getResetBit(), 0)
+
     def dataflow_wrapper(self,code_file):
 
         from optparse import OptionParser
