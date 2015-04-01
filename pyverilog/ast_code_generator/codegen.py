@@ -66,11 +66,12 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_ModuleDef(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
-        paramlist = self.visit(node.paramlist)
+        paramlist = self.visit(node.paramlist) if node.paramlist is not None else ''
+        portlist = self.visit(node.portlist) if node.portlist is not None else ''
         template_dict = {
             'modulename' : escape(node.name),
-            'paramlist' : '' if len(node.paramlist.params) == 0 else paramlist,
-            'portlist' : self.visit(node.portlist),
+            'paramlist' : paramlist,
+            'portlist' :  portlist,
             'items' : [ self.visit(item) for item in node.items ],
             }
         rslt = template.render(template_dict)
