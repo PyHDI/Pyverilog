@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # signalvisitor.py
-# 
+#
 # Signal definition visitor
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
@@ -62,6 +62,9 @@ class SignalVisitor(NodeVisitor):
     def visit_Wire(self, node):
         self.frames.addSignal(node)
 
+    def visit_Supply(self, node):
+        self.frames.addSignal(node)
+
     def visit_RegArray(self, node):
         self.frames.addSignal(node)
 
@@ -87,7 +90,7 @@ class SignalVisitor(NodeVisitor):
         if not self.hasConstant(name):
             value = self.optimize(self.getTree(node.value, self.frames.getCurrent()))
             self.setConstant(name, value)
-        
+
     def visit_Genvar(self, node):
         self.frames.addConst(node)
         name = self.frames.getCurrent() + ScopeLabel(node.name, 'signal')
@@ -110,7 +113,7 @@ class SignalVisitor(NodeVisitor):
     def visit_Initial(self, node):
         pass
         #label = self.labels.get( self.frames.getLabelKey('initial') )
-        #current = self.frames.addFrame(ScopeLabel(label, 'initial'), 
+        #current = self.frames.addFrame(ScopeLabel(label, 'initial'),
         #                               generate=self.frames.isGenerate(),
         #                               initial=True)
         #self.generic_visit(node)
@@ -124,25 +127,25 @@ class SignalVisitor(NodeVisitor):
         if node.array: return self._visit_Instance_array(node)
         nodename = node.name
         return self._visit_Instance_body(node, nodename)
-        
+
     def _visit_Instance_array(self, node):
         if node.name == '':
             raise verror.FormatError("Module %s requires an instance name" % node.module)
-        
+
         current = self.frames.getCurrent()
         msb = self.optimize(self.getTree(node.array.msb, current)).value
         lsb = self.optimize(self.getTree(node.array.lsb, current)).value
-        
+
         for i in range(lsb, msb+1):
             nodename = node.name + '_' + str(i)
             self._visit_Instance_body(node, nodename)
-            
+
     def _visit_Instance_body(self, node, nodename):
         if node.module in primitives: return self._visit_Instance_primitive(node)
 
         if nodename == '':
             raise verror.FormatError("Module %s requires an instance name" % node.module)
-        
+
         current = self.stackInstanceFrame(nodename, node.module)
 
         self.setInstanceSimpleConstantTerms()
@@ -151,9 +154,9 @@ class SignalVisitor(NodeVisitor):
 
         paramnames = self.moduleinfotable.getParamNames(node.module)
         for paramnames_i, param in enumerate(node.parameterlist):
-            paramname = paramnames[paramnames_i] if param.paramname is None else param.paramname 
+            paramname = paramnames[paramnames_i] if param.paramname is None else param.paramname
             if paramname not in paramnames:
-                raise verror.FormatError("No such parameter: %s in %s" % 
+                raise verror.FormatError("No such parameter: %s in %s" %
                                          (paramname, nodename))
             value = self.optimize(self.getTree(param.argname, current))
             name, definition = self.searchConstantDefinition(scope, paramname)
@@ -167,10 +170,10 @@ class SignalVisitor(NodeVisitor):
 
     def _visit_Instance_primitive(self, node):
         pass
-            
+
     def visit_Always(self, node):
         label = self.labels.get( self.frames.getLabelKey('always') )
-        current = self.frames.addFrame(ScopeLabel(label, 'always'), 
+        current = self.frames.addFrame(ScopeLabel(label, 'always'),
                                        generate=self.frames.isGenerate(),
                                        always=True)
         self.generic_visit(node)
@@ -204,13 +207,13 @@ class SignalVisitor(NodeVisitor):
     def _if_true(self, node):
         if node.true_statement is None: return None
         label = self.labels.get( self.frames.getLabelKey('if') )
-        current = self.frames.addFrame(ScopeLabel(label, 'if'), 
+        current = self.frames.addFrame(ScopeLabel(label, 'if'),
                                        frametype='ifthen',
                                        condition=node.cond,
-                                       functioncall=self.frames.isFunctioncall(), 
+                                       functioncall=self.frames.isFunctioncall(),
                                        taskcall=self.frames.isTaskcall(),
-                                       generate=self.frames.isGenerate(), 
-                                       always=self.frames.isAlways(), 
+                                       generate=self.frames.isGenerate(),
+                                       always=self.frames.isAlways(),
                                        initial=self.frames.isInitial())
         self.visit(node.true_statement)
         self.frames.setCurrent(current)
@@ -221,8 +224,8 @@ class SignalVisitor(NodeVisitor):
         label = self._toELSE(label)
         current = self.frames.addFrame(ScopeLabel(label, 'if'),
                                        frametype='ifelse',
-                                       condition=node.cond, 
-                                       functioncall=self.frames.isFunctioncall(), 
+                                       condition=node.cond,
+                                       functioncall=self.frames.isFunctioncall(),
                                        taskcall=self.frames.isTaskcall(),
                                        generate=self.frames.isGenerate(),
                                        always=self.frames.isAlways(),
@@ -242,31 +245,31 @@ class SignalVisitor(NodeVisitor):
         cond = IntConst('1')
         if case.cond is not None:
             if len(case.cond) > 1:
-                cond = Eq(comp, case.cond[0]) 
+                cond = Eq(comp, case.cond[0])
                 for c in case.cond[1:]:
                     cond = Lor(cond, Eq(comp, c))
             else:
                 cond = Eq(comp, case.cond[0])
         label = self.labels.get( self.frames.getLabelKey('if') )
-        current = self.frames.addFrame(ScopeLabel(label, 'if'), 
+        current = self.frames.addFrame(ScopeLabel(label, 'if'),
                                        frametype='ifthen',
-                                       condition=cond, 
-                                       functioncall=self.frames.isFunctioncall(), 
+                                       condition=cond,
+                                       functioncall=self.frames.isFunctioncall(),
                                        taskcall=self.frames.isTaskcall(),
-                                       generate=self.frames.isGenerate(), 
-                                       always=self.frames.isAlways(), 
+                                       generate=self.frames.isGenerate(),
+                                       always=self.frames.isAlways(),
                                        initial=self.frames.isInitial())
         if case.statement is not None: self.visit(case.statement)
         self.frames.setCurrent(current)
         if len(caselist) == 1: return
         label = self._toELSE(label)
         current = self.frames.addFrame(ScopeLabel(label, 'if'),
-                                       frametype='ifelse', 
-                                       condition=cond, 
-                                       functioncall=self.frames.isFunctioncall(), 
+                                       frametype='ifelse',
+                                       condition=cond,
+                                       functioncall=self.frames.isFunctioncall(),
                                        taskcall=self.frames.isTaskcall(),
-                                       generate=self.frames.isGenerate(), 
-                                       always=self.frames.isAlways(), 
+                                       generate=self.frames.isGenerate(),
+                                       always=self.frames.isAlways(),
                                        initial=self.frames.isInitial())
         self._case(comp, caselist[1:])
 
@@ -290,15 +293,15 @@ class SignalVisitor(NodeVisitor):
                 raise verror.FormatError(("Can not process the for-statement. "
                                           "for-condition should be evaluated statically."))
             # loop termination
-            if rslt.value <= 0: break 
+            if rslt.value <= 0: break
 
             ## main-statement
             current = self.frames.addFrame(ScopeLabel(label, 'for', loop),
-                                           frametype='for', 
-                                           functioncall=self.frames.isFunctioncall(), 
+                                           frametype='for',
+                                           functioncall=self.frames.isFunctioncall(),
                                            taskcall=self.frames.isTaskcall(),
-                                           generate=self.frames.isGenerate(), 
-                                           always=self.frames.isAlways(), 
+                                           generate=self.frames.isGenerate(),
+                                           always=self.frames.isAlways(),
                                            initial=self.frames.isInitial(),
                                            loop=loop, loop_iter=self.frames.getForIter())
             self.visit(node.statement)
@@ -335,7 +338,7 @@ class SignalVisitor(NodeVisitor):
                                        functioncall=self.frames.isFunctioncall(),
                                        taskcall=self.frames.isTaskcall(),
                                        generate=self.frames.isGenerate(),
-                                       always=self.frames.isAlways(), 
+                                       always=self.frames.isAlways(),
                                        initial=self.frames.isInitial())
         self.generic_visit(node)
         self.frames.setCurrent(current)
@@ -346,7 +349,7 @@ class SignalVisitor(NodeVisitor):
     def visit_BlockingSubstitution(self, node):
         if self.frames.isForpre() or self.frames.isForpost():
             current = self.frames.getCurrent()
-            name, definition = self.searchConstantDefinition(current, 
+            name, definition = self.searchConstantDefinition(current,
                                                              node.left.var.name)
             value = self.optimize(self.getTree(node.right.var, current))
             self.setConstant(name, value)
@@ -387,7 +390,7 @@ class SignalVisitor(NodeVisitor):
             for definition in definitions:
                 term = self.makeConstantTerm(name, definition, current)
                 self.setConstantTerm(name, term)
-    
+
     def setInstanceConstants(self):
         current = self.frames.getCurrent()
 
@@ -425,7 +428,7 @@ class SignalVisitor(NodeVisitor):
 
     def hasConstantTerm(self, name):
         self.optimizer.hasTerm(name)
-    
+
     ############################################################################
     def toScopeChain(self, blocklabel):
         scopelist = []
@@ -452,7 +455,7 @@ class SignalVisitor(NodeVisitor):
         foundkey, founddef = self.frames.searchSignalDefinition(key, name)
         if foundkey is not None:
             return foundkey + ScopeLabel(name, 'signal'), founddef
-        if foundkey is None: 
+        if foundkey is None:
             raise verror.DefinitionError('constant value not found: %s' % name)
 
     def searchScopeConstantValue(self, blocklabel, name):
@@ -482,7 +485,7 @@ class SignalVisitor(NodeVisitor):
     def makeDFTree(self, node, scope):
         if isinstance(node, str):
             return self.searchConstantValue(scope, node)
-        
+
         if isinstance(node, Identifier):
             if node.scope is not None:
                 const = self.searchScopeConstantValue(node.scope, node.name)
@@ -532,8 +535,8 @@ class SignalVisitor(NodeVisitor):
             var_df = self.makeDFTree(node.var, scope)
             ptr_df = self.makeDFTree(node.ptr, scope)
 
-            if (isinstance(var_df, DFTerminal) and 
-                (signaltype.isRegArray(self.getTermtype(var_df.name)) or 
+            if (isinstance(var_df, DFTerminal) and
+                (signaltype.isRegArray(self.getTermtype(var_df.name)) or
                  signaltype.isWireArray(self.getTermtype(var_df.name)))):
                 return DFPointer(var_df, ptr_df)
             return DFPartselect(var_df, ptr_df, copy.deepcopy(ptr_df))
