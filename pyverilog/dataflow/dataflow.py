@@ -692,12 +692,18 @@ class Bind(object):
     def getClockEdge(self):
         if self.alwaysinfo is None: return ''
         return self.alwaysinfo.getClockEdge()
+    def getClockBit(self):
+        if self.alwaysinfo is None: return ''
+        return self.alwaysinfo.getClockBit()
     def getResetName(self):
         if self.alwaysinfo is None: return ''
         return self.alwaysinfo.getResetName()
     def getResetEdge(self):
         if self.alwaysinfo is None: return ''
         return self.alwaysinfo.getResetEdge()
+    def getResetBit(self):
+        if self.alwaysinfo is None: return ''
+        return self.alwaysinfo.getResetBit()
     def getSenslist(self):
         if self.alwaysinfo is None: return ''
         return self.alwaysinfo.getSenslist()
