@@ -40,6 +40,17 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_casex(self):
         self.dataflow_wrapper("casex.v")
 
+    def test_decimal(self):
+        terms, binddict = self.dataflow_wrapper("decimal.v")
+        self.assertEqual(binddict.values()[0][0].tostr(),
+        "(Bind dest:TOP.cnt1 tree:(Branch Cond:(Terminal TOP.RST) True:(IntConst 'd0) False:(Operator Plus Next:(Terminal TOP.cnt1),(IntConst 8'd1))))")
+
+    def test_decimal2(self):
+        terms, binddict = self.dataflow_wrapper("decimal2.v")
+        self.assertEqual(binddict.values()[0][0].tostr(),
+        "(Bind dest:TOP.cnt2 tree:(Branch Cond:(Terminal TOP.RST) True:(IntConst 'd0) False:(Operator Plus Next:(Terminal TOP.cnt2),(IntConst 'd1))))")
+
+
     def dataflow_wrapper(self,code_file):
 
         from optparse import OptionParser
