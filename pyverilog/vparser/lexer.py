@@ -181,7 +181,7 @@ class VerilogLexer(object):
     signed_hex_number = '[0-9]*\'sh[0-9a-fA-Fxz][0-9a-fA-Fxz_]*'
 
     decimal_number = '[0-9]*\'d[0-9xz][0-9xz_]*' + '|' + '([0-9]*\'d)?[0-9][0-9_]*'
-    signed_decimal_number = '[0-9]*\'s(d?)[0-9xz][0-9xz_]*' + '|' + '([0-9]*\'s(d?))?[0-9][0-9_]*'
+    signed_decimal_number = '[0-9]*\'s(d?)[0-9xz][0-9xz_]*'
 
     exponent_part = r"""([eE][-+]?[0-9]+)"""
     fractional_constant = r"""([0-9]*\.[0-9]+)|([0-9]+\.)"""
