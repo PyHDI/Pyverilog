@@ -271,6 +271,7 @@ select 'led' as the target. Please type the command as below.
 Then you got a png file (out.png). The picture shows that the definition
 of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
 
+
 Control-flow analyzer
 ---------------------
 
@@ -301,6 +302,7 @@ state machine.
 
 You got also a png file (top\_state.png). The picture shows that the
 graphical structure of the state machine.
+
 
 Code generator
 --------------
@@ -348,11 +350,28 @@ Then Verilog HDL code generated from the AST instances is displayed.
       assign led = 8;
     endmodule
 
+Publication
+===========
+
+-  Shinya Takamaeda-Yamazaki: Pyverilog: A Python-based Hardware Design
+   Processing Toolkit for Verilog HDL, 11th International Symposium on
+   Applied Reconfigurable Computing (ARC 2015) (Poster), Lecture Notes
+   in Computer Science, Vol.9040/2015, pp.451-460, April 2015.
+   `Paper <http://link.springer.com/chapter/10.1007/978-3-319-16214-0_42>`__
+
 Related Project and Site
 ========================
 
 `PyCoRAM <http://shtaxxx.github.io/PyCoRAM/>`__ - Python-based Portable
 IP-core Synthesis Framework for FPGA-based Computing
+
+`flipSyrup <http://shtaxxx.github.io/flipSyrup/>`__ - Cycle-Accurate
+Hardware Simulation Framework on Abstract FPGA Platforms
+
+`Pyverilog\_toolbox <https://github.com/fukatani/Pyverilog_toolbox>`__ -
+Pyverilog\_toolbox is Pyverilog-based verification/design tool, which is
+developed by Fukatani-san and uses Pyverilog as a fundamental library.
+Thanks for your contribution!
 
 `shtaxxx.hatenablog.com <http://shtaxxx.hatenablog.com/entry/2014/01/01/045856>`__
 - Blog entry for introduction and examples of Pyverilog (in Japansese)

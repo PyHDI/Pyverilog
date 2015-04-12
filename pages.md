@@ -323,11 +323,24 @@ endmodule
 ```
 
 
+Publication
+==============================
+
+- Shinya Takamaeda-Yamazaki: Pyverilog: A Python-based Hardware Design Processing Toolkit for Verilog HDL, 11th International Symposium on Applied Reconfigurable Computing (ARC 2015) (Poster), Lecture Notes in Computer Science, Vol.9040/2015, pp.451-460, April 2015.
+[Paper](http://link.springer.com/chapter/10.1007/978-3-319-16214-0_42)
+
+
 Related Project and Site
 ==============================
 
 [PyCoRAM](http://shtaxxx.github.io/PyCoRAM/)
-- Python-based Implementation of CoRAM Memory Architecture for AXI4 Interconnection on FPGAs
+- Python-based Portable IP-core Synthesis Framework for FPGA-based Computing
+
+[flipSyrup](http://shtaxxx.github.io/flipSyrup/)
+- Cycle-Accurate Hardware Simulation Framework on Abstract FPGA Platforms
+
+[Pyverilog_toolbox](https://github.com/fukatani/Pyverilog_toolbox)
+- Pyverilog_toolbox is Pyverilog-based verification/design tool, which is developed by Fukatani-san and uses Pyverilog as a fundamental library. Thanks for your contribution!
 
 [shtaxxx.hatenablog.com](http://shtaxxx.hatenablog.com/entry/2014/01/01/045856)
 - Blog entry for introduction and examples of Pyverilog (in Japansese)
