@@ -10,7 +10,6 @@
 
 import sys
 import os
-import subprocess
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
 
@@ -1745,8 +1744,7 @@ def preprocess(filelist, preprocess_output='preprocess.output'):
     pre = VerilogPreprocessor(filelist, preprocess_output)
     pre.preprocess()
     text = open(preprocess_output).read()
-    rm = 'rm -f ' + preprocess_output
-    subprocess.call(rm, shell=True)
+    os.remove(preprocess_output)
     return text
 
 def parse(filelist, preprocess_output='preprocess.output', debug=0):
@@ -1769,8 +1767,7 @@ class VerilogCodeParser(object):
     def preprocess(self):
         self.preprocessor.preprocess()
         text = open(self.preprocess_output).read()
-        rm = 'rm -f ' + self.preprocess_output
-        subprocess.call(rm, shell=True)
+        os.remove(self.preprocess_output)
         return text
 
     def parse(self, preprocess_output='preprocess.output', debug=0):
