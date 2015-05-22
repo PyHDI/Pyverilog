@@ -288,7 +288,7 @@ Loop
 
 You got also a png file (top_state.png). The picture shows that the graphical structure of the state machine.
 
-![top_state.png](top_state.png)
+![top_state.png](img/top_state.png)
 
 Code generator
 ------------------------------
