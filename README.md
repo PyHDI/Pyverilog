@@ -258,7 +258,7 @@ python3 pyverilog/dataflow/graphgen.py -t top -s top.led test.v
 
 Then you got a png file (out.png). The picture shows that the definition of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
 
-![out.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045641.png)
+![out.png](img/out.png)
 
 Control-flow analyzer
 ------------------------------
@@ -288,7 +288,7 @@ Loop
 
 You got also a png file (top_state.png). The picture shows that the graphical structure of the state machine.
 
-![top_state.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png)
+![top_state.png](top_state.png)
 
 Code generator
 ------------------------------
