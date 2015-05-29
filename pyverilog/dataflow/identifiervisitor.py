@@ -17,6 +17,12 @@ if sys.version_info[0] >= 3:
 else:
     from visit import NodeVisitor
 
+def getIdentifiers(node):
+    v = IdentifierVisitor()
+    v.visit(node)
+    ids = v.getIdentifiers()
+    return ids
+    
 class IdentifierVisitor(NodeVisitor):
     def __init__(self):
         self.identifiers = []
@@ -37,8 +43,5 @@ if __name__ == '__main__':
     b = vast.Identifier('b')
     c = vast.Plus(a, b)
 
-    v = IdentifierVisitor()
-    v.visit(c)
-    
-    ids = v.getIdentifiers()
+    ids = getIdentifiers(c)
     print(ids)
