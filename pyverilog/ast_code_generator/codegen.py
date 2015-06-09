@@ -681,6 +681,16 @@ class ASTCodeGenerator(ConvertVisitor):
         rslt = template.render(template_dict)
         return rslt
 
+    def visit_CasexStatement(self, node):
+        filename = getfilename(node)
+        template = self.env.get_template(filename)
+        template_dict = {
+            'comp' : self.visit(node.comp),
+            'caselist' : [ self.visit(case) for case in node.caselist ],
+            }
+        rslt = template.render(template_dict)
+        return rslt
+
     def visit_Case(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
