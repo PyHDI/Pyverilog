@@ -72,7 +72,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'modulename' : escape(node.name),
             'paramlist' : paramlist,
             'portlist' :  portlist,
-            'items' : [ self.visit(item) for item in node.items ],
+            'items' : [ self.visit(item) for item in node.items ] if node.items else (),
             }
         rslt = template.render(template_dict)
         return rslt
