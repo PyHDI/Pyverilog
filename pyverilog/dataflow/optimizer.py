@@ -96,7 +96,7 @@ class VerilogOptimizer(object):
                 return DFUndefined(tree.width())
             return DFEvalValue(tree.eval(), tree.width())
         if isinstance(tree, DFFloatConst):
-            return DFEvalValue(tree.eval(), None, isfloat=True)
+            return DFEvalValue(tree.eval(), self.default_width, isfloat=True)
         if isinstance(tree, DFStringConst):
             return DFEvalValue(tree.eval(), None, isstring=True)
         if isinstance(tree, DFConstant):
