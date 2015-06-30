@@ -365,10 +365,10 @@ endmodule
 Related Project and Site
 ==============================
 
-[PyCoRAM](http://shtaxxx.github.io/PyCoRAM/)
+[PyCoRAM](https://github.com/shtaxxx/PyCoRAM)
 - Python-based Portable IP-core Synthesis Framework for FPGA-based Computing
 
-[flipSyrup](http://shtaxxx.github.io/flipSyrup/)
+[flipSyrup](https://github.com/shtaxxx/flipSyrup)
 - Cycle-Accurate Hardware Simulation Framework on Abstract FPGA Platforms
 
 [Pyverilog_toolbox](https://github.com/fukatani/Pyverilog_toolbox)
@@ -376,4 +376,3 @@ Related Project and Site
 
 [shtaxxx.hatenablog.com](http://shtaxxx.hatenablog.com/entry/2014/01/01/045856)
 - Blog entry for introduction and examples of Pyverilog (in Japansese)
-
