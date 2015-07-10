@@ -365,6 +365,9 @@ endmodule
 Related Project and Site
 ==============================
 
+[Veriloggen](https://github.com/shtaxxx/veriloggen)
+- A library for constructing a Verilog HDL source code in Python
+
 [PyCoRAM](https://github.com/shtaxxx/PyCoRAM)
 - Python-based Portable IP-core Synthesis Framework for FPGA-based Computing
 
