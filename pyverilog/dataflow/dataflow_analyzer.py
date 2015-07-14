@@ -36,7 +36,8 @@ class VerilogDataflowAnalyzer(VerilogCodeParser):
         self.terms = {}
         self.binddict = {}
         self.frametable = None
-        VerilogCodeParser.__init__(self, filelist,
+        files = filelist if isinstance(filelist, tuple) or isinstance(filelist, list) else [ filelist ]
+        VerilogCodeParser.__init__(self, files,
                                    preprocess_include=preprocess_include,
                                    preprocess_define=preprocess_define)
         self.noreorder = noreorder
