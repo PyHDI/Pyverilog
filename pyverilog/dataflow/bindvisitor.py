@@ -373,6 +373,9 @@ class BindVisitor(NodeVisitor):
         for f in caseframes:
             self.copyBlockingAssigns(f, start_frame)
 
+    def visit_CasexStatement(self, node):
+        return self.visit_CaseStatement(node)
+        
     def _case(self, comp, caselist, myframes):
         if len(caselist) == 0: return
 

@@ -239,6 +239,9 @@ class SignalVisitor(NodeVisitor):
         self._case(node.comp, node.caselist)
         self.frames.setCurrent(start_frame)
 
+    def visit_CasexStatement(self, node):
+        return self.visit_CaseStatement(node)
+        
     def _case(self, comp, caselist):
         if len(caselist) == 0: return
         case = caselist[0]
