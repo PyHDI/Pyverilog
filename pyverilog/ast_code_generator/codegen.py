@@ -116,7 +116,6 @@ class ASTCodeGenerator(ConvertVisitor):
             'lsb' : self.visit(node.lsb),
             }
         rslt = template.render(template_dict)
-        if rslt == '[0:0]': return ''
         return rslt
         
     def visit_Length(self, node):
