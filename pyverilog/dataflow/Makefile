@@ -12,7 +12,7 @@ SUBSET=subset.py
 CODEGEN=codegen.py
 GRAPHGEN=graphgen.py
 
-SRCS=../testcode/generate.v
+SRCS=../../testcode/generate.v
 TOP=-t TOP
 TARGETS=-s "TOP.OUT4"
 

@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+ppfrom setuptools import setup, find_packages
 
 import pyverilog.utils.version
 import re
@@ -20,7 +20,5 @@ setup(name='pyverilog',
       license="Apache License 2.0",
       url='http://shtaxxx.github.io/Pyverilog/',
       packages=find_packages(),
-      package_data={ 'pyverilog.ast_code_generator' : ['template/*'], 
-                     'pyverilog' : ['testcode/*'], },
+      package_data={ 'pyverilog.ast_code_generator' : ['template/*'],  },
 )
-

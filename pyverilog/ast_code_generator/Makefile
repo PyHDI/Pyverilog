@@ -4,7 +4,7 @@ PYTHON=python3
 #OPT=-m cProfile -o profile.rslt
 
 CODEGEN=codegen.py
-SRCS=../testcode/test.v
+SRCS=../../testcode/led.v
 
 .PHONY: codegen
 codegen:
