@@ -1,19 +1,10 @@
-TEST=test.py
-ARGS=
-
-PYTHON=python3
-#PYTHON=python
-#OPT=-m pdb
-#OPT=-m cProfile -s time
-#OPT=-m cProfile -o profile.rslt
-
 .PHONY: all
-all: test
+all: clean
 
 .PHONY: test
 test:
-	$(PYTHON) -m pytest -vv $(TEST)
+	find . -maxdepth 1 -type d |grep "./" | xargs -I {} make test -C {} 
 
 .PHONY: clean
 clean:
-	rm -rf *.pyc __pycache__ parsetab.py *.out
+	find . -maxdepth 1 -type d |grep "./" | xargs -I {} make clean -C {} 
