@@ -1,4 +1,3 @@
-
 module TOP(CLK, RST_X, IN, OUT);
   input CLK, RST_X;
   input [7:0] IN;
@@ -54,6 +53,4 @@ module TOP(CLK, RST_X, IN, OUT);
   end
   
 endmodule
-  
 
-  

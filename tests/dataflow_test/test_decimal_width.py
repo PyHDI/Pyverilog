@@ -1,0 +1,44 @@
+import os
+import sys
+from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
+
+codedir = '../../testcode/'
+
+expected = """\
+(Bind dest:TOP.cnt \
+tree:(Branch Cond:(Terminal TOP.RST) \
+True:(IntConst 'd0) \
+False:(Operator Plus Next:(Terminal TOP.cnt),(IntConst 8'd1))))
+"""
+
+def test():
+    filelist = [codedir + 'decimal_width.v']
+    topmodule = 'TOP'
+    noreorder = False
+    nobind = False
+    include = None
+    define = None
+    
+    analyzer = VerilogDataflowAnalyzer(filelist, topmodule,
+                                       noreorder=noreorder,
+                                       nobind=nobind,
+                                       preprocess_include=include,
+                                       preprocess_define=define)
+    analyzer.generate()
+
+    directives = analyzer.get_directives()
+    instances = analyzer.getInstances()
+    terms = analyzer.getTerms()
+    binddict = analyzer.getBinddict()
+
+    output = []
+    output.append(list(binddict.values())[0][0].tostr())
+    output.append('\n')
+            
+    rslt = ''.join(output)
+
+    print(rslt)
+    assert(rslt == expected)
+
+if __name__ == '__main__':
+    test()

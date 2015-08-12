@@ -1,6 +1,5 @@
-module TOP(CLK, RST, LED);
+module TOP(CLK, RST);
   input CLK, RST;
-  output [7:0] LED;
   reg [7:0] cnt;
   always @(posedge CLK) begin
     if(RST) begin
@@ -19,6 +18,4 @@ module TOP(CLK, RST, LED);
       endcase
     end
   end
-  assign LED = cnt;
 endmodule
-

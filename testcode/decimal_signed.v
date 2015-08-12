@@ -1,9 +1,6 @@
-//`default_nettype none
-
 module TOP(CLK, RST);
   input CLK, RST;
   reg [7:0] cnt;
-
 
   always @(posedge CLK or negedge RST) begin
     if(RST) begin
@@ -13,6 +10,4 @@ module TOP(CLK, RST);
     end
   end
 
-
 endmodule
-

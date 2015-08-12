@@ -10,5 +10,4 @@ module TOP(CLK, RST);
     end
   end
 
-
 endmodule
