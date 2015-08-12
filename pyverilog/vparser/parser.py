@@ -1739,20 +1739,7 @@ class VerilogParser(PLYParser):
         else:
             self._parse_error('At end of input', '')
 
-################################################################################
-def preprocess(filelist, preprocess_output='preprocess.output'):
-    pre = VerilogPreprocessor(filelist, preprocess_output)
-    pre.preprocess()
-    text = open(preprocess_output).read()
-    os.remove(preprocess_output)
-    return text
-
-def parse(filelist, preprocess_output='preprocess.output', debug=0):
-    text = preprocess(filelist, preprocess_output)
-    parser = VerilogParser()
-    ast = parser.parse(text, debug=debug)
-    return ast
-
+#-------------------------------------------------------------------------------
 class VerilogCodeParser(object):
     def __init__(self, filelist, preprocess_output='preprocess.output',
                  preprocess_include=None,
@@ -1779,6 +1766,16 @@ class VerilogCodeParser(object):
     def get_directives(self):
         return self.directives
 
+#-------------------------------------------------------------------------------
+def parse(filelist, preprocess_include=None, preprocess_define=None):
+    codeparser = VerilogCodeParser(filelist,
+                                   preprocess_include=preprocess_include,
+                                   preprocess_define=preprocess_define)
+    ast = codeparser.parse()
+    directives = codeparser.get_directives()
+    return ast, directives
+    
+#-------------------------------------------------------------------------------
 if __name__ == '__main__':
     from optparse import OptionParser
 
@@ -1811,12 +1808,10 @@ if __name__ == '__main__':
     if len(filelist) == 0:
         showVersion()
 
-    codeparser = VerilogCodeParser(filelist,
-                                   preprocess_include=options.include,
-                                   preprocess_define=options.define)
-    ast = codeparser.parse()
-    directives = codeparser.get_directives()
-
+    ast, directives = parse(filelist,
+                            preprocess_include=options.include,
+                            preprocess_define=options.define)
+    
     ast.show()
     for lineno, directive in directives:
         print('Line %d : %s' % (lineno, directive))

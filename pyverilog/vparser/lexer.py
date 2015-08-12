@@ -1,12 +1,10 @@
 #-------------------------------------------------------------------------------
 # lexer.py
 #
-# Lexical analyzer
+# Verilog Lexical Analyzer
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
-#
-# edited by ryosuke fukatani
-#
+# Edited by ryosuke fukatani
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
 
@@ -265,20 +263,66 @@ class VerilogLexer(object):
     def _make_tok_location(self, token):
         return (token.lineno, self._find_tok_column(token))
 
-if __name__ == '__main__':
+#-------------------------------------------------------------------------------
+def dump_tokens(text):
     def my_error_func(msg, a, b):
         sys.write(msg + "\n")
         sys.exit()
-
-    filename = '../testcode/test.v'
-    text = open(filename, 'r').read()
-
-    lexer = VerilogLexer(error_func = my_error_func)
+        
+    lexer = VerilogLexer(error_func=my_error_func)
     lexer.build()
     lexer.input(text)
 
+    ret = []
+    
     # Tokenize
-    while 1:
+    while True:
         tok = lexer.token()
-        if not tok: break      # No more input
-        print (tok.value, tok.type, tok.lineno, lexer.filename, tok.lexpos)
+        if not tok: break # No more input
+        ret.append("%s %s %d %s %d\n" %
+                   (tok.value, tok.type, tok.lineno, lexer.filename, tok.lexpos))
+        
+    return ''.join(ret)
+        
+#-------------------------------------------------------------------------------
+if __name__ == '__main__':
+    import pyverilog.utils.version
+    from pyverilog.vparser.preprocessor import preprocess
+    from optparse import OptionParser
+
+    INFO = "Verilog Preprocessor"
+    VERSION = pyverilog.utils.version.VERSION
+    USAGE = "Usage: python preprocessor.py file ..."
+
+    def showVersion():
+        print(INFO)
+        print(VERSION)
+        print(USAGE)
+        sys.exit()
+
+    optparser = OptionParser()
+    optparser.add_option("-v","--version",action="store_true",dest="showversion",
+                         default=False,help="Show the version")
+    optparser.add_option("-I","--include",dest="include",action="append",
+                         default=[],help="Include path")
+    optparser.add_option("-D",dest="define",action="append",
+                         default=[],help="Macro Definition")
+    (options, args) = optparser.parse_args()
+
+    filelist = args
+    if options.showversion:
+        showVersion()
+
+    for f in filelist:
+        if not os.path.exists(f): raise IOError("file not found: " + f)
+
+    if len(filelist) == 0:
+        showVersion()
+        
+    text = preprocess(filelist, 
+                      preprocess_include=options.include,
+                      preprocess_define=options.define)
+
+    dump = dump_tokens(text)
+    
+    print(dump)
