@@ -12,19 +12,11 @@ module main #
 
   localparam DELAY = 10;
   
-  reg [31:0] count;
-  
   always @(posedge CLK) begin
     if(RST) begin
-      count <= 0;
       LED <= 0;
     end else begin
-      if(count == STEP - 1) begin
-        count <= 0;
-        LED <= #DELAY LED + 1;
-      end else begin
-        count <= count + 1;
-      end
+      LED <= #DELAY LED + 1;
     end
   end
 endmodule

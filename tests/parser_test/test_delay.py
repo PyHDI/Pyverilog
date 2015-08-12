@@ -7,6 +7,8 @@ try:
 except:
     from io import StringIO
 
+codedir = '../../testcode/'
+
 expected = """\
 Source: 
   Description: 
@@ -40,11 +42,6 @@ Source:
         Localparam: DELAY, False
           Rvalue: 
             IntConst: 10
-      Decl: 
-        Reg: count, False
-          Width: 
-            IntConst: 31
-            IntConst: 0
       Always: 
         SensList: 
           Sens: posedge
@@ -55,49 +52,24 @@ Source:
             Block: None
               NonblockingSubstitution: 
                 Lvalue: 
-                  Identifier: count
-                Rvalue: 
-                  IntConst: 0
-              NonblockingSubstitution: 
-                Lvalue: 
                   Identifier: LED
                 Rvalue: 
                   IntConst: 0
             Block: None
-              IfStatement: 
-                Eq: 
-                  Identifier: count
-                  Minus: 
-                    Identifier: STEP
+              NonblockingSubstitution: 
+                Lvalue: 
+                  Identifier: LED
+                Rvalue: 
+                  Plus: 
+                    Identifier: LED
                     IntConst: 1
-                Block: None
-                  NonblockingSubstitution: 
-                    Lvalue: 
-                      Identifier: count
-                    Rvalue: 
-                      IntConst: 0
-                  NonblockingSubstitution: 
-                    Lvalue: 
-                      Identifier: LED
-                    Rvalue: 
-                      Plus: 
-                        Identifier: LED
-                        IntConst: 1
-                    DelayStatement: 
-                      Identifier: DELAY
-                Block: None
-                  NonblockingSubstitution: 
-                    Lvalue: 
-                      Identifier: count
-                    Rvalue: 
-                      Plus: 
-                        Identifier: count
-                        IntConst: 1
+                DelayStatement: 
+                  Identifier: DELAY
 Line 1 : `timescale 1ns / 1ps
 """
 
 def test():
-    filelist = ['main.v']
+    filelist = [codedir + 'delay.v']
     output = 'preprocess.out'
     include = None
     define = None

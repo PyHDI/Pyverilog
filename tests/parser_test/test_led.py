@@ -7,6 +7,8 @@ try:
 except:
     from io import StringIO
 
+codedir = '../../testcode/'
+
 expected = """\
 Source: 
   Description: 
@@ -121,9 +123,9 @@ Line 1 : `default_nettype none
 """
 
 def test():
-    filelist = ['main.v']
+    filelist = [codedir + 'led_main.v']
     output = 'preprocess.out'
-    include = ['./']
+    include = [codedir]
     define = ['STEP=100']
     
     parser = VerilogCodeParser(filelist,

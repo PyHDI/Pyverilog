@@ -2,6 +2,8 @@ import os
 import sys
 from pyverilog.vparser.preprocessor import VerilogPreprocessor
 
+codedir = '../../testcode/'
+
 expected = """\
 `default_nettype none
 module led #
@@ -52,10 +54,10 @@ module main
 endmodule
 """
 
-def test():
-    filelist = ['main.v']
+def test_preprocessor():
+    filelist = [codedir + 'led_main.v']
     output = 'preprocess.out'
-    include = ['./']
+    include = [codedir]
     define = ['STEP=100']
     
     pre = VerilogPreprocessor(filelist, output, include, define)

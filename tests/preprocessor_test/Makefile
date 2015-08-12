@@ -1,4 +1,4 @@
-TEST=test.py
+TEST=*.py
 ARGS=
 
 PYTHON=python3
