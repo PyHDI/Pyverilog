@@ -54,7 +54,7 @@ module main
 endmodule
 """
 
-def test_preprocessor():
+def test():
     filelist = [codedir + 'led_main.v']
     output = 'preprocess.out'
     include = [codedir]
@@ -65,4 +65,8 @@ def test_preprocessor():
     rslt = open(output).read()
     os.remove(output)
     
+    print(rslt)
     assert(rslt == expected)
+
+if __name__ == '__main__':
+    test()

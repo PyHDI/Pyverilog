@@ -137,13 +137,13 @@ if __name__ == '__main__':
 
     directives = verilogdataflowanalyzer.get_directives()
     print('Directive:')
-    for dr in directives:
+    for dr in sorted(directives, key=lambda x:str(x)):
         print(dr)
 
     instances = verilogdataflowanalyzer.getInstances()
     print('Instance:')
-    for ins in instances:
-        print(ins)
+    for module, instname in sorted(instances, key=lambda x:str(x[1])):
+        print((module, instname))
 
     if options.nobind:
         print('Signal:')
@@ -159,11 +159,11 @@ if __name__ == '__main__':
     else:
         terms = verilogdataflowanalyzer.getTerms()
         print('Term:')
-        for tk, tv in sorted(terms.items(), key=lambda x:len(x[0])):
+        for tk, tv in sorted(terms.items(), key=lambda x:str(x[0])):
             print(tv.tostr())
    
         binddict = verilogdataflowanalyzer.getBinddict()
         print('Bind:')
-        for bk, bv in sorted(binddict.items(), key=lambda x:len(x[0])):
+        for bk, bv in sorted(binddict.items(), key=lambda x:str(x[0])):
             for bvi in bv:
                 print(bvi.tostr())

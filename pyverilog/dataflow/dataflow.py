@@ -522,7 +522,7 @@ class Term(object):
     def __repr__(self):
         return str(self.name)
     def tostr(self):
-        ret = '(Term name:' + str(self.name) + ' type:' + str(self.termtype)
+        ret = '(Term name:' + str(self.name) + ' type:' + str(sorted(self.termtype, key=lambda x:str(x)))
         if self.msb is not None: ret += ' msb:' + self.msb.tostr()
         if self.lsb is not None: ret += ' lsb:' + self.lsb.tostr()
         if self.lenmsb is not None: ret += ' lenmsb:' + self.lenmsb.tostr()

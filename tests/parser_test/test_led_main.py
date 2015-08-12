@@ -142,4 +142,8 @@ def test():
     
     rslt = output.getvalue()
 
+    print(rslt)
     assert(rslt == expected)
+
+if __name__ == '__main__':
+    test()
