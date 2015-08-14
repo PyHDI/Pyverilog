@@ -477,8 +477,8 @@ class SignalVisitor(NodeVisitor):
     def makeConstantTerm(self, name, node, scope):
         termtype = node.__class__.__name__
         termtypes = set([termtype])
-        msb = DFEvalValue(31) if node.width is None else self.makeDFTree(node.width.msb, scope)
-        lsb = DFEvalValue(0) if node.width is None else self.makeDFTree(node.width.lsb, scope)
+        msb = DFIntConst('31') if node.width is None else self.makeDFTree(node.width.msb, scope)
+        lsb = DFIntConst('0') if node.width is None else self.makeDFTree(node.width.lsb, scope)
         return Term(name, termtypes, msb, lsb)
 
     def getTree(self, node, scope):

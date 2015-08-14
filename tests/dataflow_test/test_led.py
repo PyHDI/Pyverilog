@@ -12,7 +12,7 @@ Term:
 (Term name:led.CLK type:['Input'] msb:(IntConst 0) lsb:(IntConst 0))
 (Term name:led.LED type:['Output', 'Reg'] msb:(IntConst 7) lsb:(IntConst 0))
 (Term name:led.RST type:['Input'] msb:(IntConst 0) lsb:(IntConst 0))
-(Term name:led.STEP type:['Parameter'] msb:'d31 lsb:'d0)
+(Term name:led.STEP type:['Parameter'] msb:(IntConst 31) lsb:(IntConst 0))
 (Term name:led.count type:['Reg'] msb:(IntConst 31) lsb:(IntConst 0))
 Bind:
 (Bind dest:led.LED tree:(Branch Cond:(Terminal led.RST) True:(IntConst 0) False:(Branch Cond:(Operator Eq Next:(Terminal led.count),(Operator Minus Next:(Terminal led.STEP),(IntConst 1))) True:(Operator Plus Next:(Terminal led.LED),(IntConst 1)))))

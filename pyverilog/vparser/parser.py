@@ -272,7 +272,6 @@ class VerilogParser(PLYParser):
         p[0] = (p[1],)
 
     def ioport_create(self, sigtypes, name, width=None):
-        width = Width(IntConst('0'),IntConst('0')) if width is None else width
         self.ioport_typecheck(sigtypes)
         first = None
         second = None
@@ -377,7 +376,6 @@ class VerilogParser(PLYParser):
 
     # Signal Decl
     def decl_create(self, sigtypes, name, width=None, length=None):
-        width = Width(msb=IntConst('0'), lsb=IntConst('0')) if width is None else width
         self.decl_typecheck(sigtypes, length)
         decls = []
         signed = False
@@ -465,7 +463,6 @@ class VerilogParser(PLYParser):
 
     # Decl and Assign
     def declassign_create(self, sigtypes, name, assign, width=None):
-        width = Width(msb=IntConst('0'), lsb=IntConst('0')) if width is None else width
         self.declassign_typecheck(sigtypes)
         decls = []
         signed = False

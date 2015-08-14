@@ -166,7 +166,7 @@ class Variable(Value):
     attr_names = ('name', 'signed')
     def __init__(self, name, width=None, signed=False):
         self.name = name
-        self.width = width if width else Width(IntConst('0'),IntConst('0'))
+        self.width = width
         self.signed = signed
     def children(self):
         nodelist = []
@@ -223,7 +223,7 @@ class Parameter(Node):
     def __init__(self, name, value, width=None, signed=False):
         self.name = name
         self.value = value
-        self.width = width #if width else Width(msb=IntConst('31'),lsb=IntConst('0'))
+        self.width = width
         self.signed = signed
     def children(self):
         nodelist = []

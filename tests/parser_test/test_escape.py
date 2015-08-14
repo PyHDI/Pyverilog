@@ -20,18 +20,9 @@ Source:
         Port: \\1234RST*%&, None
       Decl: 
         Input: \\CLK~, False
-          Width: 
-            IntConst: 0
-            IntConst: 0
         Input: \\1234RST*%&, False
-          Width: 
-            IntConst: 0
-            IntConst: 0
       Decl: 
         Output: LE$D, False
-          Width: 
-            IntConst: 0
-            IntConst: 0
       Decl: 
         Genvar: i, False
           Width: 

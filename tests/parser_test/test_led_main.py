@@ -21,14 +21,8 @@ Source:
       Portlist: 
         Ioport: 
           Input: CLK, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
         Ioport: 
           Input: RST, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
         Ioport: 
           Output: LED, False
             Width: 
@@ -94,14 +88,8 @@ Source:
       Portlist: 
         Ioport: 
           Input: CLK, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
         Ioport: 
           Input: RST, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
         Ioport: 
           Output: LED, False
             Width: 

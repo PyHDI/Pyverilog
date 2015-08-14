@@ -37,19 +37,10 @@ Source:
               IntConst: 0
         Ioport: 
           Input: in3, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
         Ioport: 
           Input: in4, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
         Ioport: 
           Input: in5, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
         Ioport: 
           Output: LED0, False
             Width: 
@@ -72,14 +63,8 @@ Source:
               IntConst: 0
         Ioport: 
           Output: LED4, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
         Ioport: 
           Output: LED5, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
       InstanceList: SUB
         ParamArg: MODE
           IntConst: 0
@@ -191,14 +176,8 @@ Source:
       Portlist: 
         Ioport: 
           Input: VAL, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
         Ioport: 
           Output: LED, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
       Assign: 
         Lvalue: 
           Identifier: LED

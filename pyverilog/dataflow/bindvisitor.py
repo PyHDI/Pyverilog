@@ -807,8 +807,8 @@ class BindVisitor(NodeVisitor):
     def makeConstantTerm(self, name, node, scope):
         termtype = node.__class__.__name__
         termtypes = set([termtype])
-        msb = DFEvalValue(31) if node.width is None else self.makeDFTree(node.width.msb, scope)
-        lsb = DFEvalValue(0) if node.width is None else self.makeDFTree(node.width.lsb, scope)
+        msb = DFIntConst('31') if node.width is None else self.makeDFTree(node.width.msb, scope)
+        lsb = DFIntConst('0') if node.width is None else self.makeDFTree(node.width.lsb, scope)
         return Term(name, termtypes, msb, lsb)
 
     def addTerm(self, node, rscope=None):
@@ -821,8 +821,12 @@ class BindVisitor(NodeVisitor):
         if self.frames.isTaskcall(): termtype = 'Task'
         termtypes = set([termtype])
 
-        msb = DFEvalValue(31) if node.width is None else self.makeDFTree(node.width.msb, scope)
-        lsb = DFEvalValue(0) if node.width is None else self.makeDFTree(node.width.lsb, scope)
+        if isinstance(node, (Parameter, Localparam)):
+            msb = DFIntConst('31') if node.width is None else self.makeDFTree(node.width.msb, scope)
+        else:
+            msb = DFIntConst('0') if node.width is None else self.makeDFTree(node.width.msb, scope)
+        lsb = DFIntConst('0') if node.width is None else self.makeDFTree(node.width.lsb, scope)
+        
         lenmsb = None
         lenlsb = None
         if isinstance(node, RegArray) or isinstance(node, WireArray):
