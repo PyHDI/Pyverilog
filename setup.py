@@ -1,4 +1,4 @@
-ppfrom setuptools import setup, find_packages
+from setuptools import setup, find_packages
 
 import pyverilog.utils.version
 import re
