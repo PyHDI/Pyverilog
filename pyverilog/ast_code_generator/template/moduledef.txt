@@ -11,3 +11,4 @@ module {{ modulename }}{% if paramlist != '' %} #
 {% for item in items %}{{ item }}
 {% endfor %}
 endmodule
+

@@ -984,6 +984,8 @@ if __name__ == '__main__':
                          default=False,help="Show the version")
     optparser.add_option("-I","--include",dest="include",action="append",
                          default=[],help="Include path")
+    optparser.add_option("-D",dest="define",action="append",
+                         default=[],help="Macro Definition")
     (options, args) = optparser.parse_args()
 
     filelist = args
@@ -996,7 +998,10 @@ if __name__ == '__main__':
     if len(filelist) == 0:
         showVersion()
 
-    codeparser = VerilogCodeParser(filelist, preprocess_include=options.include)
+    codeparser = VerilogCodeParser(filelist,
+                                   preprocess_include=options.include,
+                                   preprocess_define=options.define)
+
     ast = codeparser.parse()
     directives = codeparser.get_directives()
 
