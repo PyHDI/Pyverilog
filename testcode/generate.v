@@ -67,8 +67,19 @@ module SUB(CLK, RST_X, subin, subout);
   output [WD-1:0] subout;
   
   genvar j;
-  generate for(j=0; j<WD; j=j+1) begin
-    assign subout[j] = ~subin[j];
+  generate for(j=0; j<WD; j=j+1) begin: loop
+    if(j == 0) begin: _t
+      wire tmp;
+      assign subout[j] = subin[j];
+      assign tmp = ~subin[j];
+    end else begin: _f
+      wire tmp;
+      if(j == 1) begin
+        assign subout[j] = loop[j-1]._t.tmp ^ subin[j];
+      end else begin
+        assign subout[j] = loop[j-1]._f.tmp ^ subin[j];
+      end
+    end
   end endgenerate
     
 endmodule
