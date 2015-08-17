@@ -2,4 +2,4 @@ fork{% if scope != '' %} : {{ scope }}{% endif %}
 {%- for statement in statements %}
 {{ statement }}
 {%- endfor %}
-join 
+join

@@ -11,6 +11,7 @@ import sys
 import os
 import math
 import re
+import functools
 from jinja2 import Environment, FileSystemLoader
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
@@ -22,6 +23,22 @@ from pyverilog.utils.op2mark import op2mark
 
 DEFAULT_TEMPLATE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/template/'
 
+#-------------------------------------------------------------------------------
+try:
+    import textwrap
+    indent = textwrap.indent
+except:
+    def indent(text, prefix, predicate=None):
+        if predicate is None: predicate = lambda x: x and not x.isspace()
+        ret = []
+        for line in text.split('\n'):
+            if predicate(line):
+                ret.append(prefix)
+            ret.append(line)
+            ret.append('\n')
+        return ''.join(ret[:-1])
+    
+#-------------------------------------------------------------------------------
 class ConvertVisitor(object):
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
@@ -42,8 +59,9 @@ def escape(s):
     return s
 
 class ASTCodeGenerator(ConvertVisitor):
-    def __init__(self):
+    def __init__(self, indentsize=2):
         self.env = Environment(loader=FileSystemLoader(DEFAULT_TEMPLATE_DIR))
+        self.indent = functools.partial(indent, prefix=' '*indentsize)
 
     def visit_Source(self, node):
         filename = getfilename(node)
@@ -66,13 +84,13 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_ModuleDef(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
-        paramlist = self.visit(node.paramlist) if node.paramlist is not None else ''
-        portlist = self.visit(node.portlist) if node.portlist is not None else ''
+        paramlist = self.indent(self.visit(node.paramlist)) if node.paramlist is not None else ''
+        portlist = self.indent(self.visit(node.portlist)) if node.portlist is not None else ''
         template_dict = {
             'modulename' : escape(node.name),
             'paramlist' : paramlist,
             'portlist' :  portlist,
-            'items' : [ self.visit(item) for item in node.items ] if node.items else (),
+            'items' : [ self.indent(self.visit(item)) for item in node.items ] if node.items else (),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -641,10 +659,12 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_IfStatement(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
+        true_statement = '' if node.true_statement is None else self.visit(node.true_statement)
+        false_statement = '' if node.false_statement is None else self.visit(node.false_statement)
         template_dict = {
             'cond' : self.visit(node.cond),
-            'true_statement' : '' if node.true_statement is None else self.visit(node.true_statement),
-            'false_statement' : '' if node.false_statement is None else self.visit(node.false_statement),
+            'true_statement' : true_statement,
+            'false_statement' : false_statement,
             }
         rslt = template.render(template_dict)
         return rslt
@@ -711,7 +731,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         template_dict = {
             'scope' : '' if node.scope is None else escape(node.scope),
-            'statements' : [ self.visit(statement) for statement in node.statements ],
+            'statements' : [ self.indent(self.visit(statement)) for statement in node.statements ],
             }
         rslt = template.render(template_dict)
         return rslt
@@ -765,7 +785,7 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_InstanceList(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
-        parameterlist = [ self.visit(param) for param in node.parameterlist ]
+        parameterlist = [ self.indent(self.visit(param)) for param in node.parameterlist ]
         instances = [ self.visit(instance) for instance in node.instances ]
         template_dict = {
             'module' : escape(node.module),
@@ -781,7 +801,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         array = '' if node.array is None else self.visit(node.array)
-        portlist = [ self.visit(port) for port in node.portlist ]
+        portlist = [ self.indent(self.visit(port)) for port in node.portlist ]
         template_dict = {
             'name' : escape(node.name),
             'array' : array,
@@ -814,7 +834,7 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_Function(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
-        statement = [ self.visit(s) for s in node.statement ]
+        statement = [ self.indent(self.visit(s)) for s in node.statement ]
         template_dict = {
             'name' : escape(node.name),
             'retwidth' : self.visit(node.retwidth),
@@ -838,9 +858,10 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_Task(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
+        statement = [ self.indent(self.visit(s)) for s in node.statement ]
         template_dict = {
             'name' : escape(node.name),
-            'statement' : self.visit(node.statement),
+            'statement' : statement,
             }
         rslt = template.render(template_dict)
         return rslt
@@ -931,7 +952,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         template_dict = {
             'scope' : '' if node.scope is None else escape(node.scope),
-            'statements' : [ self.visit(statement) for statement in node.statements ],
+            'statements' : [ self.indent(self.visit(statement)) for statement in node.statements ],
             }
         rslt = template.render(template_dict)
         return rslt

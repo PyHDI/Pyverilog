@@ -7,8 +7,7 @@ module {{ modulename }}{% if paramlist != '' %} #
 (
 {{ portlist }}
 );
-{%- for item in items %}
-{{ item }}
-{%- endfor %}
-endmodule
 
+{% for item in items %}{{ item }}
+{% endfor %}
+endmodule
