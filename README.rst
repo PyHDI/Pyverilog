@@ -374,15 +374,15 @@ Then Verilog HDL code generated from the AST instances is displayed.
 
 .. code:: verilog
 
-
     module top
-     (
-      input [0:0] CLK, 
-    input [0:0] RST, 
-    output [7:0] led
+    (
+      input CLK,
+      input RST,
+      output [7:0] led
+    );
 
-     );
       assign led = 8;
+
     endmodule
 
 Related Project and Site
