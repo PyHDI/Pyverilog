@@ -388,11 +388,11 @@ Then Verilog HDL code generated from the AST instances is displayed.
 Related Project and Site
 ========================
 
-`Veriloggen <https://github.com/Pyverilog/veriloggen>`__ - A library for
+`Veriloggen <https://github.com/PyHDI/veriloggen>`__ - A library for
 constructing a Verilog HDL source code in Python
 
-`PyCoRAM <https://github.com/Pyverilog/PyCoRAM>`__ - Python-based
-Portable IP-core Synthesis Framework for FPGA-based Computing
+`PyCoRAM <https://github.com/PyHDI/PyCoRAM>`__ - Python-based Portable
+IP-core Synthesis Framework for FPGA-based Computing
 
 `flipSyrup <https://github.com/shtaxxx/flipSyrup>`__ - Cycle-Accurate
 Hardware Simulation Framework on Abstract FPGA Platforms
