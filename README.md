@@ -364,10 +364,10 @@ endmodule
 Related Project and Site
 ==============================
 
-[Veriloggen](https://github.com/shtaxxx/veriloggen)
+[Veriloggen](https://github.com/Pyverilog/veriloggen)
 - A library for constructing a Verilog HDL source code in Python
 
-[PyCoRAM](https://github.com/shtaxxx/PyCoRAM)
+[PyCoRAM](https://github.com/Pyverilog/PyCoRAM)
 - Python-based Portable IP-core Synthesis Framework for FPGA-based Computing
 
 [flipSyrup](https://github.com/shtaxxx/flipSyrup)
