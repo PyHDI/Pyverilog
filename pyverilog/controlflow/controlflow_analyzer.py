@@ -10,6 +10,8 @@
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 
@@ -24,13 +26,8 @@ import pyverilog.dataflow.replace as replace
 from pyverilog.dataflow.subset import VerilogSubset
 from pyverilog.dataflow.walker import VerilogDataflowWalker
 from pyverilog.dataflow.dataflow import *
-
-if sys.version_info[0] >= 3:
-    import pyverilog.controlflow.splitter as splitter
-    import pyverilog.controlflow.transition as transition
-else:
-    import splitter
-    import transition
+import pyverilog.controlflow.splitter as splitter
+import pyverilog.controlflow.transition as transition
 
 class VerilogControlflowAnalyzer(VerilogSubset):
     def __init__(self, topmodule, terms, binddict,
