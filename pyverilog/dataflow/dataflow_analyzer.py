@@ -6,7 +6,8 @@
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
-
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 import subprocess
@@ -18,15 +19,9 @@ import pyverilog
 import pyverilog.utils
 import pyverilog.utils.version
 from pyverilog.vparser.parser import VerilogCodeParser
-
-if sys.version_info[0] >= 3:
-    from pyverilog.dataflow.modulevisitor import ModuleVisitor
-    from pyverilog.dataflow.signalvisitor import SignalVisitor
-    from pyverilog.dataflow.bindvisitor import BindVisitor
-else:
-    from modulevisitor import ModuleVisitor
-    from signalvisitor import SignalVisitor
-    from bindvisitor import BindVisitor
+from pyverilog.dataflow.modulevisitor import ModuleVisitor
+from pyverilog.dataflow.signalvisitor import SignalVisitor
+from pyverilog.dataflow.bindvisitor import BindVisitor
 
 class VerilogDataflowAnalyzer(VerilogCodeParser):
     def __init__(self, filelist, topmodule='TOP', noreorder=False, nobind=False,

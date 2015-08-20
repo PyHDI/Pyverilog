@@ -6,7 +6,8 @@
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
-
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 import collections
@@ -18,10 +19,7 @@ import pyverilog.utils.util as util
 import pyverilog.utils.verror as verror
 import pyverilog.utils.signaltype as signaltype
 
-if sys.version_info[0] >= 3:
-    from pyverilog.dataflow.merge import VerilogDataflowMerge
-else:
-    from merge import VerilogDataflowMerge
+from pyverilog.dataflow.merge import VerilogDataflowMerge
 
 class VerilogSubset(VerilogDataflowMerge):
     def __init__(self, topmodule, terms, binddict,

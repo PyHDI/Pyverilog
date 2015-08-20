@@ -12,9 +12,9 @@ SUBSET=subset.py
 CODEGEN=codegen.py
 GRAPHGEN=graphgen.py
 
-SRCS=../../testcode/generate.v
+SRCS=../../testcode/vectoradd.v
 TOP=-t TOP
-TARGETS=-s "TOP.OUT4"
+TARGETS=-s "TOP.MEM_A"
 
 CODEGEN_OUT=out.v
 CODEGEN_OPT=-o $(CODEGEN_OUT)

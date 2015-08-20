@@ -6,18 +6,15 @@
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
-
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
 
 from pyverilog.dataflow.dataflow import *
-
-if sys.version_info[0] >= 3:
-    import pyverilog.utils.verror as verror
-else:
-    import verror as verror
+import pyverilog.utils.verror as verror
 
 this = sys.modules[__name__]
 

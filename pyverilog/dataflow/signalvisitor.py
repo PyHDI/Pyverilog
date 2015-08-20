@@ -6,7 +6,8 @@
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
-
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 
@@ -16,17 +17,10 @@ from pyverilog.vparser.ast import *
 import pyverilog.utils.util as util
 import pyverilog.utils.verror as verror
 from pyverilog.utils.scope import ScopeLabel, ScopeChain
-
-if sys.version_info[0] >= 3:
-    from pyverilog.dataflow.dataflow import *
-    from pyverilog.dataflow.visit import *
-    from pyverilog.dataflow.optimizer import VerilogOptimizer
-    import pyverilog.dataflow.reorder as reorder
-else:
-    from dataflow import *
-    from visit import *
-    from optimizer import VerilogOptimizer
-    import reorder
+from pyverilog.dataflow.dataflow import *
+from pyverilog.dataflow.visit import *
+from pyverilog.dataflow.optimizer import VerilogOptimizer
+import pyverilog.dataflow.reorder as reorder
 
 class SignalVisitor(NodeVisitor):
     def __init__(self, moduleinfotable, top):

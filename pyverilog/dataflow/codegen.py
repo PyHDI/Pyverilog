@@ -6,7 +6,8 @@
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
-
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 import re
@@ -18,11 +19,7 @@ import pyverilog.utils.util as util
 import pyverilog.utils.verror as verror
 import pyverilog.utils.signaltype as signaltype
 from pyverilog.utils.scope import ScopeLabel, ScopeChain
-
-if sys.version_info[0] >= 3:
-    from pyverilog.dataflow.subset import VerilogSubset
-else:
-    from subset import VerilogSubset
+from pyverilog.dataflow.subset import VerilogSubset
 
 class VerilogCodeGenerator(VerilogSubset):
     def __init__(self, topmodule, terms, binddict, 

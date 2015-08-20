@@ -8,7 +8,8 @@
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
-
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 import pygraphviz as pgv
@@ -18,19 +19,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 import pyverilog.utils.version
 import pyverilog.utils.util as util
 import pyverilog.utils.verror as verror
-
-if sys.version_info[0] >= 3:
-    from pyverilog.dataflow.dataflow import *
-    from pyverilog.dataflow.optimizer import VerilogOptimizer
-    from pyverilog.dataflow.walker import VerilogDataflowWalker
-    import pyverilog.dataflow.reorder as reorder
-    import pyverilog.dataflow.replace as replace
-else:
-    from dataflow import *
-    from optimizer import VerilogOptimizer
-    from walker import VerilogDataflowWalker
-    import reorder
-    import replace
+from pyverilog.dataflow.dataflow import *
+from pyverilog.dataflow.optimizer import VerilogOptimizer
+from pyverilog.dataflow.walker import VerilogDataflowWalker
+import pyverilog.dataflow.reorder as reorder
+import pyverilog.dataflow.replace as replace
 
 class VerilogGraphGenerator(object):
     def visit(self, node, parent, color='black', edge_label=None):
