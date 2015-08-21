@@ -31,7 +31,7 @@ def test():
     rslt = codegen.visit(ast)
     
     print(rslt)
-    assert(rslt == expected)
+    assert(expected == rslt)
 
 if __name__ == '__main__':
     test()
