@@ -695,11 +695,6 @@ class BindVisitor(NodeVisitor):
             scopelist.append( ScopeLabel(b.name, 'any') )
         return ScopeChain( scopelist )
 
-    def searchConstantDefinition(self, key, name):
-        const = self.frames.searchConstantDefinition(key, name)
-        if const is None: raise verror.DefinitionError('constant value not found: %s' % name)
-        return const
-
     def getModuleScopeChain(self, target):
         remove_cnt = 0
         length = len(target)
@@ -709,13 +704,6 @@ class BindVisitor(NodeVisitor):
             remove_cnt += 1
         raise verror.DefinitionError('module not found')
 
-    def searchScopeConstantDefinition(self, blocklabel, name, current):
-        currentmodule = self.getModuleScopeChain(current)
-        localchain = currentmodule[-1:] + self.toScopeChain(blocklabel, current)
-        matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
-        constdef = self.frames.getConstantDefinition(matchedchain, name)
-        return constdef
-
     def searchScopeTerminal(self, blocklabel, name, current):
         currentmodule = self.getModuleScopeChain(current)
         localchain = currentmodule[-1:] + self.toScopeChain(blocklabel, current)
@@ -724,39 +712,51 @@ class BindVisitor(NodeVisitor):
         if self.dataflow.hasTerm(varname): return varname
         raise verror.DefinitionError('No such signal: %s' % varname)
 
-    def searchScopeFunction(self, blocklabel, name, current):
-        currentmodule = self.getModuleScopeChain(current)
-        localchain = currentmodule[-1:] + self.toScopeChain(blocklabel, current)
-        matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
-        varname = currentmodule[:-1] + matchedchain + ScopeLabel(name, 'function')
-        if self.dataflow.hasFunction(varname): return self.dataflow.getFunction(varname)
-        raise verror.DefinitionError('No such function: %s' % varname)
+    #def searchScopeConstantDefinition(self, blocklabel, name, current):
+    #    currentmodule = self.getModuleScopeChain(current)
+    #    localchain = currentmodule[-1:] + self.toScopeChain(blocklabel, current)
+    #    matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
+    #    constdef = self.frames.getConstantDefinition(matchedchain, name)
+    #    return constdef
 
-    def searchScopeTask(self, blocklabel, name, current):
-        currentmodule = self.getModuleScopeChain(current)
-        localchain = currentmodule[-1:] + self.toScopeChain(blocklabel, current)
-        matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
-        varname = currentmodule[:-1] + matchedchain + ScopeLabel(name, 'task')
-        if self.dataflow.hasTask(varname): return self.dataflow.getTask(varname)
-        raise verror.DefinitionError('No such task: %s' % varname)
+    #def searchScopeFunction(self, blocklabel, name, current):
+    #    currentmodule = self.getModuleScopeChain(current)
+    #    localchain = currentmodule[-1:] + self.toScopeChain(blocklabel, current)
+    #    matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
+    #    varname = currentmodule[:-1] + matchedchain + ScopeLabel(name, 'function')
+    #    if self.dataflow.hasFunction(varname): return self.dataflow.getFunction(varname)
+    #    raise verror.DefinitionError('No such function: %s' % varname)
 
-    def searchScopeFunctionPorts(self, blocklabel, name, current):
-        currentmodule = self.getModuleScopeChain(current)
-        localchain = currentmodule[-1:] + self.toScopeChain(blocklabel, current)
-        matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
-        varname = currentmodule[:-1] + matchedchain + ScopeLabel(name, 'function')
-        if self.dataflow.hasFunction(varname):
-            return self.dataflow.getFunctionPorts(varname)
-        raise verror.DefinitionError('No such function: %s' % varname)
+    #def searchScopeTask(self, blocklabel, name, current):
+    #    currentmodule = self.getModuleScopeChain(current)
+    #    localchain = currentmodule[-1:] + self.toScopeChain(blocklabel, current)
+    #    matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
+    #    varname = currentmodule[:-1] + matchedchain + ScopeLabel(name, 'task')
+    #    if self.dataflow.hasTask(varname): return self.dataflow.getTask(varname)
+    #    raise verror.DefinitionError('No such task: %s' % varname)
 
-    def searchScopeTaskPorts(self, blocklabel, name, current):
-        currentmodule = self.frames.getModuleScopeChain(current)
-        localchain = currentmodule[-1:] + self.toScopeChain(blocklabel, current)
-        matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
-        varname = currentmodule[:-1] + matchedchain + ScopeLabel(name, 'task')
-        if self.dataflow.hasTask(varname):
-            return self.dataflow.getTaskPorts(varname)
-        raise verror.DefinitionError('No such task: %s' % varname)
+    #def searchScopeFunctionPorts(self, blocklabel, name, current):
+    #    currentmodule = self.getModuleScopeChain(current)
+    #    localchain = currentmodule[-1:] + self.toScopeChain(blocklabel, current)
+    #    matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
+    #    varname = currentmodule[:-1] + matchedchain + ScopeLabel(name, 'function')
+    #    if self.dataflow.hasFunction(varname):
+    #        return self.dataflow.getFunctionPorts(varname)
+    #    raise verror.DefinitionError('No such function: %s' % varname)
+
+    #def searchScopeTaskPorts(self, blocklabel, name, current):
+    #    currentmodule = self.frames.getModuleScopeChain(current)
+    #    localchain = currentmodule[-1:] + self.toScopeChain(blocklabel, current)
+    #    matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
+    #    varname = currentmodule[:-1] + matchedchain + ScopeLabel(name, 'task')
+    #    if self.dataflow.hasTask(varname):
+    #        return self.dataflow.getTaskPorts(varname)
+    #    raise verror.DefinitionError('No such task: %s' % varname)
+
+    def searchConstantDefinition(self, key, name):
+        const = self.frames.searchConstantDefinition(key, name)
+        if const is None: raise verror.DefinitionError('constant value not found: %s' % name)
+        return const
 
     def searchTerminal(self, name, scope):
         if len(scope) == 0: return None

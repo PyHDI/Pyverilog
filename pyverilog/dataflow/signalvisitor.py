@@ -438,12 +438,20 @@ class SignalVisitor(NodeVisitor):
             scopelsit.append( ScopeLabel(b.name, 'any') )
         return ScopeChain( scopelist )
 
-    def searchScopeConstantDefinition(self, blocklabel, name):
+    def searchScopeConstantValue(self, blocklabel, name):
         currentmodule = self.frames.getCurrentModuleScopeChain()
         localchain = currentmodule[-1:] + self.toScopeChain(blocklabel)
         matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
-        constdef = self.frames.getConstantDefinition(matchedchain, name)
-        return constdef
+        varname = currentmodule[:-1] + matchedchain + ScopeLabel(name, 'signal')
+        const = self.getConstant(varname)
+        return const
+
+    #def searchScopeConstantDefinition(self, blocklabel, name):
+    #    currentmodule = self.frames.getCurrentModuleScopeChain()
+    #    localchain = currentmodule[-1:] + self.toScopeChain(blocklabel)
+    #    matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
+    #    constdef = self.frames.getConstantDefinition(matchedchain, name)
+    #    return constdef
 
     def searchConstantDefinition(self, key, name):
         foundkey, founddef = self.frames.searchConstantDefinition(key, name)
@@ -454,14 +462,6 @@ class SignalVisitor(NodeVisitor):
             return foundkey + ScopeLabel(name, 'signal'), founddef
         if foundkey is None:
             raise verror.DefinitionError('constant value not found: %s' % name)
-
-    def searchScopeConstantValue(self, blocklabel, name):
-        currentmodule = self.frames.getCurrentModuleScopeChain()
-        localchain = currentmodule[-1:] + self.toScopeChain(blocklabel)
-        matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
-        varname = currentmodule[:-1] + matchedchain + ScopeLabel(name, 'signal')
-        const = self.getConstant(varname)
-        return const
 
     def searchConstantValue(self, key, name):
         foundkey, founddef = self.searchConstantDefinition(key, name)
