@@ -18,7 +18,7 @@ setup(name='pyverilog',
       author='Shinya Takamaeda-Yamazaki',
       author_email='shinya.takamaeda_at_gmail_com',
       license="Apache License 2.0",
-      url='http://shtaxxx.github.io/Pyverilog/',
+      url='https://github.com/PyHDI/Pyverilog',
       packages=find_packages(),
       package_data={ 'pyverilog.ast_code_generator' : ['template/*'],  },
 )
