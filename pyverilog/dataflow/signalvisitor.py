@@ -440,7 +440,7 @@ class SignalVisitor(NodeVisitor):
 
     def searchScopeConstantDefinition(self, blocklabel, name):
         currentmodule = self.frames.getCurrentModuleScopeChain()
-        localchain = self.toScopeChain(blocklabel)
+        localchain = currentmodule[-1:] + self.toScopeChain(blocklabel)
         matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
         constdef = self.frames.getConstantDefinition(matchedchain, name)
         return constdef
@@ -457,9 +457,10 @@ class SignalVisitor(NodeVisitor):
 
     def searchScopeConstantValue(self, blocklabel, name):
         currentmodule = self.frames.getCurrentModuleScopeChain()
-        localchain = self.toScopeChain(blocklabel)
+        localchain = currentmodule[-1:] + self.toScopeChain(blocklabel)
         matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
-        const = self.getConstant(matchedchain + ScopeLabel(name, 'signal'))
+        varname = currentmodule[:-1] + matchedchain + ScopeLabel(name, 'signal')
+        const = self.getConstant(varname)
         return const
 
     def searchConstantValue(self, key, name):
