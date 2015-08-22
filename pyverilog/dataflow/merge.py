@@ -39,6 +39,9 @@ class VerilogDataflowMerge(object):
 
     ############################################################################
     def getTerm(self, termname):
+        if isinstance(termname, str):
+            for scope in self.terms.keys():
+                if termname == str(scope): return self.terms[scope]
         if not termname in self.terms: return None
         return self.terms[termname]
 
