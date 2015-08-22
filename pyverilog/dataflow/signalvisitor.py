@@ -6,7 +6,8 @@
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
-
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 
@@ -16,17 +17,10 @@ from pyverilog.vparser.ast import *
 import pyverilog.utils.util as util
 import pyverilog.utils.verror as verror
 from pyverilog.utils.scope import ScopeLabel, ScopeChain
-
-if sys.version_info[0] >= 3:
-    from pyverilog.dataflow.dataflow import *
-    from pyverilog.dataflow.visit import *
-    from pyverilog.dataflow.optimizer import VerilogOptimizer
-    import pyverilog.dataflow.reorder as reorder
-else:
-    from dataflow import *
-    from visit import *
-    from optimizer import VerilogOptimizer
-    import reorder
+from pyverilog.dataflow.dataflow import *
+from pyverilog.dataflow.visit import *
+from pyverilog.dataflow.optimizer import VerilogOptimizer
+import pyverilog.dataflow.reorder as reorder
 
 class SignalVisitor(NodeVisitor):
     def __init__(self, moduleinfotable, top):
@@ -444,12 +438,20 @@ class SignalVisitor(NodeVisitor):
             scopelsit.append( ScopeLabel(b.name, 'any') )
         return ScopeChain( scopelist )
 
-    def searchScopeConstantDefinition(self, blocklabel, name):
+    def searchScopeConstantValue(self, blocklabel, name):
         currentmodule = self.frames.getCurrentModuleScopeChain()
-        localchain = self.toScopeChain(blocklabel)
+        localchain = currentmodule[-1:] + self.toScopeChain(blocklabel)
         matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
-        constdef = self.frames.getConstantDefinition(matchedchain, name)
-        return constdef
+        varname = currentmodule[:-1] + matchedchain + ScopeLabel(name, 'signal')
+        const = self.getConstant(varname)
+        return const
+
+    #def searchScopeConstantDefinition(self, blocklabel, name):
+    #    currentmodule = self.frames.getCurrentModuleScopeChain()
+    #    localchain = currentmodule[-1:] + self.toScopeChain(blocklabel)
+    #    matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
+    #    constdef = self.frames.getConstantDefinition(matchedchain, name)
+    #    return constdef
 
     def searchConstantDefinition(self, key, name):
         foundkey, founddef = self.frames.searchConstantDefinition(key, name)
@@ -460,13 +462,6 @@ class SignalVisitor(NodeVisitor):
             return foundkey + ScopeLabel(name, 'signal'), founddef
         if foundkey is None:
             raise verror.DefinitionError('constant value not found: %s' % name)
-
-    def searchScopeConstantValue(self, blocklabel, name):
-        currentmodule = self.frames.getCurrentModuleScopeChain()
-        localchain = self.toScopeChain(blocklabel)
-        matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
-        const = self.getConstant(matchedchain + ScopeLabel(name, 'signal'))
-        return const
 
     def searchConstantValue(self, key, name):
         foundkey, founddef = self.searchConstantDefinition(key, name)

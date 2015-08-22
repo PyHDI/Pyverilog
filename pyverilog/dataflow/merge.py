@@ -6,7 +6,8 @@
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
-
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 
@@ -15,17 +16,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 import pyverilog.utils.version
 import pyverilog.utils.verror as verror
 import pyverilog.utils.signaltype as signaltype
-
-if sys.version_info[0] >= 3:
-    from pyverilog.dataflow.dataflow import *
-    from pyverilog.dataflow.visit import *
-    from pyverilog.dataflow.optimizer import VerilogOptimizer
-    import pyverilog.dataflow.reorder as reorder
-else:
-    from dataflow import *
-    from visit import *
-    from optimizer import VerilogOptimizer
-    import reorder
+from pyverilog.dataflow.dataflow import *
+from pyverilog.dataflow.visit import *
+from pyverilog.dataflow.optimizer import VerilogOptimizer
+import pyverilog.dataflow.reorder as reorder
 
 class VerilogDataflowMerge(object):
     def __init__(self, topmodule, terms, binddict, resolved_terms, resolved_binddict, constlist):

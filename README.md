@@ -348,27 +348,26 @@ python3 test.py
 Then Verilog HDL code generated from the AST instances is displayed.
 
 ```verilog
-
 module top
- (
-  input [0:0] CLK, 
-input [0:0] RST, 
-output [7:0] led
+(
+  input CLK,
+  input RST,
+  output [7:0] led
+);
 
- );
   assign led = 8;
-endmodule
 
+endmodule
 ```
 
 
 Related Project and Site
 ==============================
 
-[Veriloggen](https://github.com/shtaxxx/veriloggen)
+[Veriloggen](https://github.com/PyHDI/veriloggen)
 - A library for constructing a Verilog HDL source code in Python
 
-[PyCoRAM](https://github.com/shtaxxx/PyCoRAM)
+[PyCoRAM](https://github.com/PyHDI/PyCoRAM)
 - Python-based Portable IP-core Synthesis Framework for FPGA-based Computing
 
 [flipSyrup](https://github.com/shtaxxx/flipSyrup)

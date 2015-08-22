@@ -7,6 +7,8 @@
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
 
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 
@@ -18,13 +20,8 @@ import pyverilog.utils.signaltype as signaltype
 import pyverilog.utils.inference as inference
 import pyverilog.dataflow.reorder as reorder
 from pyverilog.dataflow.dataflow import *
-
-if sys.version_info[0] >= 3:
-    import pyverilog.controlflow.splitter as splitter
-    from pyverilog.controlflow.controlflow_analyzer import VerilogControlflowAnalyzer
-else:
-    import splitter
-    from controlflow_analyzer import VerilogControlflowAnalyzer
+import pyverilog.controlflow.splitter as splitter
+from pyverilog.controlflow.controlflow_analyzer import VerilogControlflowAnalyzer
 
 class VerilogActiveAnalyzer(VerilogControlflowAnalyzer):
     def __init__(self, topmodule, terms, binddict, 

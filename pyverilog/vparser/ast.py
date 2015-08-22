@@ -7,7 +7,8 @@
 # edited by ryosuke fukatani
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
-
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import re
 

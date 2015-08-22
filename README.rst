@@ -374,24 +374,24 @@ Then Verilog HDL code generated from the AST instances is displayed.
 
 .. code:: verilog
 
-
     module top
-     (
-      input [0:0] CLK, 
-    input [0:0] RST, 
-    output [7:0] led
+    (
+      input CLK,
+      input RST,
+      output [7:0] led
+    );
 
-     );
       assign led = 8;
+
     endmodule
 
 Related Project and Site
 ========================
 
-`Veriloggen <https://github.com/shtaxxx/veriloggen>`__ - A library for
+`Veriloggen <https://github.com/PyHDI/veriloggen>`__ - A library for
 constructing a Verilog HDL source code in Python
 
-`PyCoRAM <https://github.com/shtaxxx/PyCoRAM>`__ - Python-based Portable
+`PyCoRAM <https://github.com/PyHDI/PyCoRAM>`__ - Python-based Portable
 IP-core Synthesis Framework for FPGA-based Computing
 
 `flipSyrup <https://github.com/shtaxxx/flipSyrup>`__ - Cycle-Accurate

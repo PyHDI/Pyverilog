@@ -6,7 +6,8 @@
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
-
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 import math
@@ -696,7 +697,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         template_dict = {
             'comp' : self.visit(node.comp),
-            'caselist' : [ self.visit(case) for case in node.caselist ],
+            'caselist' : [ self.indent(self.visit(case)) for case in node.caselist ],
             }
         rslt = template.render(template_dict)
         return rslt
@@ -706,7 +707,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         template_dict = {
             'comp' : self.visit(node.comp),
-            'caselist' : [ self.visit(case) for case in node.caselist ],
+            'caselist' : [ self.indent(self.visit(case)) for case in node.caselist ],
             }
         rslt = template.render(template_dict)
         return rslt

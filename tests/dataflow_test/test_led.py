@@ -15,9 +15,15 @@ Term:
 (Term name:led.STEP type:['Parameter'] msb:(IntConst 31) lsb:(IntConst 0))
 (Term name:led.count type:['Reg'] msb:(IntConst 31) lsb:(IntConst 0))
 Bind:
-(Bind dest:led.LED tree:(Branch Cond:(Terminal led.RST) True:(IntConst 0) False:(Branch Cond:(Operator Eq Next:(Terminal led.count),(Operator Minus Next:(Terminal led.STEP),(IntConst 1))) True:(Operator Plus Next:(Terminal led.LED),(IntConst 1)))))
+(Bind dest:led.LED \
+tree:(Branch Cond:(Terminal led.RST) \
+True:(IntConst 0) \
+False:(Branch Cond:(Operator Eq Next:(Terminal led.count),(Operator Minus Next:(Terminal led.STEP),(IntConst 1))) True:(Operator Plus Next:(Terminal led.LED),(IntConst 1)))))
 (Bind dest:led.STEP tree:(IntConst 10))
-(Bind dest:led.count tree:(Branch Cond:(Terminal led.RST) True:(IntConst 0) False:(Branch Cond:(Operator Eq Next:(Terminal led.count),(Operator Minus Next:(Terminal led.STEP),(IntConst 1))) True:(IntConst 0) False:(Operator Plus Next:(Terminal led.count),(IntConst 1)))))
+(Bind dest:led.count \
+tree:(Branch Cond:(Terminal led.RST) \
+True:(IntConst 0) \
+False:(Branch Cond:(Operator Eq Next:(Terminal led.count),(Operator Minus Next:(Terminal led.STEP),(IntConst 1))) True:(IntConst 0) False:(Operator Plus Next:(Terminal led.count),(IntConst 1)))))
 """
 
 def test():
@@ -66,7 +72,7 @@ def test():
     rslt = ''.join(output)
 
     print(rslt)
-    assert(rslt == expected)
+    assert(expected == rslt)
 
 if __name__ == '__main__':
     test()

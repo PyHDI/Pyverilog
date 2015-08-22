@@ -6,7 +6,8 @@
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
-
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 
@@ -16,21 +17,12 @@ import pyverilog.utils.version
 import pyverilog.utils.util as util
 import pyverilog.utils.verror as verror
 import pyverilog.utils.signaltype as signaltype
-
-if sys.version_info[0] >= 3:
-    from pyverilog.dataflow.dataflow import *
-    from pyverilog.dataflow.visit import *
-    from pyverilog.dataflow.optimizer import VerilogOptimizer
-    from pyverilog.dataflow.merge import VerilogDataflowMerge
-    import pyverilog.dataflow.reorder as reorder
-    import pyverilog.dataflow.replace as replace
-else:
-    from dataflow import *
-    from visit import *
-    from optimizer import VerilogOptimizer
-    from merge import VerilogDataflowMerge
-    import reorder
-    import replace
+from pyverilog.dataflow.dataflow import *
+from pyverilog.dataflow.visit import *
+from pyverilog.dataflow.optimizer import VerilogOptimizer
+from pyverilog.dataflow.merge import VerilogDataflowMerge
+import pyverilog.dataflow.reorder as reorder
+import pyverilog.dataflow.replace as replace
 
 class VerilogDataflowWalker(VerilogDataflowMerge):
     def __init__(self, topmodule, terms, binddict, resolved_terms, resolved_binddict, constlist):

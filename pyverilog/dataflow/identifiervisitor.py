@@ -6,16 +6,14 @@
 # Copyright (C) 2015, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 #-------------------------------------------------------------------------------
-
+from __future__ import absolute_import
+from __future__ import print_function
 import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
 
-if sys.version_info[0] >= 3:
-    from pyverilog.dataflow.visit import NodeVisitor
-else:
-    from visit import NodeVisitor
+from pyverilog.dataflow.visit import NodeVisitor
 
 def getIdentifiers(node):
     v = IdentifierVisitor()
