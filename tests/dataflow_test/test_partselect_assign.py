@@ -1,18 +1,20 @@
 import os
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
+
 from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
 from pyverilog.dataflow.optimizer import VerilogDataflowOptimizer
 from pyverilog.controlflow.controlflow_analyzer import VerilogControlflowAnalyzer
+
 codedir = '../../testcode/'
 
 expected = """\
-TOP.RST: TOP_RST
-TOP.reg1: TOP_reg3['d6:'d5]
-TOP.in2: TOP_in2
 TOP.CLK: TOP_CLK
-TOP.reg3: ((TOP_RST)? 3'd0 : 3'd1)
+TOP.RST: TOP_RST
 TOP.in1: TOP_reg3['d6:'d5]
+TOP.in2: TOP_in2
+TOP.reg1: TOP_reg3['d6:'d5]
+TOP.reg3: ((TOP_RST)? 3'd0 : 3'd1)
 """
 
 def test():
@@ -46,14 +48,15 @@ def test():
                                             )
 
     output = []
-    for tk in sorted(c_analyzer.resolved_terms.keys(), key=lambda x:str(x[0])):
+    for tk in sorted(c_analyzer.resolved_terms.keys(), key=lambda x:str(x)):
         tree = c_analyzer.makeTree(tk)
         output.append(str(tk) + ': ' + tree.tocode())
 
     rslt = '\n'.join(output) + '\n'
 
     print(rslt)
-    assert(rslt == expected)
+    
+    assert(expected == rslt)
 
 if __name__ == '__main__':
     test()
