@@ -362,18 +362,27 @@ class BindVisitor(NodeVisitor):
         start_frame = self.frames.getCurrent()
         caseframes = []
         self._case(node.comp, node.caselist, caseframes)
+        #self._case(node.comp, tuple(reversed(list(node.caselist))), caseframes)
         self.frames.setCurrent(start_frame)
         for f in caseframes:
             self.copyBlockingAssigns(f, start_frame)
 
     def visit_CasexStatement(self, node):
         return self.visit_CaseStatement(node)
-        
+
     def _case(self, comp, caselist, myframes):
         if len(caselist) == 0: return
 
         case = caselist[0]
-        cond = Eq(comp, case)
+        cond = IntConst('1')
+        if case.cond is not None:
+            if len(case.cond) > 1:
+                cond = Eq(comp, case.cond[0])
+                for c in case.cond[1:]:
+                    cond = Lor(cond, Eq(comp, c))
+            else:
+                cond = Eq(comp, case.cond[0])
+        #else: raise Exception
         label = self.labels.get( self.frames.getLabelKey('if') )
         current = self.stackNextFrame(label, 'if',
                                       frametype='ifthen',
@@ -919,7 +928,7 @@ class BindVisitor(NodeVisitor):
             if cond is not None:
                 ret.append(self.makeDFTree(cond, self.reduceIfScope(s)))
             if frame.isModule(): break
-            if frame.isFunctioncall(): break
+            #if frame.isFunctioncall(): break
             s = frame.previous
         ret.reverse()
         return tuple(ret)
@@ -932,7 +941,7 @@ class BindVisitor(NodeVisitor):
             cond = frame.getCondition()
             if cond is not None: ret.append(not frame.isIfelse())
             if frame.isModule(): break
-            if frame.isFunctioncall(): break
+            #if frame.isFunctioncall(): break
             s = frame.previous
         ret.reverse()
         return tuple(ret)
