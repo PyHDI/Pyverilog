@@ -399,6 +399,8 @@ class DFEvalValue(DFNode):
     def children(self):
         nodelist = []
         return tuple(nodelist)
+    def eval(self):
+        return self.value
     def __eq__(self, other):
         if type(self) != type(other): return False
         return self.value == other.value and self.width == other.width and self.isfloat == other.isfloat and self.isstring == other.isstring

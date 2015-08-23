@@ -99,6 +99,10 @@ class VerilogDataflowWalker(VerilogDataflowMerge):
             msb = self.walkTree(tree.msb, visited, step, delay)
             lsb = self.walkTree(tree.lsb, visited, step, delay)
             var = self.walkTree(tree.var, visited, step, delay, msb=msb, lsb=lsb)
+            if isinstance(var, DFPartselect):
+                child_lsb = self.getTerm(str(tree.var)).lsb.eval()
+                return DFPartselect(var.var, DFIntConst(str(msb.eval() + var.lsb.eval() - child_lsb)),
+                                    DFIntConst(str(lsb.eval() + var.lsb.eval() - child_lsb)))
             return DFPartselect(var, msb, lsb)
 
         if isinstance(tree, DFPointer):
