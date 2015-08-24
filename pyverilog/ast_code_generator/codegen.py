@@ -760,7 +760,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         template_dict = {
             'cond': self.visit(node.cond),
-            'statement' : self.visit(node.statement),
+            'statement' : self.visit(node.statement) if node.statement else '',
             }
         rslt = template.render(template_dict)
         return rslt
