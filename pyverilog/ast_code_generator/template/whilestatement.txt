@@ -1,2 +1,1 @@
-while({{ cond }})
-{{ statement }}
+while({{ cond }}) {{ statement }}
