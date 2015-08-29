@@ -256,6 +256,11 @@ class BindVisitor(NodeVisitor):
         reset_name = None
         reset_bit = None
 
+        #TODO unimplemented
+        #print('load: ' + str(self._first_lvalue_is_const(node)))
+        #print('if_branch: ' + str(self._has_if_branch(node)))
+        #print('reset_info: ' + str(self._get_rst_info(node)))
+
         for l in node.sens_list.list:
             if l.sig is None:
                 continue
@@ -282,6 +287,134 @@ class BindVisitor(NodeVisitor):
             raise verror.FormatError('Illegal sensitivity list')
 
         return (clock_name, clock_edge, clock_bit, reset_name, reset_edge, reset_bit, senslist)
+
+    #TODO This function is implemented for https://github.com/PyHDI/Pyverilog/issues/14.
+    #Be incorporated into formally in lator commit.
+    def _first_lvalue_is_const(self, node):
+        """ [FUNCTIONS]
+        Walk until lvalue and judge whether it is constant or not.
+
+        ex.
+        if(RST)
+          reg1 <= 1'd0: //const: judged as rst branch
+
+        if(RST)
+          reg1 <= {1'd0, 1'd0}: //const: judged as rst branch
+
+        if(RST)
+          reg1 <= reg2: //variable: judged as not rst branch
+
+        if(RST)
+          reg1 <= {1'd0, reg2}: //variable: judged as not rst branch
+        """
+        if isinstance(node, Always):
+            return self._first_lvalue_is_const(node.statement)
+        elif isinstance(node, Block):
+            return self._first_lvalue_is_const(node.statements[0])
+        elif isinstance(node, IfStatement):
+            return self._first_lvalue_is_const(node.true_statement)
+        elif isinstance(node, NonblockingSubstitution):
+            print(node.left.var)# for debug
+            return self._first_lvalue_is_const(node.right)
+        elif isinstance(node, Identifier):
+            node_chain = self.get_scopechain(node)
+            if node_chain in self.dataflow.terms.keys():
+                #Parameter is regard as constant.
+                return 'Parameter' in self.dataflow.terms[node_chain].termtype
+            return False
+        elif hasattr(node, 'children'):
+            for child in node.children():
+                if not self._first_lvalue_is_const(child):
+                    return False
+            return True
+        elif isinstance(node, Rvalue):
+            return self._first_lvalue_is_const(node.var)
+        elif hasattr(node, 'value'):
+            return True
+        else:
+            raise Exception('Pyverilog unknown error')
+
+    def get_scopechain(self, node):
+        assert isinstance(node, Identifier), 'Node type should be Identifier.'
+        scope_list = self.frames.current.get_module_list() + [util.ScopeLabel(str(node)),]
+        return util.ScopeChain(scope_list)
+
+    #TODO This function is implemented for https://github.com/PyHDI/Pyverilog/issues/14.
+    #Be incorporated into formally in lator commit.
+    def _get_rst_info(self, node, rst_name='', is_posedge=True, rst_bit=0):
+        """ [FUNCTIONS]
+        get reset information from first if statement.
+
+        ex1.
+        always @(posedge CLK or posedge RST) begin
+            if(RST)
+                reg1 <= 0;
+            else
+                reg1 <= !reg1;
+        end
+        ->RST is posedge RST.
+
+        ex2.
+        always @(posedge CLK or posedge RST) begin
+            if(!RSTN[1])
+                reg1 <= 0;
+            else
+                reg1 <= !reg1;
+        end
+        ->RSTN[1] is negedge RST.
+
+        ex3.
+        always @(posedge CLK or posedge RST) begin
+            if(RST && RST2)
+                reg1 <= 0;
+            else
+                reg1 <= !reg1;
+        end
+        -> reg1 has no reset. (too complex condition)
+        """
+        if isinstance(node, Always):
+            return self._get_rst_info(node.statement, rst_name, is_posedge, rst_bit)
+        elif isinstance(node, Block):
+            return self._get_rst_info(node.statements[0], rst_name, is_posedge, rst_bit)
+        elif isinstance(node, IfStatement):
+            return self._get_rst_info(node.cond, rst_name, is_posedge, rst_bit)
+        elif isinstance(node, pyverilog.vparser.ast.Ulnot):
+            is_posedge = not is_posedge
+            return self._get_rst_info(node.children()[0], rst_name, is_posedge, rst_bit)
+        elif isinstance(node, pyverilog.vparser.ast.Pointer):
+            #TODO if identifier
+            if isinstance(node.ptr, Identifier):
+                ptr_chain = self.get_scopechain(node.ptr)
+                if 'Parameter' in self.dataflow.terms[ptr_chain].termtype:
+                    rst_bit = self.dataflow.binddict[ptr_chain][0].tree.eval()
+                    return self._get_rst_info(node.var, rst_name, is_posedge, rst_bit)
+                else:
+                    return (None, None, None)
+            elif hasattr(node.ptr, 'value'):
+                return self._get_rst_info(node.var, rst_name, is_posedge, int(node.ptr.value))
+        elif isinstance(node, pyverilog.vparser.ast.Identifier):
+            return (node, is_posedge, rst_bit)
+        return (None, None, None)
+
+    #TODO This function is implemented for https://github.com/PyHDI/Pyverilog/issues/14.
+    #Be incorporated into formally in lator commit.
+    def _has_if_branch(self, node):
+        """ [FUNCTIONS]
+        Return always block have 'if branch' or not.
+        ex.
+        always @(posedge CLK or posedge RST) begin
+            reg1 <= 0;
+        end
+        -> reg1 has no reset. (If statement isn't exists.)
+        """
+        if isinstance(node, Always):
+            return self._has_if_branch(node.statement)
+        elif isinstance(node, Block):
+            return self._has_if_branch(node.statements[0])
+        elif isinstance(node, IfStatement):
+            return True
+        else:
+            return  False
 
     def visit_IfStatement(self, node):
         if self.frames.isFunctiondef() and not self.frames.isFunctioncall(): return
@@ -828,7 +961,7 @@ class BindVisitor(NodeVisitor):
         else:
             msb = DFIntConst('0') if node.width is None else self.makeDFTree(node.width.msb, scope)
         lsb = DFIntConst('0') if node.width is None else self.makeDFTree(node.width.lsb, scope)
-        
+
         lenmsb = None
         lenlsb = None
         if isinstance(node, RegArray) or isinstance(node, WireArray):

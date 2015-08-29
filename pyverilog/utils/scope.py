@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # scope.py
-# 
+#
 # classes for definition of scope
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
@@ -12,7 +12,7 @@ import sys
 import os
 import copy
 
-scopetype_list_unprint = ('generate', 'always', 'function', #'functioncall', 
+scopetype_list_unprint = ('generate', 'always', 'function', #'functioncall',
                           'task', 'taskcall', 'initial', 'for', 'while', 'if')
 scopetype_list_print = ('module', 'block', 'signal', 'functioncall',)
 scopetype_list = scopetype_list_unprint + scopetype_list_print + ('any', )
@@ -88,6 +88,8 @@ class ScopeChain(object):
                 it = None
         ret = ret[:-1]
         return ''.join(ret)
+    def get_module_list(self):
+        return [scope for scope in self.scopechain if scope.scopetype == 'module']
     def __repr__(self):
         ret = ''
         for scope in self.scopechain:
