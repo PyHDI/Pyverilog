@@ -32,7 +32,7 @@ If you use Pyverilog in your research, please cite my paper.
     title={Pyverilog: A Python-Based Hardware Design Processing Toolkit for Verilog HDL},
     author={Takamaeda-Yamazaki, Shinya},
     booktitle={Applied Reconfigurable Computing},
-    month={Apr}
+    month={Apr},
     year={2015},
     pages={451-460},
     volume={9040},
