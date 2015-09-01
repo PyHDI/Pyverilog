@@ -255,11 +255,12 @@ class BindVisitor(NodeVisitor):
         reset_edge = None
         reset_name = None
         reset_bit = None
+        reset_sig = None
+        is_sync_reset = True
 
-        #TODO unimplemented
-        #print('load: ' + str(self._first_lvalue_is_const(node)))
-        #print('if_branch: ' + str(self._has_if_branch(node)))
-        #print('reset_info: ' + str(self._get_rst_info(node)))
+        if str(self._has_if_branch(node)) and self._first_rvalue_is_const(node):
+            reset_sig, reset_edge, reset_bit = self._get_rst_info(node)
+            reset_name = self.searchTerminal(reset_sig, scope)
 
         for l in node.sens_list.list:
             if l.sig is None:
@@ -270,14 +271,16 @@ class BindVisitor(NodeVisitor):
             else:
                 signame = self._get_signal_name(l.sig)
                 bit = 0
-            if signaltype.isClock(signame):
+
+            if signame == reset_sig and bit == reset_bit:
+                if l.type == reset_edge:
+                    is_sync_reset = False
+                else:
+                    raise verror.FormatError('Illegal reset polarity')
+            elif not clock_name: #First signal which is not reset is regard as clock.
                 clock_name = self.searchTerminal(signame, scope)
                 clock_edge = l.type
                 clock_bit = bit
-            elif signaltype.isReset(signame):
-                reset_name = self.searchTerminal(signame, scope)
-                reset_edge = l.type
-                reset_bit = bit
             else:
                 senslist.append(l)
 
@@ -286,11 +289,11 @@ class BindVisitor(NodeVisitor):
         if reset_edge is not None and len(senslist) > 0:
             raise verror.FormatError('Illegal sensitivity list')
 
+        if is_sync_reset:
+            reset_edge = 'sync'
         return (clock_name, clock_edge, clock_bit, reset_name, reset_edge, reset_bit, senslist)
 
-    #TODO This function is implemented for https://github.com/PyHDI/Pyverilog/issues/14.
-    #Be incorporated into formally in lator commit.
-    def _first_lvalue_is_const(self, node):
+    def _first_rvalue_is_const(self, node):
         """ [FUNCTIONS]
         Walk until lvalue and judge whether it is constant or not.
 
@@ -308,14 +311,13 @@ class BindVisitor(NodeVisitor):
           reg1 <= {1'd0, reg2}: //variable: judged as not rst branch
         """
         if isinstance(node, Always):
-            return self._first_lvalue_is_const(node.statement)
+            return self._first_rvalue_is_const(node.statement)
         elif isinstance(node, Block):
-            return self._first_lvalue_is_const(node.statements[0])
+            return self._first_rvalue_is_const(node.statements[0])
         elif isinstance(node, IfStatement):
-            return self._first_lvalue_is_const(node.true_statement)
+            return self._first_rvalue_is_const(node.true_statement)
         elif isinstance(node, NonblockingSubstitution):
-            print(node.left.var)# for debug
-            return self._first_lvalue_is_const(node.right)
+            return self._first_rvalue_is_const(node.right)
         elif isinstance(node, Identifier):
             node_chain = self.get_scopechain(node)
             if node_chain in self.dataflow.terms.keys():
@@ -324,11 +326,11 @@ class BindVisitor(NodeVisitor):
             return False
         elif hasattr(node, 'children'):
             for child in node.children():
-                if not self._first_lvalue_is_const(child):
+                if not self._first_rvalue_is_const(child):
                     return False
             return True
         elif isinstance(node, Rvalue):
-            return self._first_lvalue_is_const(node.var)
+            return self._first_rvalue_is_const(node.var)
         elif hasattr(node, 'value'):
             return True
         else:
@@ -339,9 +341,7 @@ class BindVisitor(NodeVisitor):
         scope_list = self.frames.current.get_module_list() + [util.ScopeLabel(str(node)),]
         return util.ScopeChain(scope_list)
 
-    #TODO This function is implemented for https://github.com/PyHDI/Pyverilog/issues/14.
-    #Be incorporated into formally in lator commit.
-    def _get_rst_info(self, node, rst_name='', is_posedge=True, rst_bit=0):
+    def _get_rst_info(self, node, rst_name='', is_posedge='posedge', rst_bit=0):
         """ [FUNCTIONS]
         get reset information from first if statement.
 
@@ -379,10 +379,9 @@ class BindVisitor(NodeVisitor):
         elif isinstance(node, IfStatement):
             return self._get_rst_info(node.cond, rst_name, is_posedge, rst_bit)
         elif isinstance(node, pyverilog.vparser.ast.Ulnot):
-            is_posedge = not is_posedge
+            is_posedge = 'negedge' if is_posedge == 'posedge' else 'negedge'
             return self._get_rst_info(node.children()[0], rst_name, is_posedge, rst_bit)
         elif isinstance(node, pyverilog.vparser.ast.Pointer):
-            #TODO if identifier
             if isinstance(node.ptr, Identifier):
                 ptr_chain = self.get_scopechain(node.ptr)
                 if 'Parameter' in self.dataflow.terms[ptr_chain].termtype:
@@ -393,11 +392,9 @@ class BindVisitor(NodeVisitor):
             elif hasattr(node.ptr, 'value'):
                 return self._get_rst_info(node.var, rst_name, is_posedge, int(node.ptr.value))
         elif isinstance(node, pyverilog.vparser.ast.Identifier):
-            return (node, is_posedge, rst_bit)
+            return (str(node), is_posedge, rst_bit)
         return (None, None, None)
 
-    #TODO This function is implemented for https://github.com/PyHDI/Pyverilog/issues/14.
-    #Be incorporated into formally in lator commit.
     def _has_if_branch(self, node):
         """ [FUNCTIONS]
         Return always block have 'if branch' or not.
@@ -495,7 +492,6 @@ class BindVisitor(NodeVisitor):
         start_frame = self.frames.getCurrent()
         caseframes = []
         self._case(node.comp, node.caselist, caseframes)
-        #self._case(node.comp, tuple(reversed(list(node.caselist))), caseframes)
         self.frames.setCurrent(start_frame)
         for f in caseframes:
             self.copyBlockingAssigns(f, start_frame)

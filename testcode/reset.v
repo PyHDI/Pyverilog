@@ -20,6 +20,7 @@ module TOP(CLK, RST);
       cnt2 <= 8'd1;
 
   //not reset
+/*
   always @(posedge CLK or posedge RST) begin
     if(RST) begin
       cnt3 <= cnt1[0];
@@ -32,7 +33,7 @@ module TOP(CLK, RST);
   always @(posedge CLK or posedge RST) begin
     cnt4 <= 0;
   end
-
+*/
   //reset
   always @(posedge CLK or posedge RST) begin
     if(RST) begin
@@ -41,7 +42,7 @@ module TOP(CLK, RST);
       cnt5 <= 8'd1;
     end
   end
-
+/*
   //not reset
   always @(posedge CLK or posedge RST) begin
     if(RST) begin
@@ -50,7 +51,7 @@ module TOP(CLK, RST);
       cnt6 <= 8'd1;
     end
   end
-
+*/
   //reset
   always @(posedge CLK) begin
     if(!RST) begin
@@ -59,7 +60,7 @@ module TOP(CLK, RST);
       cnt7 <= 8'd1;
     end
   end
-
+/*
   //not reset
   always @(posedge CLK) begin
     if(RST && RST) begin
@@ -68,7 +69,7 @@ module TOP(CLK, RST);
       cnt8 <= 8'd1;
     end
   end
-
+*/
   always @(posedge CLK) begin
     if(RST[zero]) begin
       cnt10 <= 0;

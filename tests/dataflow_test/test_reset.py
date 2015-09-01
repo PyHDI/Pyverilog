@@ -6,6 +6,16 @@ from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
 codedir = '../../testcode/'
 
 expected = """\
+TOP.cnt1: sync TOP.RST[0]posedge TOP.CLK[0]
+TOP.cnt10: sync TOP.RST[0]posedge TOP.CLK[0]
+TOP.cnt2: posedge TOP.RST[0]posedge TOP.CLK[0]
+TOP.cnt5: posedge TOP.RST[0]posedge TOP.CLK[0]
+TOP.cnt7: sync TOP.RST[0]posedge TOP.CLK[0]
+TOP.sub.CLK:  [] []
+TOP.sub.RST:  [] []
+TOP.sub.cnt9: sync TOP.sub.RST[0]posedge TOP.sub.CLK[0]
+TOP.sub.zero:  [] []
+TOP.zero:  [] []
 """
 
 def test():
@@ -22,26 +32,26 @@ def test():
                                        preprocess_include=include,
                                        preprocess_define=define)
     analyzer.generate()
-    #TODO Current version is for only display.
-##    directives = analyzer.get_directives()
-##    instances = analyzer.getInstances()
-##    terms = analyzer.getTerms()
-##    binddict = analyzer.getBinddict()
-##
-##    output = []
-##    output.append(list(binddict.values())[0][0].tostr())
-##    output.append('\n')
-##
-##    rslt = ''.join(output)
-##
-##    print(rslt)
-##    for key, verb in binddict.items():
-##        if verb[0].getResetName() is None:
-##            print(str(key) + ': None')
-##        else:
-##            print(str(key) + ': ' + verb[0].getResetEdge() + str(verb[0].getResetName()) +
-##              '[' + str(verb[0].getResetBit()) + ']')
+    directives = analyzer.get_directives()
+    instances = analyzer.getInstances()
+    terms = analyzer.getTerms()
+    binddict = analyzer.getBinddict()
 
+    sens_info = []
+    for tk in sorted(binddict.keys(), key=lambda x:str(x)):
+        sens_info.append(str(tk) + ': ')
+        sens_info.append(binddict[tk][0].getResetEdge() + ' ' +
+                        str(binddict[tk][0].getResetName())+
+                        '[' + str(binddict[tk][0].getResetBit()) +']' +
+                        binddict[tk][0].getClockEdge() + ' ' +
+                        str(binddict[tk][0].getClockName()) +
+                        '[' + str(binddict[tk][0].getClockBit()) + ']')
+        sens_info.append('\n')
+
+    rslt = ''.join(sens_info)
+
+    print(rslt)
+    assert(expected == rslt)
 
 
 if __name__ == '__main__':
