@@ -1,0 +1,10 @@
+language: python
+python:
+  - 2.7
+  - 3.2
+before_script:
+  - sudo apt-get install iverilog
+  - sudo pip install jinja2
+script:
+  - python --version
+  - make
