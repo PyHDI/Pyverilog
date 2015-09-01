@@ -8,11 +8,11 @@ module TOP(CLK, RST, reg1, OUT);
 
   assign in1[2:1] = reg3[6:5];
 
-  always @(posedge CLK or negedge RST) begin
+  always @(posedge CLK) begin
     reg1 <= in1[2:1];
   end
 
-  always @(posedge CLK or negedge RST) begin
+  always @(posedge CLK or posedge RST) begin
     if(RST) begin
       reg3 <= 3'd0;
     end else begin
