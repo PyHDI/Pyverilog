@@ -38,7 +38,7 @@ module TOP(CLK, RST_X,
   localparam ST_WRITEWAIT = 8;
   localparam ST_DONE = 9;
 
-  always @(posedge CLK or negedge RST_X) begin
+  always @(posedge CLK) begin
     if(!RST_X) begin
       state <= ST_INIT;
       cnt0 <= 0;
