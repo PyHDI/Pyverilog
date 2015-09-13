@@ -266,7 +266,7 @@ class BindVisitor(NodeVisitor):
         for l in node.sens_list.list:
             if l.sig is None:
                 continue
-            if isinstance(l.sig, pyverilog.vparser.ast.Pointer):
+            if isinstance(l.sig, Pointer):
                 signame = self._get_signal_name(l.sig.var)
                 bit = int(l.sig.ptr.value)
             else:
@@ -1561,11 +1561,11 @@ class BindVisitor(NodeVisitor):
             elif isinstance(node, IfStatement):
                 self._walk_in_first_ifbranch(node.true_statement)
             elif isinstance(node, NonblockingSubstitution):
-                self.load_const_dict[node.left] = self.is_const(node.right)
+                self.load_const_dict[node.left] = self._is_const(node.right)
             else:
                 raise Exception('Pyverilog unknown error')
 
-        def is_const(self, node):
+        def _is_const(self, node):
             if isinstance(node, Identifier):
                 node_chain = self.get_scopechain(node)
                 if node_chain in self.dataflow.terms.keys():
@@ -1573,12 +1573,12 @@ class BindVisitor(NodeVisitor):
                     return 'Parameter' in self.dataflow.terms[node_chain].termtype
             elif hasattr(node, 'children'):
                 for child in node.children():
-                    if not self.is_const(child):
+                    if not self._is_const(child):
                         return False
                 else:
                     return True
             elif isinstance(node, Rvalue):
-                self.is_const(node.var)
+                self._is_const(node.var)
             elif hasattr(node, 'value'):
                 return True
             else:
@@ -1645,7 +1645,7 @@ class BindVisitor(NodeVisitor):
                 elif hasattr(node.ptr, 'value'):
                     self.rst_bit = int(node.ptr.value)
                     self._make_rst_info(node.var)
-            elif isinstance(node, pyverilog.vparser.ast.Identifier):
+            elif isinstance(node, Identifier):
                 self.rst_name = str(node)
 
         def _has_if_branch(self, node):
