@@ -172,15 +172,15 @@ class VerilogLexer(object):
     t_DELAY = r'\#'
     t_DOLLER = r'\$'
 
-    bin_number = '[0-9]*\'b[0-1xz?][0-1xz?_]*'
-    signed_bin_number = '[0-9]*\'sb[0-1xz?][0-1xz?_]*'
-    octal_number = '[0-9]*\'o[0-7xz?][0-7xz?_]*'
-    signed_octal_number = '[0-9]*\'so[0-7xz?][0-7xz?_]*'
-    hex_number = '[0-9]*\'h[0-9a-fA-Fxz?][0-9a-fA-Fxz?_]*'
-    signed_hex_number = '[0-9]*\'sh[0-9a-fA-Fxz?][0-9a-fA-Fxz?_]*'
+    bin_number = '[0-9]*\'[bB][0-1xXzZ?][0-1xXzZ?_]*'
+    signed_bin_number = '[0-9]*\'[sS][bB][0-1xZzZ?][0-1xXzZ?_]*'
+    octal_number = '[0-9]*\'[oO][0-7xXzZ?][0-7xXzZ?_]*'
+    signed_octal_number = '[0-9]*\'[sS][oO][0-7xXzZ?][0-7xXzZ?_]*'
+    hex_number = '[0-9]*\'[hH][0-9a-fA-FxXzZ?][0-9a-fA-FxXzZ?_]*'
+    signed_hex_number = '[0-9]*\'[sS][hH][0-9a-fA-FxXzZ?][0-9a-fA-FxXzZ?_]*'
 
-    decimal_number = '([0-9]*\'d)?[0-9][0-9_]*'
-    signed_decimal_number = '[0-9]*\'sd[0-9?][0-9?_]*'
+    decimal_number = '([0-9]*\'[dD][0-9xXzZ?][0-9xXzZ?_]*)|([0-9][0-9_]*)'
+    signed_decimal_number = '[0-9]*\'[sS][dD][0-9xXzZ?][0-9xXzZ?_]*'
 
     exponent_part = r"""([eE][-+]?[0-9]+)"""
     fractional_constant = r"""([0-9]*\.[0-9]+)|([0-9]+\.)"""
