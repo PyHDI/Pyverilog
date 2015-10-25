@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # visit.py
-#
+# 
 # Basic classes for binding tree analysis
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
@@ -127,7 +127,7 @@ class VariableTable(object):
         self.dict.update(table)
     def getDict(self):
         return self.dict
-
+        
 class SignalTable(VariableTable): pass
 class ConstTable(VariableTable): pass
 class GenvarTable(VariableTable): pass
@@ -271,7 +271,6 @@ class Frame(object):
         self.frametype = frametype
 
         self.alwaysinfo = alwaysinfo
-        self.load_const_dict = {}
         self.condition = condition
 
         self.module = module
@@ -305,8 +304,6 @@ class Frame(object):
 
     def getAlwaysInfo(self):
         return self.alwaysinfo
-    def getLoadConstDict(self):
-        return self.load_const_dict
     def getCondition(self):
         return self.condition
 
@@ -327,10 +324,9 @@ class Frame(object):
         self.next.append(nextframe)
 
     def setAlwaysInfo(self, clock_name, clock_edge, clock_bit,
-                      reset_name, reset_edge, reset_bit, senslist, load_const_dict):
+                      reset_name, reset_edge, reset_bit, senslist):
         self.alwaysinfo = AlwaysInfo(clock_name, clock_edge, clock_bit,
                                      reset_name, reset_edge, reset_bit, senslist)
-        self.load_const_dict = load_const_dict
 
     def addSignal(self, node):
         self.variables.addSignal(node.name, node)
@@ -387,7 +383,7 @@ class Frame(object):
                 self.blockingassign[dst][c_i].tree = bind.tree
                 return
         self.blockingassign[dst] = current + (bind,)
-
+            
     def getBlockingAssign(self, dst):
         if dst in self.blockingassign: return self.blockingassign[dst]
         return ()
@@ -508,10 +504,9 @@ class FrameTable(object):
         return self.for_iter
 
     def setAlwaysInfo(self, clock_name, clock_edge, clock_bit,
-                      reset_name, reset_edge, reset_bit, senslist, load_const_dict):
+                      reset_name, reset_edge, reset_bit, senslist):
         self.dict[self.current].setAlwaysInfo(clock_name, clock_edge, clock_bit,
-                                              reset_name, reset_edge, reset_bit,
-                                              senslist, load_const_dict)
+                                              reset_name, reset_edge, reset_bit, senslist)
 
     def setCurrent(self, current):
         self.current = current
@@ -541,7 +536,7 @@ class FrameTable(object):
             self.dict[self.current].addTaskPort(var)
             return
         self.dict[self.current].addSignal(var)
-
+            
     def addConst(self, var):
         self.dict[self.current].addConst(var)
     def addGenvar(self, var):
@@ -565,7 +560,7 @@ class FrameTable(object):
             if dk[-1].scopetype == 'module':
                 ret.append( (dk, self.dict[dk].getModuleName()) )
         return tuple(ret)
-
+        
     def getAllSignals(self):
         ret = collections.OrderedDict()
         for dk, dv in self.dict.items():
@@ -628,7 +623,7 @@ class FrameTable(object):
             ptr = self.dict[ptr].previous
         return tuple(reversed(ret))
 
-    def getAlwaysStatus(self, left_value):
+    def getAlwaysStatus(self):
         ptr = self.current
         frame = self.dict[ptr]
         alwaysinfo = frame.getAlwaysInfo()
@@ -636,33 +631,11 @@ class FrameTable(object):
             if frame.isFunctioncall(): return None
             if frame.isTaskcall(): return None
             if not frame.isAlways(): return None
-            if alwaysinfo is not None:
-                if left_value in frame.load_const_dict.keys() and frame.load_const_dict[left_value]:
-                    return alwaysinfo
-                elif alwaysinfo.reset_edge != 'sync':
-                    raise verror.FormatError('Illegal sensitivity list')
-                #ex.
-                #As follows, RST is reset signal for reg1 but clock for reg2.
-                #This is rearded as illegal sensitivity list.
-
-#               always @(posedge CLK or posedge RST) begin
-#                   if(RST) begin
-#                       reg1 <= 8'd0;
-#                   end else begin
-#                       reg1 <= 8'd0;
-#                       reg2 <= 8'd1;
-#                   end
-#               end
-                else:
-                    return self.to_noreset(alwaysinfo)
+            if alwaysinfo is not None: return alwaysinfo
             ptr = self.dict[ptr].previous
             frame = self.dict[ptr]
             alwaysinfo = frame.getAlwaysInfo()
-
-    def to_noreset(self, alwaysinfo):
-        return AlwaysInfo(alwaysinfo.clock_name, alwaysinfo.clock_edge, alwaysinfo.clock_bit,
-                          None, None, None, alwaysinfo.senslist)
-
+    
     def setBlockingAssign(self, dst, bind, scope):
         self.dict[scope].setBlockingAssign(dst, bind)
 
@@ -727,7 +700,7 @@ class FrameTable(object):
                     return ScopeChain( [currentchain[skiplength]] ) + rslt
             return None
 
-        if (currentchain[skiplength].scopetype == 'for' and
+        if (currentchain[skiplength].scopetype == 'for' and 
             targetchain[0].scopetype == 'for'):
             if currentchain[skiplength].scopeloop != targetchain[0].scopeloop:
                 return None
@@ -737,7 +710,7 @@ class FrameTable(object):
                 rslt = self.searchMatchedScopeChain(nextframe, targetchain[1:])
                 if rslt is not None:
                     return ScopeChain( [currentchain[skiplength]] ) + rslt
-
+                    
             return None
 
         for nextframe in self.dict[currentchain].getNext():

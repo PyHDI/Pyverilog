@@ -1,8 +1,4 @@
-ifndef EXE_TRAVIS
-	PYTHON=python3
-else
-	PYTHON=python
-endif
+PYTHON=python3
 #OPT=-m pdb
 #OPT=-m cProfile -s time
 #OPT=-m cProfile -o profile.rslt

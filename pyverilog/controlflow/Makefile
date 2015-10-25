@@ -1,8 +1,3 @@
-ifndef EXE_TRAVIS
-	PYTHON=python3
-else
-	PYTHON=python
-endif
 PYTHON=python3
 #PYTHON=python2.7
 #OPT=-m pdb

@@ -1,8 +1,4 @@
-ifndef EXE_TRAVIS
-	PYTHON=python3
-else
-	PYTHON=python
-endif
+PYTHON=python3
 #PYTHON=python2.7
 PYTHON27=python2.7
 #OPT=-m pdb
@@ -46,18 +42,11 @@ subset:
 
 .PHONY: codegen
 codegen:
-	$(PYTHON) $(OPT) $(CODEGEN) $(SRCS) $(TOP) $(TARGETS) $(CODEGEN_OPT)
+		$(PYTHON) $(OPT) $(CODEGEN) $(SRCS) $(TOP) $(TARGETS) $(CODEGEN_OPT)
 
 .PHONY: graphgen
 graphgen:
-ifdef EXE_TRAVIS
-ifdef EXE_GRAPHGEN
-	python --version
-	$(PYTHON) $(OPT) $(GRAPHGEN) $(SRCS) $(TOP) $(TARGETS) $(GRAPHGEN_OPT)
-endif
-else
-	$(PYTHON27) $(OPT) $(GRAPHGEN) $(SRCS) $(TOP) $(TARGETS) $(GRAPHGEN_OPT)
-endif
+		$(PYTHON27) $(OPT) $(GRAPHGEN) $(SRCS) $(TOP) $(TARGETS) $(GRAPHGEN_OPT)
 
 .PHONY: clean
 clean:
