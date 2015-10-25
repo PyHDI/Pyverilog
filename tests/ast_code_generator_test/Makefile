@@ -1,7 +1,8 @@
 TEST=*.py
 ARGS=
-
-PYTHON=python3
+if [ -z "${PYTHON}" ];then
+        PYTHON=python3
+fi
 #PYTHON=python
 #OPT=-m pdb
 #OPT=-m cProfile -s time
