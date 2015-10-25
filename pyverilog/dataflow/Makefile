@@ -3,7 +3,7 @@ ifndef EXE_TRAVIS
 else
 	PYTHON=python
 endif
-#PYTHON=python2.7
+
 PYTHON27=python2.7
 #OPT=-m pdb
 #OPT=-m cProfile -s time

@@ -12,5 +12,4 @@ before_install:
 before_script:
   - pip freeze
 script:
-#  - export EXE_TRAVIS=1
   - make
