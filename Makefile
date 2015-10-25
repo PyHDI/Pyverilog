@@ -1,5 +1,7 @@
 .PHONY: all
 all:
+	export PYTHON=python3
+	export PYTHON27=python2.7
 	make -C ./pyverilog
 
 .PHONY: clean
