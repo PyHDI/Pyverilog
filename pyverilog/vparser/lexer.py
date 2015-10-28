@@ -4,8 +4,8 @@
 # Verilog Lexical Analyzer
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
-# Edited by ryosuke fukatani
 # License: Apache 2.0
+# Contributor: ryosuke fukatani
 #-------------------------------------------------------------------------------
 from __future__ import absolute_import
 from __future__ import print_function
@@ -321,8 +321,8 @@ if __name__ == '__main__':
         showVersion()
         
     text = preprocess(filelist, 
-                      preprocess_include=options.include,
-                      preprocess_define=options.define)
+                      include=options.include,
+                      define=options.define)
 
     dump = dump_tokens(text)
     

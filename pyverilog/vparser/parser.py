@@ -1,11 +1,11 @@
 #-------------------------------------------------------------------------------
 # parser.py
 #
-# Parser
+# Verilog Parser
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
-# modified by ryosuke fukatani
 # License: Apache 2.0
+# Contributor: ryosuke fukatani
 #-------------------------------------------------------------------------------
 from __future__ import absolute_import
 from __future__ import print_function

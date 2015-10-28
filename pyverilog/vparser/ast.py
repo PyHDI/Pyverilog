@@ -1,11 +1,11 @@
 #-------------------------------------------------------------------------------
 # ast.py
 #
-# Verilog HDL AST classes with Pyverilog
+# Verilog HDL AST Node Definitions
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
-# edited by ryosuke fukatani
 # License: Apache 2.0
+# Contributor: ryosuke fukatani
 #-------------------------------------------------------------------------------
 from __future__ import absolute_import
 from __future__ import print_function
@@ -770,4 +770,3 @@ class SingleStatement(Node):
         nodelist = []
         if self.statement: nodelist.append(self.statement)
         return tuple(nodelist)
-
