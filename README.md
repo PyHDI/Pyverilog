@@ -54,10 +54,12 @@ You can create your own design analyzer, code translator and code generator of V
 Installation
 ==============================
 
-Software Requirements
+Requirements
 --------------------
 
 - Python: 2.7, 3.4 or later
+
+Python3 is recommended.
 
 - Icarus Verilog: 0.9.7 or later
 
@@ -68,14 +70,26 @@ Install on your platform. For exmple, on Ubuntu:
 - Jinja2: 2.8 or later
 - pytest: 2.8.2 or later
 - pytest-pythonpath: 0.7 or lator
-- Pygraphviz: 1.3.1 or later (Option for graph visualization in dataflow/graphgen.py and controlflow/controlflow_analyzer.py)
 
 Install on your python environment by using pip.
 
     pip install jinja2 pytest pytest-pythonpath
-    (pip install pygraphviz) # option
 
-Finally, install Pyverilog.
+Options
+--------------------
+
+- Graphviz: 2.38.0 or later
+- Pygraphviz: 1.3.1 or later
+
+These softwares are option for graph visualization in dataflow/graphgen.py and controlflow/controlflow_analyzer.py.
+
+    sudo apt-get install graphviz
+    pip install pygraphviz
+
+Install
+--------------------
+
+Install Pyverilog.
 
     python setup.py install
 
@@ -133,7 +147,7 @@ Code parser
 Let's try syntax analysis. Please type the command as below.
 
 ```
-python3 pyverilog/vparser/parser.py test.v
+python pyverilog/vparser/parser.py test.v
 ```
 
 Then you got the result as below. The result of syntax analysis is displayed.
@@ -253,7 +267,7 @@ Dataflow analyzer
 Let's try dataflow analysis. Please type the command as below.
 
 ```
-python3 pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
+python pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
 ```
 
 Then you got the result as below. The result of each signal definition and each signal assignment are displayed.
@@ -276,10 +290,10 @@ Bind:
 (Bind dest:top.led tree:(Partselect Var:(Terminal top.count) MSB:(IntConst 23) LSB:(IntConst 16)))
 ```
 
-Let's view the result of dataflow analysis as a picture file. Now we select 'led' as the target. Please type the command as below.
+Let's view the result of dataflow analysis as a picture file. Now we select 'led' as the target. Please type the command as below. In this example, Graphviz and Pygraphviz are installed.
 
 ```
-python3 pyverilog/dataflow/graphgen.py -t top -s top.led test.v 
+python pyverilog/dataflow/graphgen.py -t top -s top.led test.v 
 ```
 
 Then you got a png file (out.png). The picture shows that the definition of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
@@ -289,10 +303,10 @@ Then you got a png file (out.png). The picture shows that the definition of 'led
 Control-flow analyzer
 ------------------------------
 
-Let's try control-flow analysis. Please type the command as below.
+Let's try control-flow analysis. Please type the command as below. In this example, Graphviz and Pygraphviz are installed. If don't use Graphviz, please append "--nograph" option.
 
 ```
-python2.7 pyverilog/controlflow/controlflow_analyzer.py -t top test.v 
+python pyverilog/controlflow/controlflow_analyzer.py -t top test.v 
 ```
 
 Then you got the result as below. The result shows that the state machine structure and transition conditions to the next state in the state machine.
@@ -312,7 +326,7 @@ Loop
 (0, 1, 2)
 ```
 
-You got also a png file (top_state.png). The picture shows that the graphical structure of the state machine.
+You got also a png file (top_state.png), if you did not append "--nograph". The picture shows that the graphical structure of the state machine.
 
 ![top_state.png](img/top_state.png)
 
@@ -343,7 +357,7 @@ print(rslt)
 Please type the command as below at the same directory with Pyverilog.
 
 ```
-python3 test.py
+python test.py
 ```
 
 Then Verilog HDL code generated from the AST instances is displayed.
