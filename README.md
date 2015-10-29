@@ -69,7 +69,7 @@ Install on your platform. For exmple, on Ubuntu:
 
 - Jinja2: 2.8 or later
 - pytest: 2.8.2 or later
-- pytest-pythonpath: 0.7 or lator
+- pytest-pythonpath: 0.7 or later
 
 Install on your python environment by using pip.
 
