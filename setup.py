@@ -10,8 +10,6 @@ version = m.group(1) if m is not None else '0.0.0'
 def read(filename):
     return open(os.path.join(os.path.dirname(__file__), filename)).read()
 
-requires = ['Jinja2', 'pytest', 'pytest-pythonpath']
-
 setup(name='pyverilog',
       version=version,
       description='Python-based Hardware Design Processing Toolkit for Verilog HDL: Parser, Dataflow Analyzer, Controlflow Analyzer and Code Generator',
@@ -23,6 +21,5 @@ setup(name='pyverilog',
       url='https://github.com/PyHDI/Pyverilog',
       packages=find_packages(),
       package_data={ 'pyverilog.ast_code_generator' : ['template/*'],  },
-      install_requires=requires,
-      tests_require=requires,
+      install_requires=['Jinja2', 'pytest', 'pytest-pythonpath'],
 )
