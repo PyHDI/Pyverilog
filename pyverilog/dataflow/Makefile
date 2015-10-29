@@ -1,6 +1,5 @@
 PYTHON=python3
-#PYTHON=python2.7
-PYTHON27=python2.7
+#PYTHON=python
 #OPT=-m pdb
 #OPT=-m cProfile -s time
 #OPT=-m cProfile -o profile.rslt
@@ -46,7 +45,7 @@ codegen:
 
 .PHONY: graphgen
 graphgen:
-		$(PYTHON27) $(OPT) $(GRAPHGEN) $(SRCS) $(TOP) $(TARGETS) $(GRAPHGEN_OPT)
+		$(PYTHON) $(OPT) $(GRAPHGEN) $(SRCS) $(TOP) $(TARGETS) $(GRAPHGEN_OPT)
 
 .PHONY: clean
 clean:

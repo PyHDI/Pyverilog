@@ -1,5 +1,5 @@
 PYTHON=python3
-#PYTHON=python2.7
+#PYTHON=python
 #OPT=-m pdb
 #OPT=-m cProfile -s time
 #OPT=-m cProfile -o profile.rslt

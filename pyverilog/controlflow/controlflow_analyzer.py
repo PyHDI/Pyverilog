@@ -4,7 +4,6 @@
 # Controlflow analyzer 
 #
 # for visualization, graphviz and pygraphviz are required
-# (only Python 2.7 is supported)
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
@@ -205,9 +204,9 @@ class FiniteStateMachine(object):
                 print(''.join(s))
 
     def tograph(self, filename='fsm.png', nolabel=False):
-        import pygraphviz as pgv # Python 3 currently does not support Pygraphviz
-
-        graph = pgv.AGraph(directed=True) #pgv.AGraph(strict=False, directed=True)
+        import pygraphviz as pgv
+        #graph = pgv.AGraph(strict=False, directed=True)
+        graph = pgv.AGraph(directed=True)
         for src, dstdict in self.fsm.items():
             graph.add_node(str(src), label=str(src))
             for cond, dst in dstdict.items():

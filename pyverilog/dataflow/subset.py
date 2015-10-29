@@ -127,12 +127,8 @@ class VerilogSubset(VerilogDataflowMerge):
 if __name__ == '__main__':
     from optparse import OptionParser
     import pyverilog.utils.util as util
-    if sys.version_info[0] >= 3:
-        from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
-        from pyverilog.dataflow.optimizer import VerilogDataflowOptimizer
-    else:
-        from dataflow_analyzer import VerilogDataflowAnalyzer
-        from optimizer import VerilogDataflowOptimizer
+    from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
+    from pyverilog.dataflow.optimizer import VerilogDataflowOptimizer
     INFO = "Subset generator from Verilog dataflow definitions"
     VERSION = pyverilog.utils.version.VERSION
     USAGE = "Usage: python subset.py -t TOPMODULE file ..."

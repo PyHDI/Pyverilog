@@ -51,32 +51,33 @@ Pyverilog includes **(1) code parser, (2) dataflow analyzer, (3) control-flow an
 You can create your own design analyzer, code translator and code generator of Verilog HDL based on this toolkit.
 
 
-Software Requirements
-==============================
-
-* Python (2.7, 3.3 or later)
-* Icarus Verilog (0.9.6 or later)
-   - pyverilog.vparser.preprocessor.py uses 'iverilog -E' command as the preprocessor.
-   - 'apt-get install iverilog'
-* Graphviz and Pygraphviz (Python3 does not support Pygraphviz)
-   - pyverilog.dataflow.graphgen and pyverilog.controlflow.controlflow (without --nograph option) use Pygraphviz (on Python 2.7).
-   - If you do not use graphgen and controlflow (without --nograph) option, Python 3.x is fine.
-* Jinja2 (2.7 or later)
-   - ast\_code\_generator requires jinja2 module.
-   - 'pip3 install jinja2' (for Python 3.x) or 'pip install jinja2' (for Python 2.7)
-
-
 Installation
 ==============================
 
-If you want to use Pyverilog as a general library, you can install on your environment by using setup.py.
-If Python 2.7 is used,
+Software Requirements
+--------------------
+
+- Python: 2.7, 3.4 or later
+
+- Icarus Verilog: 0.9.7 or later
+
+Install on your platform. For exmple, on Ubuntu:
+
+    sudo apt-get install iverilog
+
+- Jinja2: 2.8 or later
+- pytest: 2.8.2 or later
+- pytest-pythonpath: 0.7 or lator
+- Pygraphviz: 1.3.1 or later (Option for graph visualization in dataflow/graphgen.py and controlflow/controlflow_analyzer.py)
+
+Install on your python environment by using pip.
+
+    pip install jinja2 pytest pytest-pythonpath
+    (pip install pygraphviz) # option
+
+Finally, install Pyverilog.
 
     python setup.py install
-
-If Python 3.x is used,
-
-    python3 setup.py install
 
 
 Tools
