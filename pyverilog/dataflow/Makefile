@@ -21,7 +21,7 @@ GRAPHGEN_OUT=out.png
 GRAPHGEN_OPT=--identical --walk --step=0 -o $(GRAPHGEN_OUT)
 
 .PHONY: all
-all: analyze merge walk subset codegen graphgen
+all: analyze merge walk subset codegen
 
 .PHONY: analyze
 analyze:
