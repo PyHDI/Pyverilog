@@ -22,5 +22,5 @@ setup(name='pyverilog',
       packages=find_packages(),
       package_data={ 'pyverilog.ast_code_generator' : ['template/*'],  },
       install_requires=['Jinja2'],
-      tests_requires=['pytest', 'pytest-pythonpath']
+      tests_require=['pytest', 'pytest-pythonpath']
 )
