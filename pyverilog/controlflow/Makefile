@@ -8,7 +8,7 @@ ANALYZER=controlflow_analyzer.py
 ACTIVE=active_analyzer.py
 ACTIVERANGE=active_range.py
 
-SRCS=../../testcode/vectoradd.v
+SRCS=../../verilogcode/vectoradd.v
 TOP=-t TOP
 TARGETS=-s "TOP.MEM_A"
 

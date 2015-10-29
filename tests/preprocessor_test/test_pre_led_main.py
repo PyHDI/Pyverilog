@@ -2,7 +2,7 @@ import os
 import sys
 from pyverilog.vparser.preprocessor import VerilogPreprocessor
 
-codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/testcode/'
+codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/verilogcode/'
 
 expected = """\
 `default_nettype none

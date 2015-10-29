@@ -11,7 +11,7 @@ SUBSET=subset.py
 CODEGEN=codegen.py
 GRAPHGEN=graphgen.py
 
-SRCS=../../testcode/vectoradd.v
+SRCS=../../verilogcode/vectoradd.v
 TOP=-t TOP
 TARGETS=-s "TOP.MEM_A"
 
