@@ -2,7 +2,7 @@ import os
 import sys
 from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
 
-codedir = '../../testcode/'
+codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/testcode/'
 
 expected = """\
 (Bind dest:TOP.cnt \

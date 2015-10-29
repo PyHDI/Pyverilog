@@ -2,16 +2,21 @@ import os
 import sys
 from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
 
-codedir = '../../testcode/'
+codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/testcode/'
 
 expected = """\
-(Bind dest:TOP.AAA tree:(IntConst 1))
-(Bind dest:TOP.VDD tree:(IntConst 1))
-(Bind dest:TOP.VSS tree:(IntConst 0))
+(Bind dest:TOP.cnt \
+tree:(Branch Cond:(Terminal TOP.RST) \
+True:(IntConst 0) \
+False:(Branch Cond:(Operator Eq Next:(Terminal TOP.cnt),(IntConst 'b00)) \
+True:(Operator Plus Next:(Terminal TOP.cnt),(IntConst 1)) \
+False:(Branch Cond:(Operator Eq Next:(Terminal TOP.cnt),(IntConst 'b1x)) \
+True:(IntConst 0) False:(Branch Cond:(IntConst 1) \
+True:(Operator Plus Next:(Terminal TOP.cnt),(IntConst 1)))))))
 """
 
 def test():
-    filelist = [codedir + 'supply.v']
+    filelist = [codedir + 'casex.v']
     topmodule = 'TOP'
     noreorder = False
     nobind = False
@@ -31,11 +36,8 @@ def test():
     binddict = analyzer.getBinddict()
 
     output = []
-    
-    for bk, bv in sorted(binddict.items(), key=lambda x:str(x[0])):
-        for bvi in bv:
-            output.append(bvi.tostr())
-            output.append('\n')
+    output.append(list(binddict.values())[0][0].tostr())
+    output.append('\n')
             
     rslt = ''.join(output)
 

@@ -1,24 +1,23 @@
 import os
 import sys
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
-
 from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
 from pyverilog.dataflow.optimizer import VerilogDataflowOptimizer
 from pyverilog.controlflow.controlflow_analyzer import VerilogControlflowAnalyzer
 
-codedir = '../../testcode/'
+codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/testcode/'
 
 expected = """\
 TOP.CLK: TOP_CLK
-TOP.RST: TOP_RST
-TOP.in1: TOP_reg3['d6:'d5]
-TOP.in2: TOP_in2
-TOP.reg1: TOP_reg3['d6:'d5]
-TOP.reg3: ((TOP_RST)? 3'd0 : 3'd1)
+TOP.RST_X: TOP_RST_X
+TOP.cnt: (((!TOP_RST_X))? 'd0 : (((!TOP_RST_X))? TOP_cnt : (((&TOP_al_block0_al_block2_al_functioncall0_inc))? 'd0 : (((!TOP_RST_X))? (TOP_cnt+'d1) : (TOP_cnt+'d1)))))
+TOP.md_always0.al_block0.al_if0_ELSE.al_block2.al_functioncall0._rn0_inc: 'd0
+TOP.md_always0.al_block0.al_if0_ELSE.al_block2.al_functioncall0._rn1_inc: (((!TOP_RST_X))? (TOP_al_block0_al_block2_al_functioncall0__rn1_inc+'d1) : (TOP_cnt+'d1))
+TOP.md_always0.al_block0.al_if0_ELSE.al_block2.al_functioncall0.in: (((!TOP_RST_X))? TOP_al_block0_al_block2_al_functioncall0_in : TOP_cnt)
+TOP.md_always0.al_block0.al_if0_ELSE.al_block2.al_functioncall0.inc: (((!TOP_RST_X))? TOP_al_block0_al_block2_al_functioncall0_inc : (((!TOP_RST_X))? (((&TOP_al_block0_al_block2_al_functioncall0_inc))? 'd0 : (((!TOP_RST_X))? (TOP_al_block0_al_block2_al_functioncall0_inc+'d1) : (TOP_cnt+'d1))) : (((&TOP_al_block0_al_block2_al_functioncall0_inc))? (((!TOP_RST_X))? (TOP_al_block0_al_block2_al_functioncall0_inc+'d1) : (TOP_cnt+'d1)) : (((!TOP_RST_X))? (((&(TOP_al_block0_al_block2_al_functioncall0_inc+'d1)))? 'd0 : (((!TOP_RST_X))? (TOP_al_block0_al_block2_al_functioncall0_inc+'d1) : (TOP_cnt+'d1))) : (((&(TOP_cnt+'d1)))? 'd0 : (((!TOP_RST_X))? (TOP_al_block0_al_block2_al_functioncall0_inc+'d1) : (TOP_cnt+'d1)))))))
 """
 
 def test():
-    filelist = [codedir + 'partselect_assign.v']
+    filelist = [codedir + 'function.v']
     topmodule = 'TOP'
     noreorder = False
     nobind = False
@@ -55,7 +54,6 @@ def test():
     rslt = '\n'.join(output) + '\n'
 
     print(rslt)
-    
     assert(expected == rslt)
 
 if __name__ == '__main__':

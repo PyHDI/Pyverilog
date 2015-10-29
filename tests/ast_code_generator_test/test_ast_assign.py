@@ -1,5 +1,6 @@
 import os
 import sys
+
 import pyverilog.vparser.ast as vast
 from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
 

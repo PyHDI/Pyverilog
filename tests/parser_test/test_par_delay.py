@@ -7,7 +7,7 @@ try:
 except:
     from io import StringIO
 
-codedir = '../../testcode/'
+codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/testcode/'
 
 expected = """\
 Source: 

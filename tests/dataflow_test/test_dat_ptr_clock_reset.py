@@ -2,17 +2,16 @@ import os
 import sys
 from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
 
-codedir = '../../testcode/'
+codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/testcode/'
 
 expected = """\
 (Bind dest:TOP.cnt \
-tree:(Branch Cond:(Terminal TOP.RST) \
-True:(IntConst 'd0) \
-False:(Operator Plus Next:(Terminal TOP.cnt),(IntConst 1'sd1))))
+tree:(Branch Cond:(Partselect Var:(Terminal TOP.RST) MSB:(IntConst 0) LSB:(IntConst 0)) \
+True:(IntConst 'd0)))
 """
 
 def test():
-    filelist = [codedir + 'decimal_signed.v']
+    filelist = [codedir + 'ptr_clock_reset.v']
     topmodule = 'TOP'
     noreorder = False
     nobind = False
@@ -38,7 +37,10 @@ def test():
     rslt = ''.join(output)
 
     print(rslt)
-    assert(expected == rslt)
+    assert(rslt == expected)
+    
+    assert(list(binddict.values())[0][0].getClockBit() == 2)
+    assert(list(binddict.values())[0][0].getResetBit() == 0)
 
 if __name__ == '__main__':
     test()

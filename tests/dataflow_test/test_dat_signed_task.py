@@ -2,17 +2,16 @@ import os
 import sys
 from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
 
-codedir = '../../testcode/'
+codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/testcode/'
 
 expected = """\
 (Bind dest:TOP.cnt \
 tree:(Branch Cond:(Terminal TOP.RST) \
-True:(IntConst 'd0) \
-False:(Operator Plus Next:(Terminal TOP.cnt),(IntConst 8'd1))))
+True:(Terminal TOP.cnt) False:(Terminal TOP.cnt)))
 """
 
 def test():
-    filelist = [codedir + 'decimal_width.v']
+    filelist = [codedir + 'signed_task.v']
     topmodule = 'TOP'
     noreorder = False
     nobind = False
