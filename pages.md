@@ -11,7 +11,7 @@ If you use Pyverilog in your research, please cite my paper.
 title={Pyverilog: A Python-Based Hardware Design Processing Toolkit for Verilog HDL},
 author={Takamaeda-Yamazaki, Shinya},
 booktitle={Applied Reconfigurable Computing},
-month={Apr}
+month={Apr},
 year={2015},
 pages={451-460},
 volume={9040},
@@ -32,37 +32,47 @@ Pyverilog includes **(1) code parser, (2) dataflow analyzer, (3) control-flow an
 You can create your own design analyzer, code translator and code generator of Verilog HDL based on this toolkit.
 
 
-Software Requirements
-==============================
-
-* Python (2.7, 3.3 or later)
-* Icarus Verilog (0.9.6 or later)
-   - pyverilog.vparser.preprocessor.py uses 'iverilog -E' command as the preprocessor.
-   - 'apt-get install iverilog'
-* Graphviz and Pygraphviz (Python3 does not support Pygraphviz)
-   - pyverilog.dataflow.graphgen and pyverilog.controlflow.controlflow (without --nograph option) use Pygraphviz (on Python 2.7).
-   - If you do not use graphgen and controlflow (without --nograph) option, Python 3.x is fine.
-* Jinja2 (2.7 or later)
-   - ast\_code\_generator requires jinja2 module.
-   - 'pip3 install jinja2' (for Python 3.x) or 'pip install jinja2' (for Python 2.7)
-
-
 Installation
 ==============================
 
-If you want to use Pyverilog as a general library, you can install on your environment by using setup.py.
+Requirements
+--------------------
 
-If Python 2.7 is used,
+- Python: 2.7, 3.4 or later
 
-```
-python setup.py install
-```
+Python3 is recommended.
 
-If Python 3.x is used,
+- Icarus Verilog: 0.9.7 or later
 
-```
-python3 setup.py install
-```
+Install on your platform. For exmple, on Ubuntu:
+
+    sudo apt-get install iverilog
+
+- Jinja2: 2.8 or later
+- pytest: 2.8.2 or later
+- pytest-pythonpath: 0.7 or later
+
+Install on your python environment by using pip.
+
+    pip install jinja2 pytest pytest-pythonpath
+
+Options
+--------------------
+
+- Graphviz: 2.38.0 or later
+- Pygraphviz: 1.3.1 or later
+
+These softwares are option for graph visualization in dataflow/graphgen.py and controlflow/controlflow_analyzer.py.
+
+    sudo apt-get install graphviz
+    pip install pygraphviz
+
+Install
+--------------------
+
+Install Pyverilog.
+
+    python setup.py install
 
 
 Tools
@@ -118,7 +128,7 @@ Code parser
 Let's try syntax analysis. Please type the command as below.
 
 ```
-python3 pyverilog/vparser/parser.py test.v
+python pyverilog/vparser/parser.py test.v
 ```
 
 Then you got the result as below. The result of syntax analysis is displayed.
@@ -238,7 +248,7 @@ Dataflow analyzer
 Let's try dataflow analysis. Please type the command as below.
 
 ```
-python3 pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
+python pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
 ```
 
 Then you got the result as below. The result of each signal definition and each signal assignment are displayed.
@@ -261,23 +271,23 @@ Bind:
 (Bind dest:top.led tree:(Partselect Var:(Terminal top.count) MSB:(IntConst 23) LSB:(IntConst 16)))
 ```
 
-Let's view the result of dataflow analysis as a picture file. Now we select 'led' as the target. Please type the command as below.
+Let's view the result of dataflow analysis as a picture file. Now we select 'led' as the target. Please type the command as below. In this example, Graphviz and Pygraphviz are installed.
 
 ```
-python3 pyverilog/dataflow/graphgen.py -t top -s top.led test.v 
+python pyverilog/dataflow/graphgen.py -t top -s top.led test.v 
 ```
 
 Then you got a png file (out.png). The picture shows that the definition of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
 
-![out.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045641.png)
+![out.png](img/out.png)
 
 Control-flow analyzer
 ------------------------------
 
-Let's try control-flow analysis. Please type the command as below.
+Let's try control-flow analysis. Please type the command as below. In this example, Graphviz and Pygraphviz are installed. If don't use Graphviz, please append "--nograph" option.
 
 ```
-python2.7 pyverilog/controlflow/controlflow_analyzer.py -t top test.v 
+python pyverilog/controlflow/controlflow_analyzer.py -t top test.v 
 ```
 
 Then you got the result as below. The result shows that the state machine structure and transition conditions to the next state in the state machine.
@@ -297,9 +307,9 @@ Loop
 (0, 1, 2)
 ```
 
-You got also a png file (top_state.png). The picture shows that the graphical structure of the state machine.
+You got also a png file (top_state.png), if you did not append "--nograph". The picture shows that the graphical structure of the state machine.
 
-![top_state.png](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sxhxtxa/20140101/20140101045835.png)
+![top_state.png](img/top_state.png)
 
 Code generator
 ------------------------------
@@ -328,30 +338,32 @@ print(rslt)
 Please type the command as below at the same directory with Pyverilog.
 
 ```
-python3 test.py
+python test.py
 ```
 
 Then Verilog HDL code generated from the AST instances is displayed.
 
 ```verilog
-
 module top
- (
-  input [0:0] CLK, 
-input [0:0] RST, 
-output [7:0] led
+(
+  input CLK,
+  input RST,
+  output [7:0] led
+);
 
- );
   assign led = 8;
-endmodule
 
+endmodule
 ```
 
 
 Related Project and Site
 ==============================
 
-[PyCoRAM](https://github.com/shtaxxx/PyCoRAM)
+[Veriloggen](https://github.com/PyHDI/veriloggen)
+- A library for constructing a Verilog HDL source code in Python
+
+[PyCoRAM](https://github.com/PyHDI/PyCoRAM)
 - Python-based Portable IP-core Synthesis Framework for FPGA-based Computing
 
 [flipSyrup](https://github.com/shtaxxx/flipSyrup)
@@ -379,4 +391,3 @@ Copyright and Contact
 Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 
 E-mail: shinya\_at\_is.naist.jp
-
