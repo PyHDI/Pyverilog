@@ -362,7 +362,6 @@ class BindVisitor(NodeVisitor):
         start_frame = self.frames.getCurrent()
         caseframes = []
         self._case(node.comp, node.caselist, caseframes)
-        #self._case(node.comp, tuple(reversed(list(node.caselist))), caseframes)
         self.frames.setCurrent(start_frame)
         for f in caseframes:
             self.copyBlockingAssigns(f, start_frame)
@@ -928,7 +927,6 @@ class BindVisitor(NodeVisitor):
             if cond is not None:
                 ret.append(self.makeDFTree(cond, self.reduceIfScope(s)))
             if frame.isModule(): break
-            #if frame.isFunctioncall(): break
             s = frame.previous
         ret.reverse()
         return tuple(ret)
@@ -941,7 +939,6 @@ class BindVisitor(NodeVisitor):
             cond = frame.getCondition()
             if cond is not None: ret.append(not frame.isIfelse())
             if frame.isModule(): break
-            #if frame.isFunctioncall(): break
             s = frame.previous
         ret.reverse()
         return tuple(ret)
