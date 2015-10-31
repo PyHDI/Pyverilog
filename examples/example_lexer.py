@@ -12,9 +12,9 @@ from pyverilog.vparser.preprocessor import preprocess
 from pyverilog.vparser.lexer import dump_tokens
 
 def main():
-    INFO = "Verilog Preprocessor"
+    INFO = "Verilog Lexer"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python preprocessor.py file ..."
+    USAGE = "Usage: python example_lexer.py file ..."
 
     def showVersion():
         print(INFO)

@@ -16,7 +16,7 @@ from pyverilog.controlflow.controlflow_analyzer import VerilogControlflowAnalyze
 def main():
     INFO = "Control-flow analyzer for Verilog definitions"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python controlflow_analyzer.py -t TOPMODULE file ..."
+    USAGE = "Usage: python example_controlflow_analyzer.py -t TOPMODULE file ..."
 
     def showVersion():
         print(INFO)

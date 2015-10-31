@@ -15,7 +15,7 @@ from pyverilog.dataflow.subset import VerilogSubset
 def main():
     INFO = "Subset generator from Verilog dataflow definitions"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python subset.py -t TOPMODULE file ..."
+    USAGE = "Usage: python example_subset.py -t TOPMODULE file ..."
 
     def showVersion():
         print(INFO)

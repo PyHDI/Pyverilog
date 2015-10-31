@@ -13,7 +13,7 @@ from pyverilog.vparser.preprocessor import preprocess
 def main():
     INFO = "Verilog Preprocessor"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python preprocessor.py file ..."
+    USAGE = "Usage: python example_preprocessor.py file ..."
 
     def showVersion():
         print(INFO)

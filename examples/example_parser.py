@@ -11,9 +11,9 @@ import pyverilog.utils.version
 from pyverilog.vparser.parser import parse
 
 def main():
-    INFO = "Verilog code parser with Pyverilog"
+    INFO = "Verilog code parser"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python parser.py file ..."
+    USAGE = "Usage: python example_parser.py file ..."
 
     def showVersion():
         print(INFO)

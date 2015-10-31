@@ -16,7 +16,7 @@ from pyverilog.dataflow.merge import VerilogDataflowMerge
 def main():
     INFO = "Dataflow merge module"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python merge.py -t TOPMODULE file ..."
+    USAGE = "Usage: python example_merge.py -t TOPMODULE file ..."
 
     def showVersion():
         print(INFO)

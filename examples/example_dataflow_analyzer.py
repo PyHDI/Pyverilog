@@ -13,7 +13,7 @@ from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
 def main():
     INFO = "Verilog module signal/module dataflow analyzer"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python dataflow_analyzer.py -t TOPMODULE file ..."
+    USAGE = "Usage: python example_dataflow_analyzer.py -t TOPMODULE file ..."
 
     def showVersion():
         print(INFO)

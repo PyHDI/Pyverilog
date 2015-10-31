@@ -26,7 +26,7 @@ from pyverilog.dataflow.graphgen import VerilogGraphGenerator
 def main():
     INFO = "Graph generator from dataflow"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python graphgen.py -t TOPMODULE -s TARGETSIGNAL file ..."
+    USAGE = "Usage: python example_graphgen.py -t TOPMODULE -s TARGETSIGNAL file ..."
 
     def showVersion():
         print(INFO)

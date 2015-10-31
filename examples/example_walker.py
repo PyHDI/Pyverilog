@@ -15,7 +15,7 @@ from pyverilog.dataflow.walker import VerilogDataflowWalker
 def main():
     INFO = "Dataflow walker"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python walker.py -t TOPMODULE -s TARGETSIGNAL file ..."
+    USAGE = "Usage: python example_walker.py -t TOPMODULE -s TARGETSIGNAL file ..."
 
     def showVersion():
         print(INFO)

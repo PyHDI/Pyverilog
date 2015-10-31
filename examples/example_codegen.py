@@ -14,7 +14,7 @@ from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
 def main():
     INFO = "Code converter from AST"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python codegen.py file ..."
+    USAGE = "Usage: python example_codegen.py file ..."
 
     def showVersion():
         print(INFO)

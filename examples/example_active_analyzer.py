@@ -17,7 +17,7 @@ from pyverilog.controlflow.active_analyzer import VerilogActiveConditionAnalyzer
 def main():
     INFO = "Active condition analyzer"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python active_analyzer.py -t TOPMODULE file ..."
+    USAGE = "Usage: python example_active_analyzer.py -t TOPMODULE file ..."
 
     def showVersion():
         print(INFO)

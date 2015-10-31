@@ -16,7 +16,7 @@ from pyverilog.controlflow.active_range import VerilogActiveAnalyzer
 def main():
     INFO = "Active condition analyzer (Obsoluted)"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python active_range.py -t TOPMODULE file ..."
+    USAGE = "Usage: python example_active_range.py -t TOPMODULE file ..."
 
     def showVersion():
         print(INFO)

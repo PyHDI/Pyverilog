@@ -14,7 +14,7 @@ from pyverilog.dataflow.optimizer import VerilogDataflowOptimizer
 def main():
     INFO = "Verilog dataflow optimizer with Pyverilog"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python optimizer.py -t TOPMODULE file ..."
+    USAGE = "Usage: python example_optimizer.py -t TOPMODULE file ..."
 
     def showVersion():
         print(INFO)

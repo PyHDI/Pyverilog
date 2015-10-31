@@ -15,7 +15,7 @@ from pyverilog.dataflow.dataflow_codegen import VerilogCodeGenerator
 def main():
     INFO = "Code generator from Verilog dataflow definitions"
     VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python codegen.py -t TOPMODULE file ..."
+    USAGE = "Usage: python example_dataflow_codegen.py -t TOPMODULE file ..."
 
     def showVersion():
         print(INFO)
