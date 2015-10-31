@@ -147,7 +147,7 @@ Code parser
 Let's try syntax analysis. Please type the command as below.
 
 ```
-python pyverilog/vparser/parser.py test.v
+python pyverilog/examples/example_parser.py test.v
 ```
 
 Then you got the result as below. The result of syntax analysis is displayed.
@@ -267,7 +267,7 @@ Dataflow analyzer
 Let's try dataflow analysis. Please type the command as below.
 
 ```
-python pyverilog/dataflow/dataflow_analyzer.py -t top test.v 
+python pyverilog/examples/example_dataflow_analyzer.py -t top test.v 
 ```
 
 Then you got the result as below. The result of each signal definition and each signal assignment are displayed.
@@ -293,7 +293,7 @@ Bind:
 Let's view the result of dataflow analysis as a picture file. Now we select 'led' as the target. Please type the command as below. In this example, Graphviz and Pygraphviz are installed.
 
 ```
-python pyverilog/dataflow/graphgen.py -t top -s top.led test.v 
+python pyverilog/examples/example_graphgen.py -t top -s top.led test.v 
 ```
 
 Then you got a png file (out.png). The picture shows that the definition of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
@@ -306,7 +306,7 @@ Control-flow analyzer
 Let's try control-flow analysis. Please type the command as below. In this example, Graphviz and Pygraphviz are installed. If don't use Graphviz, please append "--nograph" option.
 
 ```
-python pyverilog/controlflow/controlflow_analyzer.py -t top test.v 
+python pyverilog/examples/example_controlflow_analyzer.py -t top test.v 
 ```
 
 Then you got the result as below. The result shows that the state machine structure and transition conditions to the next state in the state machine.
