@@ -14,8 +14,6 @@ import re
 import copy
 import collections
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
-
 import pyverilog
 import pyverilog.utils.util as util
 import pyverilog.utils.verror as verror

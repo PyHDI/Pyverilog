@@ -16,8 +16,6 @@ import os
 import subprocess
 import re
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
-
 class VerilogPreprocessor(object):
     def __init__(self, filelist, outputfile='pp.out', include=None, define=None):
         self.filelist = filelist

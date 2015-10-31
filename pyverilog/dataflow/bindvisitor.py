@@ -13,8 +13,6 @@ import sys
 import os
 import re
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
-
 from pyverilog.vparser.ast import *
 import pyverilog.utils.util as util
 import pyverilog.utils.verror as verror

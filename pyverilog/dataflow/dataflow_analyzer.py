@@ -12,11 +12,11 @@ import sys
 import os
 import subprocess
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
+if __name__ == '__main__':
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    
 sys.setrecursionlimit(16 * 1024)
 
-import pyverilog
-import pyverilog.utils
 import pyverilog.utils.version
 from pyverilog.vparser.parser import VerilogCodeParser
 from pyverilog.dataflow.modulevisitor import ModuleVisitor

@@ -15,7 +15,8 @@ import re
 import functools
 from jinja2 import Environment, FileSystemLoader
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
+if __name__ == '__main__':
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 import pyverilog.utils.version
 from pyverilog.vparser.parser import VerilogCodeParser

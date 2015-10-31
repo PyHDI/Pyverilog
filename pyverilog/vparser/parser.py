@@ -12,11 +12,8 @@ from __future__ import print_function
 import sys
 import os
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) )
-
 import pyverilog.utils.version
-from pyverilog.vparser import ply
-from pyverilog.vparser.ply import yacc
+from pyverilog.vparser.ply.yacc import yacc
 from pyverilog.vparser.plyparser import PLYParser, Coord, ParseError
 from pyverilog.vparser.preprocessor import VerilogPreprocessor
 from pyverilog.vparser.lexer import VerilogLexer
@@ -49,9 +46,9 @@ class VerilogParser(PLYParser):
         self.lexer.build()
 
         self.tokens = self.lexer.tokens
-        #self.parser = ply.yacc.yacc(module=self)
+        #self.parser = yacc(module=self)
         ## Use this if you want to build the parser using LALR(1) instead of SLR
-        self.parser = ply.yacc.yacc(module=self, method="LALR")
+        self.parser = yacc(module=self, method="LALR")
 
     def _lexer_error_func(self, msg, line, column):
         self._parse_error(msg, self._coord(line, column))
