@@ -15,11 +15,6 @@ import re
 import functools
 from jinja2 import Environment, FileSystemLoader
 
-if __name__ == '__main__':
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
-import pyverilog.utils.version
-from pyverilog.vparser.parser import VerilogCodeParser
 from pyverilog.vparser.ast import *
 from pyverilog.utils.op2mark import op2mark
 
@@ -967,47 +962,3 @@ class ASTCodeGenerator(ConvertVisitor):
             }
         rslt = template.render(template_dict)
         return rslt
-
-if __name__ == '__main__':
-    from optparse import OptionParser
-
-    INFO = "Code converter from AST"
-    VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python codegen.py file ..."
-
-    def showVersion():
-        print(INFO)
-        print(VERSION)
-        print(USAGE)
-        sys.exit()
-    
-    optparser = OptionParser()
-    optparser.add_option("-v","--version",action="store_true",dest="showversion",
-                         default=False,help="Show the version")
-    optparser.add_option("-I","--include",dest="include",action="append",
-                         default=[],help="Include path")
-    optparser.add_option("-D",dest="define",action="append",
-                         default=[],help="Macro Definition")
-    (options, args) = optparser.parse_args()
-
-    filelist = args
-    if options.showversion:
-        showVersion()
-
-    for f in filelist:
-        if not os.path.exists(f): raise IOError("file not found: " + f)
-
-    if len(filelist) == 0:
-        showVersion()
-
-    codeparser = VerilogCodeParser(filelist,
-                                   preprocess_include=options.include,
-                                   preprocess_define=options.define)
-
-    ast = codeparser.parse()
-    directives = codeparser.get_directives()
-
-    codegen = ASTCodeGenerator()
-    rslt = codegen.visit(ast)
-    print(rslt)
-

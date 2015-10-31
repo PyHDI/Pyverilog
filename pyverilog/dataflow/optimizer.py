@@ -12,7 +12,6 @@ import sys
 import os
 import math
 
-import pyverilog.utils.util as util
 import pyverilog.utils.verror as verror
 import pyverilog.utils.signaltype as signaltype
 from pyverilog.dataflow.dataflow import *
@@ -958,65 +957,3 @@ class VerilogDataflowOptimizer(VerilogOptimizer):
             if tv.lenlsb is not None: 
                 rslt = self.optimizeConstant(tv.lenlsb)
                 self.resolved_terms[tk].lenlsb = rslt
-
-################################################################################
-if __name__ == '__main__':
-    from optparse import OptionParser
-    from pyverilog.dataflow_analyzer.dataflow_analyzer import VerilogDataflowAnalyzer
-    INFO = "Verilog dataflow optimizer with Pyverilog"
-    VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python dataflow_optimizer.py -t TOPMODULE file ..."
-
-    def showVersion():
-        print(INFO)
-        print(VERSION)
-        print(USAGE)
-        sys.exit()
-    
-    optparser = OptionParser()
-    optparser.add_option("-v","--version",action="store_true",dest="showversion",
-                         default=False,help="Show the version")
-    optparser.add_option("-t","--top",dest="topmodule",
-                         default="TOP",help="Top module, Default=TOP")
-    (options, args) = optparser.parse_args()
-
-    filelist = args
-    if options.showversion:
-        showVersion()
-
-    for f in filelist:
-        if not os.path.exists(f): raise IOError("file not found: " + f)
-
-    if len(filelist) == 0:
-        showVersion()
-
-    analyzer = VerilogDataflowAnalyzer(filelist, options.topmodule)
-    analyzer.generate()
-
-    directives = analyzer.get_directives()
-    terms = analyzer.getTerms()
-    binddict = analyzer.getBinddict()
-
-    optimizer = VerilogDataflowOptimizer(terms, binddict)
-    optimizer.resolveConstant()
-
-    resolved_terms = optimizer.getResolvedTerms()
-    resolved_binddict = optimizer.getResolvedBinddict()
-    constlist = optimizer.getConstlist()
-
-    print('Directive:')
-    for dr in directives:
-        print(dr)
-
-    print('Term:')
-    for tk, tv in sorted(resolved_terms.items(), key=lambda x:len(x[0])):
-        print(tv.tostr())
-
-    print('Bind:')
-    for bk, bv in sorted(resolved_binddict.items(), key=lambda x:len(x[0])):
-        for bvi in bv:
-            print(bvi.tostr())
-
-    print('Const:')
-    for ck, cv in sorted(constlist.items(), key=lambda x:len(x[0])):
-        print(ck, cv)

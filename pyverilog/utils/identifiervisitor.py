@@ -31,13 +31,3 @@ class IdentifierVisitor(NodeVisitor):
     
     def visit_Identifier(self, node):
         self.identifiers.append(node.name)
-
-if __name__ == '__main__':
-    import pyverilog.vparser.ast as vast
-
-    a = vast.Identifier('a')
-    b = vast.Identifier('b')
-    c = vast.Plus(a, b)
-
-    ids = getIdentifiers(c)
-    print(ids)

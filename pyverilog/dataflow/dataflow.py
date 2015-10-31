@@ -14,11 +14,6 @@ import os
 import re
 import copy
 
-import pyverilog.utils.verror as verror
-import pyverilog.utils.util as util
-import pyverilog.utils.signaltype as signaltype
-import pyverilog.utils.op2mark as op2mark
-
 ################################################################################
 dfnodelist = ('DFIntConst', 'DFFloatConst', 'DFStringConst',
               'DFEvalValue', 'DFUndefined', 'DFHighImpedance',
@@ -38,6 +33,13 @@ def generateWalkTree(offset=1):
 
 if __name__ == '__main__':
     generateWalkTree()
+    exit()
+
+################################################################################
+import pyverilog.utils.verror as verror
+import pyverilog.utils.util as util
+import pyverilog.utils.signaltype as signaltype
+import pyverilog.utils.op2mark as op2mark
 
 ################################################################################
 class DFNode(object):

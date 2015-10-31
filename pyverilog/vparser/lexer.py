@@ -13,7 +13,6 @@ import sys
 import os
 import re
 
-from pyverilog.vparser import ply
 from pyverilog.vparser.ply.lex import *
 
 class VerilogLexer(object):
@@ -25,7 +24,7 @@ class VerilogLexer(object):
         self.default_nettype = 'wire'
 
     def build(self, **kwargs):
-        self.lexer = ply.lex.lex(object=self, **kwargs)
+        self.lexer = lex(object=self, **kwargs)
     def input(self, data):
         self.lexer.input(data)
 
@@ -282,46 +281,3 @@ def dump_tokens(text):
                    (tok.value, tok.type, tok.lineno, lexer.filename, tok.lexpos))
         
     return ''.join(ret)
-        
-#-------------------------------------------------------------------------------
-if __name__ == '__main__':
-    import pyverilog.utils.version
-    from pyverilog.vparser.preprocessor import preprocess
-    from optparse import OptionParser
-
-    INFO = "Verilog Preprocessor"
-    VERSION = pyverilog.utils.version.VERSION
-    USAGE = "Usage: python preprocessor.py file ..."
-
-    def showVersion():
-        print(INFO)
-        print(VERSION)
-        print(USAGE)
-        sys.exit()
-
-    optparser = OptionParser()
-    optparser.add_option("-v","--version",action="store_true",dest="showversion",
-                         default=False,help="Show the version")
-    optparser.add_option("-I","--include",dest="include",action="append",
-                         default=[],help="Include path")
-    optparser.add_option("-D",dest="define",action="append",
-                         default=[],help="Macro Definition")
-    (options, args) = optparser.parse_args()
-
-    filelist = args
-    if options.showversion:
-        showVersion()
-
-    for f in filelist:
-        if not os.path.exists(f): raise IOError("file not found: " + f)
-
-    if len(filelist) == 0:
-        showVersion()
-        
-    text = preprocess(filelist, 
-                      include=options.include,
-                      define=options.define)
-
-    dump = dump_tokens(text)
-    
-    print(dump)

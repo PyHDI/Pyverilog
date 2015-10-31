@@ -1,10 +1,3 @@
-.PHONY: all
-all:
-	make -C ./vparser
-	make -C ./dataflow
-	make -C ./controlflow
-	make -C ./ast_code_generator
-
 .PHONY: clean
 clean:
 	make clean -C ./utils

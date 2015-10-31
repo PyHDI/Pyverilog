@@ -65,14 +65,3 @@ class IdentifierReplace(object):
         if node.name in self.ids:
             return vast.Identifier(self.ids[node.name])
         return node
-
-if __name__ == '__main__':
-    a = vast.Identifier('a')
-    b = vast.Identifier('b')
-    c = vast.Plus(a, b)
-
-    ids = {'a' : 'x',
-           'b' : 'y'}
-    
-    d = replaceIdentifiers(c, ids)
-    print(d)
