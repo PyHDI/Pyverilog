@@ -1,5 +1,6 @@
 include README.md
 include README.rst
+include Makefile
 recursive-include tests *
 recursive-include examples *
 recursive-include verilogcode *
