@@ -68,20 +68,25 @@ Install on your platform. For exmple, on Ubuntu:
     sudo apt-get install iverilog
 
 - Jinja2: 2.8 or later
-- pytest: 2.8.2 or later
-- pytest-pythonpath: 0.7 or later
 
 Install on your python environment by using pip.
 
-    pip install jinja2 pytest pytest-pythonpath
+    pip install jinja2
 
 Options
 --------------------
 
+- pytest: 2.8.2 or later
+- pytest-pythonpath: 0.7 or later
+
+These softwares are required for running the tests in tests and examples.
+
+    pip install pytest pytest-pythonpath
+
 - Graphviz: 2.38.0 or later
 - Pygraphviz: 1.3.1 or later
 
-These softwares are option for graph visualization in dataflow/graphgen.py and controlflow/controlflow_analyzer.py.
+These softwares are required for graph visualization by dataflow/graphgen.py and controlflow/controlflow_analyzer.py.
 
     sudo apt-get install graphviz
     pip install pygraphviz

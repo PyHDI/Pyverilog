@@ -21,9 +21,9 @@ setup(name='pyverilog',
       url='https://github.com/PyHDI/Pyverilog',
       packages=find_packages(),
       package_data={ 'pyverilog.ast_code_generator' : ['template/*'],  },
-      install_requires=[ 'Jinja2' ],
+      install_requires=[ 'Jinja2>=2.8' ],
       extras_require={
-          'test' : [ 'pytest', 'pytest-pythonpath' ],
-          'graph' : [ 'pygraphviz' ],
+          'graph' : [ 'pygraphviz>=1.3.1' ],
+          'test' : [ 'pytest>=2.8.2', 'pytest-pythonpath>=0.7' ],
       },
 )
