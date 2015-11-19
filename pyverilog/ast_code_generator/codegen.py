@@ -17,6 +17,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from pyverilog.vparser.ast import *
 from pyverilog.utils.op2mark import op2mark
+from pyverilog.utils.op2mark import op2order
 
 DEFAULT_TEMPLATE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/template/'
 
@@ -53,6 +54,11 @@ def getfilename(node):
 def escape(s):
     if s.startswith('\\'):
         return s + ' '
+    return s
+
+def del_paren(s):
+    if s.startswith('(') and s.endswith(')'):
+        return s[1:-1]
     return s
 
 class ASTCodeGenerator(ConvertVisitor):
@@ -127,8 +133,8 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'msb' : self.visit(node.msb),
-            'lsb' : self.visit(node.lsb),
+            'msb' : del_paren(self.visit(node.msb)),
+            'lsb' : del_paren(self.visit(node.lsb)),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -137,8 +143,8 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'msb' : self.visit(node.msb),
-            'lsb' : self.visit(node.lsb),
+            'msb' : del_paren(self.visit(node.msb)),
+            'lsb' : del_paren(self.visit(node.lsb)),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -342,7 +348,7 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_Parameter(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
-        value = self.visit(node.value)
+        value = del_paren(self.visit(node.value))
         template_dict = {
             'name' : escape(node.name),
             'width' : '' if node.width is None or (value.startswith('"') and value.endswith('"')) else self.visit(node.width),
@@ -355,7 +361,7 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_Localparam(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
-        value = self.visit(node.value)
+        value = del_paren(self.visit(node.value))
         template_dict = {
             'name' : escape(node.name),
             'width' : '' if node.width is None or (value.startswith('"') and value.endswith('"')) else self.visit(node.width),
@@ -377,7 +383,7 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_Concat(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
-        items = [ self.visit(item) for item in node.list ]
+        items = [ del_paren(self.visit(item)) for item in node.list ]
         template_dict = {
             'items' : items,
             'len_items' : len(items),
@@ -388,7 +394,7 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_LConcat(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
-        items = [ self.visit(item) for item in node.list ]
+        items = [ del_paren(self.visit(item)) for item in node.list ]
         template_dict = {
             'items' : items,
             'len_items' : len(items),
@@ -400,8 +406,8 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'value' : self.visit(node.value),
-            'times' : self.visit(node.times),
+            'value' : del_paren(self.visit(node.value)),
+            'times' : del_paren(self.visit(node.times)),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -411,8 +417,8 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         template_dict = {
             'var' : self.visit(node.var),
-            'msb' : self.visit(node.msb),
-            'lsb' : self.visit(node.lsb),
+            'msb' : del_paren(self.visit(node.msb)),
+            'lsb' : del_paren(self.visit(node.lsb)),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -422,7 +428,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         template_dict = {
             'var' : self.visit(node.var),
-            'ptr' : self.visit(node.ptr),
+            'ptr' : del_paren(self.visit(node.ptr)),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -431,7 +437,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'var' : self.visit(node.var),
+            'var' : del_paren(self.visit(node.var)),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -440,7 +446,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'var' : self.visit(node.var),
+            'var' : del_paren(self.visit(node.var)),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -448,9 +454,22 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_Operator(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
+        order = op2order(node.__class__.__name__)
+        lorder = op2order(node.left.__class__.__name__)
+        rorder = op2order(node.right.__class__.__name__)
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        if ( isinstance(node.left, (Identifier, Value)) or
+             ((not isinstance(node.left, (Sll, Srl, Sra))) and 
+              (lorder is not None and lorder <= order)) ):
+            left = del_paren(left)
+        if ( isinstance(node.right, (Identifier, Value)) or
+             ((not isinstance(node.right, (Sll, Srl, Sra))) and 
+              (rorder is not None and order > rorder)) ):
+            right = del_paren(right)
         template_dict = {
-            'left' : self.visit(node.left),
-            'right' : self.visit(node.right),
+            'left' : left,
+            'right' : right,
             'op' : op2mark(node.__class__.__name__),
             }
         rslt = template.render(template_dict)
@@ -459,8 +478,11 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_UnaryOperator(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
+        right = self.visit(node.right)
+        if isinstance(node.right, (Identifier, Value)):
+            right = del_paren(right)
         template_dict = {
-            'right' : self.visit(node.right),
+            'right' : right,
             'op' : op2mark(node.__class__.__name__),
             }
         rslt = template.render(template_dict)
@@ -569,9 +591,9 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'cond' : self.visit(node.cond),
-            'true_value' : self.visit(node.true_value),
-            'false_value' : self.visit(node.false_value),
+            'cond' : del_paren(self.visit(node.cond)),
+            'true_value' : del_paren(self.visit(node.true_value)),
+            'false_value' : del_paren(self.visit(node.false_value)),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -659,7 +681,7 @@ class ASTCodeGenerator(ConvertVisitor):
         true_statement = '' if node.true_statement is None else self.visit(node.true_statement)
         false_statement = '' if node.false_statement is None else self.visit(node.false_statement)
         template_dict = {
-            'cond' : self.visit(node.cond),
+            'cond' : del_paren(self.visit(node.cond)),
             'true_statement' : true_statement,
             'false_statement' : false_statement,
             }
@@ -671,7 +693,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         template_dict = {
             'pre' : '' if node.pre is None else self.visit(node.pre),
-            'cond' : '' if node.cond is None else self.visit(node.cond),
+            'cond' : '' if node.cond is None else del_paren(self.visit(node.cond)),
             'post' : '' if node.post is None else self.visit(node.post).replace(';', ''),
             'statement' : '' if node.statement is None else self.visit(node.statement),
             }
@@ -682,7 +704,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'cond' : '' if node.cond is None else self.visit(node.cond),
+            'cond' : '' if node.cond is None else del_paren(self.visit(node.cond)),
             'statement' : '' if node.statement is None else self.visit(node.statement),
             }
         rslt = template.render(template_dict)
@@ -692,7 +714,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'comp' : self.visit(node.comp),
+            'comp' : del_paren(self.visit(node.comp)),
             'caselist' : [ self.indent(self.visit(case)) for case in node.caselist ],
             }
         rslt = template.render(template_dict)
@@ -702,7 +724,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'comp' : self.visit(node.comp),
+            'comp' : del_paren(self.visit(node.comp)),
             'caselist' : [ self.indent(self.visit(case)) for case in node.caselist ],
             }
         rslt = template.render(template_dict)
@@ -711,7 +733,7 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_Case(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
-        condlist = [ 'default' ] if node.cond is None else [ self.visit(c) for c in node.cond ]
+        condlist = [ 'default' ] if node.cond is None else [ del_paren(self.visit(c)) for c in node.cond ]
         cond = []
         for c in condlist:
             cond.append(c)
@@ -746,7 +768,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'senslist': self.visit(node.senslist),
+            'senslist': del_paren(self.visit(node.senslist)),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -755,7 +777,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'cond': self.visit(node.cond),
+            'cond': del_paren(self.visit(node.cond)),
             'statement' : self.visit(node.statement) if node.statement else '',
             }
         rslt = template.render(template_dict)
@@ -813,7 +835,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         template_dict = {
             'paramname' : '' if node.paramname is None else escape(node.paramname),
-            'argname' : '' if node.argname is None else self.visit(node.argname),
+            'argname' : '' if node.argname is None else del_paren(self.visit(node.argname)),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -823,7 +845,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         template_dict = {
             'portname' : '' if node.portname is None else escape(node.portname),
-            'argname' : '' if node.argname is None else self.visit(node.argname),
+            'argname' : '' if node.argname is None else del_paren(self.visit(node.argname)),
             }
         rslt = template.render(template_dict)
         return rslt
