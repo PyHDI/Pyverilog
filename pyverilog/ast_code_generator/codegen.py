@@ -460,11 +460,15 @@ class ASTCodeGenerator(ConvertVisitor):
         left = self.visit(node.left)
         right = self.visit(node.right)
         if ( isinstance(node.left, (Identifier, Value)) or
-             ((not isinstance(node.left, (Sll, Srl, Sra))) and 
+             ((not isinstance(node.left, (Sll, Srl, Sra,
+                                          LessThan, GreaterThan, LessEq, GreaterEq,
+                                          Eq, NotEq, Eql, NotEql))) and 
               (lorder is not None and lorder <= order)) ):
             left = del_paren(left)
         if ( isinstance(node.right, (Identifier, Value)) or
-             ((not isinstance(node.right, (Sll, Srl, Sra))) and 
+             ((not isinstance(node.right, (Sll, Srl, Sra,
+                                           LessThan, GreaterThan, LessEq, GreaterEq,
+                                           Eq, NotEq, Eql, NotEql))) and 
               (rorder is not None and order > rorder)) ):
             right = del_paren(right)
         template_dict = {
