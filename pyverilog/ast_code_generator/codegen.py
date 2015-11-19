@@ -348,7 +348,7 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_Parameter(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
-        value = del_paren(self.visit(node.value))
+        value = self.visit(node.value)
         template_dict = {
             'name' : escape(node.name),
             'width' : '' if node.width is None or (value.startswith('"') and value.endswith('"')) else self.visit(node.width),
@@ -361,7 +361,7 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_Localparam(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
-        value = del_paren(self.visit(node.value))
+        value = self.visit(node.value)
         template_dict = {
             'name' : escape(node.name),
             'width' : '' if node.width is None or (value.startswith('"') and value.endswith('"')) else self.visit(node.width),
