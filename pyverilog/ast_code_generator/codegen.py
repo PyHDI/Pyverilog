@@ -459,17 +459,15 @@ class ASTCodeGenerator(ConvertVisitor):
         rorder = op2order(node.right.__class__.__name__)
         left = self.visit(node.left)
         right = self.visit(node.right)
-        if ( isinstance(node.left, (Identifier, Value)) or
-             ((not isinstance(node.left, (Sll, Srl, Sra,
-                                          LessThan, GreaterThan, LessEq, GreaterEq,
-                                          Eq, NotEq, Eql, NotEql))) and 
-              (lorder is not None and lorder <= order)) ):
+        if ((not isinstance(node.left, (Sll, Srl, Sra,
+                                        LessThan, GreaterThan, LessEq, GreaterEq,
+                                        Eq, NotEq, Eql, NotEql))) and 
+            (lorder is not None and lorder <= order)):
             left = del_paren(left)
-        if ( isinstance(node.right, (Identifier, Value)) or
-             ((not isinstance(node.right, (Sll, Srl, Sra,
-                                           LessThan, GreaterThan, LessEq, GreaterEq,
-                                           Eq, NotEq, Eql, NotEql))) and 
-              (rorder is not None and order > rorder)) ):
+        if ((not isinstance(node.right, (Sll, Srl, Sra,
+                                         LessThan, GreaterThan, LessEq, GreaterEq,
+                                         Eq, NotEq, Eql, NotEql))) and 
+            (rorder is not None and order > rorder)):
             right = del_paren(right)
         template_dict = {
             'left' : left,
@@ -483,8 +481,6 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         right = self.visit(node.right)
-        if isinstance(node.right, (Identifier, Value)):
-            right = del_paren(right)
         template_dict = {
             'right' : right,
             'op' : op2mark(node.__class__.__name__),
