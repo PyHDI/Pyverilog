@@ -61,6 +61,9 @@ def del_paren(s):
         return s[1:-1]
     return s
 
+def del_space(s):
+    return s.replace(' ', '')
+
 class ASTCodeGenerator(ConvertVisitor):
     def __init__(self, indentsize=2):
         self.env = Environment(loader=FileSystemLoader(DEFAULT_TEMPLATE_DIR))
@@ -133,8 +136,8 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'msb' : del_paren(self.visit(node.msb)),
-            'lsb' : del_paren(self.visit(node.lsb)),
+            'msb' : del_space(del_paren(self.visit(node.msb))),
+            'lsb' : del_space(del_paren(self.visit(node.lsb))),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -143,8 +146,8 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'msb' : del_paren(self.visit(node.msb)),
-            'lsb' : del_paren(self.visit(node.lsb)),
+            'msb' : del_space(del_paren(self.visit(node.msb))),
+            'lsb' : del_space(del_paren(self.visit(node.lsb))),
             }
         rslt = template.render(template_dict)
         return rslt
@@ -417,8 +420,8 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.env.get_template(filename)
         template_dict = {
             'var' : self.visit(node.var),
-            'msb' : del_paren(self.visit(node.msb)),
-            'lsb' : del_paren(self.visit(node.lsb)),
+            'msb' : del_space(del_paren(self.visit(node.msb))),
+            'lsb' : del_space(del_paren(self.visit(node.lsb))),
             }
         rslt = template.render(template_dict)
         return rslt

@@ -15,11 +15,11 @@ module top #
 (
   input CLK,
   input RST,
-  output [7 : 0] led
+  output [7:0] led
 );
 
-  reg [DATAWID - 1 : 0] count;
-  assign led = count[DATAWID - 1 : DATAWID - 8];
+  reg [DATAWID-1:0] count;
+  assign led = count[DATAWID-1:DATAWID-8];
 
   always @(posedge CLK) begin
     if(RST) begin
