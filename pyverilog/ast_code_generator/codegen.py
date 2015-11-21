@@ -35,7 +35,21 @@ except:
             ret.append(line)
             ret.append('\n')
         return ''.join(ret[:-1])
-    
+
+def indent_multiline_assign(text):
+    ret = []
+    texts = text.split('\n')
+    if len(texts) <= 1:
+        return text
+    try:
+        p = texts[0].index('=')
+    except:
+        return text
+    ret.append(texts[0])
+    ret.append('\n')
+    ret.append(indent('\n'.join(texts[1:]), ' ' * (p + 2)))
+    return ''.join(ret)
+        
 #-------------------------------------------------------------------------------
 class ConvertVisitor(object):
     def visit(self, node):
@@ -593,10 +607,14 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_Cond(self, node):
         filename = getfilename(node)
         template = self.env.get_template(filename)
+        true_value = del_paren(self.visit(node.true_value))
+        false_value = del_paren(self.visit(node.false_value))
+        if isinstance(node.false_value, Cond):
+            false_value = ''.join( ['\n', false_value] )
         template_dict = {
             'cond' : del_paren(self.visit(node.cond)),
-            'true_value' : del_paren(self.visit(node.true_value)),
-            'false_value' : del_paren(self.visit(node.false_value)),
+            'true_value' : true_value,
+            'false_value' : false_value,
             }
         rslt = template.render(template_dict)
         return rslt
@@ -609,6 +627,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'right' : self.visit(node.right),
             }
         rslt = template.render(template_dict)
+        rslt = indent_multiline_assign(rslt)
         return rslt
 
     def visit_Always(self, node):
@@ -652,6 +671,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'rdelay' : '' if node.rdelay is None else self.visit(node.rdelay),
             }
         rslt = template.render(template_dict)
+        rslt = indent_multiline_assign(rslt)
         return rslt
 
     def visit_BlockingSubstitution(self, node):
@@ -664,6 +684,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'rdelay' : '' if node.rdelay is None else self.visit(node.rdelay),
             }
         rslt = template.render(template_dict)
+        rslt = indent_multiline_assign(rslt)
         return rslt
 
     def visit_NonblockingSubstitution(self, node):
@@ -676,6 +697,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'rdelay' : '' if node.rdelay is None else self.visit(node.rdelay),
             }
         rslt = template.render(template_dict)
+        rslt = indent_multiline_assign(rslt)
         return rslt
 
     def visit_IfStatement(self, node):
