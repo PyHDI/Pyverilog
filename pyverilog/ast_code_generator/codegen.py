@@ -695,9 +695,9 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.env.get_template(filename)
         template_dict = {
-            'pre' : '' if node.pre is None else self.visit(node.pre),
-            'cond' : '' if node.cond is None else del_paren(self.visit(node.cond)),
-            'post' : '' if node.post is None else self.visit(node.post).replace(';', ''),
+            'pre' : '' if node.pre is None else del_space(self.visit(node.pre)),
+            'cond' : '' if node.cond is None else del_space(del_paren(self.visit(node.cond))),
+            'post' : '' if node.post is None else del_space(self.visit(node.post).replace(';', '')),
             'statement' : '' if node.statement is None else self.visit(node.statement),
             }
         rslt = template.render(template_dict)
