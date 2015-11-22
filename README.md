@@ -158,112 +158,103 @@ python pyverilog/examples/example_parser.py test.v
 Then you got the result as below. The result of syntax analysis is displayed.
 
 ```
-Source: 
-  Description: 
-    ModuleDef: top
-      Paramlist: 
-      Portlist: 
-        Ioport: 
-          Input: CLK, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
-        Ioport: 
-          Input: RST, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
-        Ioport: 
-          Input: enable, False
-            Width: 
-              IntConst: 0
-              IntConst: 0
-        Ioport: 
-          Input: value, False
-            Width: 
-              IntConst: 31
-              IntConst: 0
-        Ioport: 
-          Output: led, False
-            Width: 
-              IntConst: 7
-              IntConst: 0
-      Decl: 
-        Reg: count, False
-          Width: 
-            IntConst: 31
-            IntConst: 0
-      Decl: 
-        Reg: state, False
-          Width: 
-            IntConst: 7
-            IntConst: 0
-      Assign: 
-        Lvalue: 
-          Identifier: led
-        Rvalue: 
-          Partselect: 
-            Identifier: count
-            IntConst: 23
-            IntConst: 16
-      Always: 
-        SensList: 
-          Sens: posedge
-            Identifier: CLK
-        Block: None
-          IfStatement: 
-            Identifier: RST
-            Block: None
-              NonblockingSubstitution: 
-                Lvalue: 
-                  Identifier: count
-                Rvalue: 
-                  IntConst: 0
-              NonblockingSubstitution: 
-                Lvalue: 
-                  Identifier: state
-                Rvalue: 
-                  IntConst: 0
-            Block: None
-              IfStatement: 
-                Eq: 
-                  Identifier: state
-                  IntConst: 0
-                Block: None
-                  IfStatement: 
-                    Identifier: enable
-                    NonblockingSubstitution: 
-                      Lvalue: 
-                        Identifier: state
-                      Rvalue: 
-                        IntConst: 1
-                IfStatement: 
-                  Eq: 
-                    Identifier: state
-                    IntConst: 1
-                  Block: None
-                    NonblockingSubstitution: 
-                      Lvalue: 
-                        Identifier: state
-                      Rvalue: 
-                        IntConst: 2
-                  IfStatement: 
-                    Eq: 
-                      Identifier: state
-                      IntConst: 2
-                    Block: None
-                      NonblockingSubstitution: 
-                        Lvalue: 
-                          Identifier: count
-                        Rvalue: 
-                          Plus: 
-                            Identifier: count
-                            Identifier: value
-                      NonblockingSubstitution: 
-                        Lvalue: 
-                          Identifier: state
-                        Rvalue: 
-                          IntConst: 0
+Source:  (at 1)
+  Description:  (at 1)
+    ModuleDef: top (at 1)
+      Paramlist:  (at 0)
+      Portlist:  (at 2)
+        Ioport:  (at 3)
+          Input: CLK, False (at 3)
+        Ioport:  (at 4)
+          Input: RST, False (at 4)
+        Ioport:  (at 5)
+          Input: enable, False (at 5)
+        Ioport:  (at 6)
+          Input: value, False (at 6)
+            Width:  (at 6)
+              IntConst: 31 (at 6)
+              IntConst: 0 (at 6)
+        Ioport:  (at 7)
+          Output: led, False (at 7)
+            Width:  (at 7)
+              IntConst: 7 (at 7)
+              IntConst: 0 (at 7)
+      Decl:  (at 9)
+        Reg: count, False (at 9)
+          Width:  (at 9)
+            IntConst: 31 (at 9)
+            IntConst: 0 (at 9)
+      Decl:  (at 10)
+        Reg: state, False (at 10)
+          Width:  (at 10)
+            IntConst: 7 (at 10)
+            IntConst: 0 (at 10)
+      Assign:  (at 11)
+        Lvalue:  (at 11)
+          Identifier: led (at 11)
+        Rvalue:  (at 11)
+          Partselect:  (at 11)
+            Identifier: count (at 11)
+            IntConst: 23 (at 11)
+            IntConst: 16 (at 11)
+      Always:  (at 12)
+        SensList:  (at 12)
+          Sens: posedge (at 12)
+            Identifier: CLK (at 12)
+        Block: None (at 12)
+          IfStatement:  (at 13)
+            Identifier: RST (at 13)
+            Block: None (at 13)
+              NonblockingSubstitution:  (at 14)
+                Lvalue:  (at 14)
+                  Identifier: count (at 14)
+                Rvalue:  (at 14)
+                  IntConst: 0 (at 14)
+              NonblockingSubstitution:  (at 15)
+                Lvalue:  (at 15)
+                  Identifier: state (at 15)
+                Rvalue:  (at 15)
+                  IntConst: 0 (at 15)
+            Block: None (at 16)
+              IfStatement:  (at 17)
+                Eq:  (at 17)
+                  Identifier: state (at 17)
+                  IntConst: 0 (at 17)
+                Block: None (at 17)
+                  IfStatement:  (at 18)
+                    Identifier: enable (at 18)
+                    NonblockingSubstitution:  (at 18)
+                      Lvalue:  (at 18)
+                        Identifier: state (at 18)
+                      Rvalue:  (at 18)
+                        IntConst: 1 (at 18)
+                IfStatement:  (at 19)
+                  Eq:  (at 19)
+                    Identifier: state (at 19)
+                    IntConst: 1 (at 19)
+                  Block: None (at 19)
+                    NonblockingSubstitution:  (at 20)
+                      Lvalue:  (at 20)
+                        Identifier: state (at 20)
+                      Rvalue:  (at 20)
+                        IntConst: 2 (at 20)
+                  IfStatement:  (at 21)
+                    Eq:  (at 21)
+                      Identifier: state (at 21)
+                      IntConst: 2 (at 21)
+                    Block: None (at 21)
+                      NonblockingSubstitution:  (at 22)
+                        Lvalue:  (at 22)
+                          Identifier: count (at 22)
+                        Rvalue:  (at 22)
+                          Plus:  (at 22)
+                            Identifier: count (at 22)
+                            Identifier: value (at 22)
+                      NonblockingSubstitution:  (at 23)
+                        Lvalue:  (at 23)
+                          Identifier: state (at 23)
+                        Rvalue:  (at 23)
+                          IntConst: 0 (at 23)
 ```
 
 Dataflow analyzer
