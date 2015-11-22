@@ -65,11 +65,11 @@ class VerilogParser(PLYParser):
     ######################################################################
     # Parse Rule Definition
     ######################################################################
-    def p_source_text(self,p):
+    def p_source_text(self, p):
         'source_text : description'
         p[0] = Source(name='', description=p[1])
 
-    def p_description(self,p):
+    def p_description(self, p):
         'description : definitions'
         p[0] = Description(definitions=p[1])
 
@@ -99,8 +99,9 @@ class VerilogParser(PLYParser):
         p[0] = Pragma( PragmaEntry(p[3]) )
 
     ######################################################################
-    def p_moduledef(self,p):
+    def p_moduledef(self, p):
         'moduledef : MODULE modulename paramlist portlist items ENDMODULE'
+        print('lineno:', p.lineno(6))
         p[0] = ModuleDef(name=p[2], paramlist=p[3], portlist=p[4], items=p[5],
                          default_nettype=self.get_default_nettype())
 
@@ -170,7 +171,7 @@ class VerilogParser(PLYParser):
         'portlist : LPAREN ports RPAREN SEMICOLON'
         p[0] = Portlist(ports=p[2])
 
-    def p_portlist_io(self,p):
+    def p_portlist_io(self, p):
         'portlist : LPAREN ioports RPAREN SEMICOLON'
         p[0] = Portlist(ports=p[2])
 
@@ -182,13 +183,13 @@ class VerilogParser(PLYParser):
         'portlist : SEMICOLON'
         p[0] = Portlist(ports=())
 
-    def p_ports(self,p):
+    def p_ports(self, p):
         'ports : ports COMMA portname'
         wid = None
         port = Port(name=p[3], width=wid, type=None)
         p[0] = p[1] + (port,)
 
-    def p_ports_one(self,p):
+    def p_ports_one(self, p):
         'ports : portname'
         wid = None
         port = Port(name=p[1], width=wid, type=None)
@@ -327,11 +328,11 @@ class VerilogParser(PLYParser):
         'ioport : portname'
         p[0] = p[1]
 
-    def p_width(self,p):
+    def p_width(self, p):
         'width : LBRACKET expression COLON expression RBRACKET'
         p[0] = Width(p[2], p[4])
 
-    def p_length(self,p):
+    def p_length(self, p):
         'length : LBRACKET expression COLON expression RBRACKET'
         p[0] = Length(p[2], p[4])
 
