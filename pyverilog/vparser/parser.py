@@ -1884,7 +1884,8 @@ class VerilogParser(PLYParser):
         'function : FUNCTION ID SEMICOLON function_statement ENDFUNCTION'
         p[0] = Function(p[2],
                         Width(IntConst('0', lineno=p.lineno(1)),
-                              IntConst('0', lineno=p.lineno(1))),
+                              IntConst('0', lineno=p.lineno(1)),
+                              lineno=p.lineno(1)),
                         p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
