@@ -12,55 +12,55 @@ except:
 codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/verilogcode/'
 
 expected = """\
-Source: 
-  Description: 
-    ModuleDef: main
-      Paramlist: 
-        Decl: 
-          Parameter: STEP, False
-            Rvalue: 
-              IntConst: 10
-      Portlist: 
-        Ioport: 
-          Input: CLK, False
-        Ioport: 
-          Input: RST, False
-        Ioport: 
-          Output: LED, False
-            Width: 
-              IntConst: 7
-              IntConst: 0
-          Reg: LED, False
-            Width: 
-              IntConst: 7
-              IntConst: 0
-      Decl: 
-        Localparam: DELAY, False
-          Rvalue: 
-            IntConst: 10
-      Always: 
-        SensList: 
-          Sens: posedge
-            Identifier: CLK
-        Block: None
-          IfStatement: 
-            Identifier: RST
-            Block: None
-              NonblockingSubstitution: 
-                Lvalue: 
-                  Identifier: LED
-                Rvalue: 
-                  IntConst: 0
-            Block: None
-              NonblockingSubstitution: 
-                Lvalue: 
-                  Identifier: LED
-                Rvalue: 
-                  Plus: 
-                    Identifier: LED
-                    IntConst: 1
-                DelayStatement: 
-                  Identifier: DELAY
+Source:  (at 3)
+  Description:  (at 3)
+    ModuleDef: main (at 3)
+      Paramlist:  (at 3)
+        Decl:  (at 5)
+          Parameter: STEP, False (at 5)
+            Rvalue:  (at 5)
+              IntConst: 10 (at 5)
+      Portlist:  (at 7)
+        Ioport:  (at 8)
+          Input: CLK, False (at 8)
+        Ioport:  (at 9)
+          Input: RST, False (at 9)
+        Ioport:  (at 10)
+          Output: LED, False (at 10)
+            Width:  (at 10)
+              IntConst: 7 (at 10)
+              IntConst: 0 (at 10)
+          Reg: LED, False (at 10)
+            Width:  (at 10)
+              IntConst: 7 (at 10)
+              IntConst: 0 (at 10)
+      Decl:  (at 13)
+        Localparam: DELAY, False (at 13)
+          Rvalue:  (at 13)
+            IntConst: 10 (at 13)
+      Always:  (at 15)
+        SensList:  (at 15)
+          Sens: posedge (at 15)
+            Identifier: CLK (at 15)
+        Block: None (at 15)
+          IfStatement:  (at 16)
+            Identifier: RST (at 16)
+            Block: None (at 16)
+              NonblockingSubstitution:  (at 17)
+                Lvalue:  (at 17)
+                  Identifier: LED (at 17)
+                Rvalue:  (at 17)
+                  IntConst: 0 (at 17)
+            Block: None (at 18)
+              NonblockingSubstitution:  (at 19)
+                Lvalue:  (at 19)
+                  Identifier: LED (at 19)
+                Rvalue:  (at 19)
+                  Plus:  (at 19)
+                    Identifier: LED (at 19)
+                    IntConst: 1 (at 19)
+                DelayStatement:  (at 19)
+                  Identifier: DELAY (at 19)
 Line 1 : `timescale 1ns / 1ps
 """
 

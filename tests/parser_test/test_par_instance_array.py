@@ -12,182 +12,182 @@ except:
 codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/verilogcode/'
 
 expected = """\
-Source: 
-  Description: 
-    ModuleDef: TOP
-      Paramlist: 
-      Portlist: 
-        Ioport: 
-          Input: VAL, False
-            Width: 
-              IntConst: 3
-              IntConst: 0
-        Ioport: 
-          Input: in0, False
-            Width: 
-              IntConst: 3
-              IntConst: 0
-        Ioport: 
-          Input: in1, False
-            Width: 
-              IntConst: 3
-              IntConst: 0
-        Ioport: 
-          Input: in2, False
-            Width: 
-              IntConst: 3
-              IntConst: 0
-        Ioport: 
-          Input: in3, False
-        Ioport: 
-          Input: in4, False
-        Ioport: 
-          Input: in5, False
-        Ioport: 
-          Output: LED0, False
-            Width: 
-              IntConst: 3
-              IntConst: 0
-        Ioport: 
-          Output: LED1, False
-            Width: 
-              IntConst: 3
-              IntConst: 0
-        Ioport: 
-          Output: LED2, False
-            Width: 
-              IntConst: 3
-              IntConst: 0
-        Ioport: 
-          Output: LED3, False
-            Width: 
-              IntConst: 3
-              IntConst: 0
-        Ioport: 
-          Output: LED4, False
-        Ioport: 
-          Output: LED5, False
-      InstanceList: SUB
-        ParamArg: MODE
-          IntConst: 0
-        Instance: inst_sub0, SUB
-          ParamArg: MODE
-            IntConst: 0
-          PortArg: None
-            Pointer: 
-              Identifier: VAL
-              IntConst: 0
-          PortArg: None
-            Pointer: 
-              Identifier: LED0
-              IntConst: 0
-        Instance: inst_sub1, SUB
-          ParamArg: MODE
-            IntConst: 0
-          PortArg: None
-            Pointer: 
-              Identifier: VAL
-              IntConst: 1
-          PortArg: None
-            Pointer: 
-              Identifier: LED0
-              IntConst: 1
-        Instance: inst_sub2, SUB
-          ParamArg: MODE
-            IntConst: 0
-          PortArg: None
-            Pointer: 
-              Identifier: VAL
-              IntConst: 2
-          PortArg: None
-            Pointer: 
-              Identifier: LED0
-              IntConst: 2
-        Instance: inst_sub3, SUB
-          ParamArg: MODE
-            IntConst: 0
-          PortArg: None
-            Pointer: 
-              Identifier: VAL
-              IntConst: 3
-          PortArg: None
-            Pointer: 
-              Identifier: LED0
-              IntConst: 3
-      InstanceList: SUB
-        ParamArg: MODE
-          IntConst: 0
-        Instance: inst_sub4, SUB
-          Width: 
-            IntConst: 3
-            IntConst: 0
-          ParamArg: MODE
-            IntConst: 0
-          PortArg: None
-            Identifier: VAL
-          PortArg: None
-            Identifier: LED1
-        Instance: inst_sub5, SUB
-          Width: 
-            IntConst: 3
-            IntConst: 0
-          ParamArg: MODE
-            IntConst: 0
-          PortArg: None
-            Identifier: VAL
-          PortArg: None
-            Identifier: LED2
-      InstanceList: and
-        Instance: U0, and
-          Width: 
-            IntConst: 3
-            IntConst: 0
-          PortArg: None
-            Identifier: LED3
-          PortArg: None
-            Identifier: in0
-          PortArg: None
-            Identifier: in1
-          PortArg: None
-            Identifier: in2
-      InstanceList: and
-        Instance: , and
-          PortArg: None
-            Identifier: LED4
-          PortArg: None
-            Identifier: in3
-          PortArg: None
-            Identifier: in4
-          PortArg: None
-            Identifier: in5
-        Instance: , and
-          PortArg: None
-            Identifier: LED5
-          PortArg: None
-            Identifier: in3
-          PortArg: None
-            Identifier: in4
-          PortArg: None
-            Identifier: in5
-    ModuleDef: SUB
-      Paramlist: 
-        Decl: 
-          Parameter: MODE, False
-            Rvalue: 
-              IntConst: 0
-      Portlist: 
-        Ioport: 
-          Input: VAL, False
-        Ioport: 
-          Output: LED, False
-      Assign: 
-        Lvalue: 
-          Identifier: LED
-        Rvalue: 
-          And: 
-            Unot: 
-              Identifier: VAL
-            Identifier: MODE
+Source:  (at 1)
+  Description:  (at 1)
+    ModuleDef: TOP (at 1)
+      Paramlist:  (at 0)
+      Portlist:  (at 2)
+        Ioport:  (at 3)
+          Input: VAL, False (at 3)
+            Width:  (at 3)
+              IntConst: 3 (at 3)
+              IntConst: 0 (at 3)
+        Ioport:  (at 4)
+          Input: in0, False (at 4)
+            Width:  (at 4)
+              IntConst: 3 (at 4)
+              IntConst: 0 (at 4)
+        Ioport:  (at 4)
+          Input: in1, False (at 4)
+            Width:  (at 4)
+              IntConst: 3 (at 4)
+              IntConst: 0 (at 4)
+        Ioport:  (at 4)
+          Input: in2, False (at 4)
+            Width:  (at 4)
+              IntConst: 3 (at 4)
+              IntConst: 0 (at 4)
+        Ioport:  (at 5)
+          Input: in3, False (at 5)
+        Ioport:  (at 5)
+          Input: in4, False (at 5)
+        Ioport:  (at 5)
+          Input: in5, False (at 5)
+        Ioport:  (at 6)
+          Output: LED0, False (at 6)
+            Width:  (at 6)
+              IntConst: 3 (at 6)
+              IntConst: 0 (at 6)
+        Ioport:  (at 6)
+          Output: LED1, False (at 6)
+            Width:  (at 6)
+              IntConst: 3 (at 6)
+              IntConst: 0 (at 6)
+        Ioport:  (at 6)
+          Output: LED2, False (at 6)
+            Width:  (at 6)
+              IntConst: 3 (at 6)
+              IntConst: 0 (at 6)
+        Ioport:  (at 6)
+          Output: LED3, False (at 6)
+            Width:  (at 6)
+              IntConst: 3 (at 6)
+              IntConst: 0 (at 6)
+        Ioport:  (at 7)
+          Output: LED4, False (at 7)
+        Ioport:  (at 7)
+          Output: LED5, False (at 7)
+      InstanceList: SUB (at 10)
+        ParamArg: MODE (at 11)
+          IntConst: 0 (at 11)
+        Instance: inst_sub0, SUB (at 10)
+          ParamArg: MODE (at 11)
+            IntConst: 0 (at 11)
+          PortArg: None (at 12)
+            Pointer:  (at 12)
+              Identifier: VAL (at 12)
+              IntConst: 0 (at 12)
+          PortArg: None (at 12)
+            Pointer:  (at 12)
+              Identifier: LED0 (at 12)
+              IntConst: 0 (at 12)
+        Instance: inst_sub1, SUB (at 10)
+          ParamArg: MODE (at 11)
+            IntConst: 0 (at 11)
+          PortArg: None (at 13)
+            Pointer:  (at 13)
+              Identifier: VAL (at 13)
+              IntConst: 1 (at 13)
+          PortArg: None (at 13)
+            Pointer:  (at 13)
+              Identifier: LED0 (at 13)
+              IntConst: 1 (at 13)
+        Instance: inst_sub2, SUB (at 10)
+          ParamArg: MODE (at 11)
+            IntConst: 0 (at 11)
+          PortArg: None (at 14)
+            Pointer:  (at 14)
+              Identifier: VAL (at 14)
+              IntConst: 2 (at 14)
+          PortArg: None (at 14)
+            Pointer:  (at 14)
+              Identifier: LED0 (at 14)
+              IntConst: 2 (at 14)
+        Instance: inst_sub3, SUB (at 10)
+          ParamArg: MODE (at 11)
+            IntConst: 0 (at 11)
+          PortArg: None (at 15)
+            Pointer:  (at 15)
+              Identifier: VAL (at 15)
+              IntConst: 3 (at 15)
+          PortArg: None (at 15)
+            Pointer:  (at 15)
+              Identifier: LED0 (at 15)
+              IntConst: 3 (at 15)
+      InstanceList: SUB (at 17)
+        ParamArg: MODE (at 18)
+          IntConst: 0 (at 18)
+        Instance: inst_sub4, SUB (at 17)
+          Width:  (at 19)
+            IntConst: 3 (at 19)
+            IntConst: 0 (at 19)
+          ParamArg: MODE (at 18)
+            IntConst: 0 (at 18)
+          PortArg: None (at 19)
+            Identifier: VAL (at 19)
+          PortArg: None (at 19)
+            Identifier: LED1 (at 19)
+        Instance: inst_sub5, SUB (at 17)
+          Width:  (at 20)
+            IntConst: 3 (at 20)
+            IntConst: 0 (at 20)
+          ParamArg: MODE (at 18)
+            IntConst: 0 (at 18)
+          PortArg: None (at 20)
+            Identifier: VAL (at 20)
+          PortArg: None (at 20)
+            Identifier: LED2 (at 20)
+      InstanceList: and (at 22)
+        Instance: U0, and (at 22)
+          Width:  (at 22)
+            IntConst: 3 (at 22)
+            IntConst: 0 (at 22)
+          PortArg: None (at 22)
+            Identifier: LED3 (at 22)
+          PortArg: None (at 22)
+            Identifier: in0 (at 22)
+          PortArg: None (at 22)
+            Identifier: in1 (at 22)
+          PortArg: None (at 22)
+            Identifier: in2 (at 22)
+      InstanceList: and (at 23)
+        Instance: , and (at 23)
+          PortArg: None (at 23)
+            Identifier: LED4 (at 23)
+          PortArg: None (at 23)
+            Identifier: in3 (at 23)
+          PortArg: None (at 23)
+            Identifier: in4 (at 23)
+          PortArg: None (at 23)
+            Identifier: in5 (at 23)
+        Instance: , and (at 23)
+          PortArg: None (at 23)
+            Identifier: LED5 (at 23)
+          PortArg: None (at 23)
+            Identifier: in3 (at 23)
+          PortArg: None (at 23)
+            Identifier: in4 (at 23)
+          PortArg: None (at 23)
+            Identifier: in5 (at 23)
+    ModuleDef: SUB (at 26)
+      Paramlist:  (at 26)
+        Decl:  (at 28)
+          Parameter: MODE, False (at 28)
+            Rvalue:  (at 28)
+              IntConst: 0 (at 28)
+      Portlist:  (at 30)
+        Ioport:  (at 31)
+          Input: VAL, False (at 31)
+        Ioport:  (at 32)
+          Output: LED, False (at 32)
+      Assign:  (at 34)
+        Lvalue:  (at 34)
+          Identifier: LED (at 34)
+        Rvalue:  (at 34)
+          And:  (at 34)
+            Unot:  (at 34)
+              Identifier: VAL (at 34)
+            Identifier: MODE (at 34)
 """
 
 def test():
