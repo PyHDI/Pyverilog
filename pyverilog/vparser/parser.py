@@ -101,7 +101,6 @@ class VerilogParser(PLYParser):
     ######################################################################
     def p_moduledef(self, p):
         'moduledef : MODULE modulename paramlist portlist items ENDMODULE'
-        print('lineno:', p.lineno(6))
         p[0] = ModuleDef(name=p[2], paramlist=p[3], portlist=p[4], items=p[5],
                          default_nettype=self.get_default_nettype())
 
