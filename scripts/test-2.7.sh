@@ -1,3 +1,6 @@
+#!/bin/sh
+set -e
+
 mkdir 2.7
 cd 2.7
 virtualenv --python=python .
@@ -16,4 +19,5 @@ make test PYTHON=python
 cd ..
 mv pyverilog.old pyverilog
 cd ..
+deactivate
 cd ..
