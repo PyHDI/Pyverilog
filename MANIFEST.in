@@ -5,3 +5,4 @@ recursive-include tests *
 recursive-include examples *
 recursive-include verilogcode *
 recursive-include img *
+recursive-include scripts *
