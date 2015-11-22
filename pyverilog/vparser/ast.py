@@ -14,10 +14,11 @@ import re
 
 class Node(object):
     '''Abstact class for every element in parser'''
-    coord = False
+    
     def children(self):
         pass
-    def show(self, buf=sys.stdout, offset=0, attrnames=False, showcoord=False):
+    
+    def show(self, buf=sys.stdout, offset=0, attrnames=False, showlineno=True):
         indent = 2
         lead = ' ' * offset
         buf.write(lead + self.__class__.__name__ + ': ')
@@ -29,11 +30,12 @@ class Node(object):
                 vlist = [getattr(self,n) for n in self.attr_names]
                 attrstr = ', '.join('%s' % v for v in vlist)
             buf.write(attrstr)
-        if showcoord:
-            buf.write(' (at %s)' % self.coord)
+        if showlineno:
+            buf.write(' (at %s)' % self.lineno)
         buf.write('\n')
         for c in self.children():
-            c.show(buf, offset + indent, attrnames, showcoord)
+            c.show(buf, offset + indent, attrnames, showlineno)
+            
     def __eq__(self, other):
         if type(self) != type(other): return False
         self_attrs = tuple( [ getattr(self, a) for a in self.attr_names ] )
@@ -43,8 +45,10 @@ class Node(object):
         for i, c in enumerate(self.children()):
             if c != other_children[i]: return False
         return True
+    
     def __ne__(self, other):
         return not self.__eq__(other)
+    
     def __hash__(self):
         s = hash(tuple([getattr(self, a) for a in self.attr_names]))
         c = hash(self.children())
@@ -53,7 +57,7 @@ class Node(object):
 ################################################################################
 class Source(Node):
     attr_names = ('name',)
-    def __init__(self, name, description, lineno=-1):
+    def __init__(self, name, description, lineno=0):
         self.lineno = lineno
         self.name = name
         self.description = description
@@ -64,7 +68,7 @@ class Source(Node):
 
 class Description(Node):
     attr_names = ()
-    def __init__(self, definitions, lineno=-1):
+    def __init__(self, definitions, lineno=0):
         self.lineno = lineno
         self.definitions = definitions
     def children(self):
@@ -74,7 +78,7 @@ class Description(Node):
 
 class ModuleDef(Node):
     attr_names = ('name',)
-    def __init__(self, name, paramlist, portlist, items, default_nettype='wire', lineno=-1):
+    def __init__(self, name, paramlist, portlist, items, default_nettype='wire', lineno=0):
         self.lineno = lineno
         self.name = name
         self.paramlist = paramlist
@@ -90,7 +94,7 @@ class ModuleDef(Node):
 
 class Paramlist(Node):
     attr_names = ()
-    def __init__(self, params, lineno=-1):
+    def __init__(self, params, lineno=0):
         self.lineno = lineno
         self.params = params
     def children(self):
@@ -100,7 +104,7 @@ class Paramlist(Node):
 
 class Portlist(Node):
     attr_names = ()
-    def __init__(self, ports, lineno=-1):
+    def __init__(self, ports, lineno=0):
         self.lineno = lineno
         self.ports = ports
     def children(self):
@@ -110,7 +114,7 @@ class Portlist(Node):
 
 class Port(Node):
     attr_names = ('name','type',)
-    def __init__(self, name, width, type, lineno=-1):
+    def __init__(self, name, width, type, lineno=0):
         self.lineno = lineno
         self.name = name
         self.width = width
@@ -122,7 +126,7 @@ class Port(Node):
 
 class Width(Node):
     attr_names = ()
-    def __init__(self, msb, lsb, lineno=-1):
+    def __init__(self, msb, lsb, lineno=0):
         self.lineno = lineno
         self.msb = msb
         self.lsb = lsb
@@ -135,7 +139,7 @@ class Length(Width): pass
 
 class Identifier(Node):
     attr_names = ('name',)
-    def __init__(self, name, scope=None, lineno=-1):
+    def __init__(self, name, scope=None, lineno=0):
         self.lineno = lineno
         self.name = name
         self.scope = scope
@@ -150,7 +154,7 @@ class Identifier(Node):
 
 class Value(Node):
     attr_names = ()
-    def __init__(self, value, lineno=-1):
+    def __init__(self, value, lineno=0):
         self.lineno = lineno
         self.value = value
     def children(self):
@@ -160,7 +164,7 @@ class Value(Node):
 
 class Constant(Value):
     attr_names = ('value',)
-    def __init__(self, value, lineno=-1):
+    def __init__(self, value, lineno=0):
         self.lineno = lineno
         self.value = value
     def children(self):
@@ -175,7 +179,7 @@ class StringConst(Constant): pass
 
 class Variable(Value):
     attr_names = ('name', 'signed')
-    def __init__(self, name, width=None, signed=False, lineno=-1):
+    def __init__(self, name, width=None, signed=False, lineno=0):
         self.lineno = lineno
         self.name = name
         self.width = width
@@ -193,7 +197,7 @@ class Wire(Variable): pass
 class Reg(Variable): pass
 class WireArray(Variable):
     attr_names = ('name', 'signed')
-    def __init__(self, name, width, length, signed=False, lineno=-1):
+    def __init__(self, name, width, length, signed=False, lineno=0):
         self.lineno = lineno
         self.name = name
         self.width = width
@@ -206,7 +210,7 @@ class WireArray(Variable):
         return tuple(nodelist)
 class RegArray(Variable):
     attr_names = ('name', 'signed')
-    def __init__(self, name, width, length, signed=False, lineno=-1):
+    def __init__(self, name, width, length, signed=False, lineno=0):
         self.lineno = lineno
         self.name = name
         self.width = width
@@ -223,7 +227,7 @@ class Genvar(Variable): pass
 
 class Ioport(Node):
     attr_names = ()
-    def __init__(self, first, second=None, lineno=-1):
+    def __init__(self, first, second=None, lineno=0):
         self.lineno = lineno
         self.first = first
         self.second = second
@@ -235,7 +239,7 @@ class Ioport(Node):
 
 class Parameter(Node):
     attr_names = ('name', 'signed')
-    def __init__(self, name, value, width=None, signed=False, lineno=-1):
+    def __init__(self, name, value, width=None, signed=False, lineno=0):
         self.lineno = lineno
         self.name = name
         self.value = value
@@ -251,7 +255,7 @@ class Supply(Parameter) : pass
 
 class Decl(Node):
     attr_names = ()
-    def __init__(self, list, lineno=-1):
+    def __init__(self, list, lineno=0):
         self.lineno = lineno
         self.list = list
     def children(self):
@@ -261,7 +265,7 @@ class Decl(Node):
 
 class Concat(Node):
     attr_names = ()
-    def __init__(self, list, lineno=-1):
+    def __init__(self, list, lineno=0):
         self.lineno = lineno
         self.list = list
     def children(self):
@@ -272,7 +276,7 @@ class LConcat(Concat): pass
 
 class Repeat(Node):
     attr_names = ()
-    def __init__(self, value, times, lineno=-1):
+    def __init__(self, value, times, lineno=0):
         self.lineno = lineno
         self.value = value
         self.times = times
@@ -284,7 +288,7 @@ class Repeat(Node):
 
 class Partselect(Node):
     attr_names = ()
-    def __init__(self, var, msb, lsb, lineno=-1):
+    def __init__(self, var, msb, lsb, lineno=0):
         self.lineno = lineno
         self.var = var
         self.msb = msb
@@ -298,7 +302,7 @@ class Partselect(Node):
 
 class Pointer(Node):
     attr_names = ()
-    def __init__(self, var, ptr, lineno=-1):
+    def __init__(self, var, ptr, lineno=0):
         self.lineno = lineno
         self.var = var
         self.ptr = ptr
@@ -310,7 +314,7 @@ class Pointer(Node):
 
 class Lvalue(Node):
     attr_names = ()
-    def __init__(self, var, lineno=-1):
+    def __init__(self, var, lineno=0):
         self.lineno = lineno
         self.var = var
     def children(self):
@@ -320,7 +324,7 @@ class Lvalue(Node):
 
 class Rvalue(Node):
     attr_names = ()
-    def __init__(self, var, lineno=-1):
+    def __init__(self, var, lineno=0):
         self.lineno = lineno
         self.var = var
     def children(self):
@@ -331,7 +335,7 @@ class Rvalue(Node):
 ################################################################################
 class Operator(Node):
     attr_names = ()
-    def __init__(self, left, right, lineno=-1):
+    def __init__(self, left, right, lineno=0):
         self.lineno = lineno
         self.left = left
         self.right = right
@@ -348,7 +352,7 @@ class Operator(Node):
 
 class UnaryOperator(Operator):
     attr_names = ()
-    def __init__(self, right, lineno=-1):
+    def __init__(self, right, lineno=0):
         self.lineno = lineno
         self.right = right
     def children(self):
@@ -413,7 +417,7 @@ class Lor(Operator): pass
 # Level 11
 class Cond(Operator):
     attr_names = ()
-    def __init__(self, cond, true_value, false_value, lineno=-1):
+    def __init__(self, cond, true_value, false_value, lineno=0):
         self.lineno = lineno
         self.cond = cond
         self.true_value = true_value
@@ -428,7 +432,7 @@ class Cond(Operator):
 ################################################################################
 class Assign(Node):
     attr_names = ()
-    def __init__(self, left, right, ldelay=None, rdelay=None, lineno=-1):
+    def __init__(self, left, right, ldelay=None, rdelay=None, lineno=0):
         self.lineno = lineno
         self.left = left
         self.right = right
@@ -444,7 +448,7 @@ class Assign(Node):
 
 class Always(Node):
     attr_names = ()
-    def __init__(self, sens_list, statement, lineno=-1):
+    def __init__(self, sens_list, statement, lineno=0):
         self.lineno = lineno
         self.sens_list = sens_list
         self.statement = statement
@@ -456,7 +460,7 @@ class Always(Node):
 
 class SensList(Node):
     attr_names = ()
-    def __init__(self, list, lineno=-1):
+    def __init__(self, list, lineno=0):
         self.lineno = lineno
         self.list = list
     def children(self):
@@ -466,7 +470,7 @@ class SensList(Node):
 
 class Sens(Node):
     attr_names = ('type',)
-    def __init__(self, sig, type='posedge', lineno=-1):
+    def __init__(self, sig, type='posedge', lineno=0):
         self.lineno = lineno
         self.sig = sig
         self.type = type # 'posedge', 'negedge', 'level', 'all' (*)
@@ -477,7 +481,7 @@ class Sens(Node):
 
 class Substitution(Node):
     attr_names = ()
-    def __init__(self, left, right, ldelay=None, rdelay=None, lineno=-1):
+    def __init__(self, left, right, ldelay=None, rdelay=None, lineno=0):
         self.lineno = lineno
         self.left = left
         self.right = right
@@ -495,7 +499,7 @@ class NonblockingSubstitution(Substitution): pass
 
 class IfStatement(Node):
     attr_names = ()
-    def __init__(self, cond, true_statement, false_statement, lineno=-1):
+    def __init__(self, cond, true_statement, false_statement, lineno=0):
         self.lineno = lineno
         self.cond = cond
         self.true_statement = true_statement
@@ -509,7 +513,7 @@ class IfStatement(Node):
 
 class ForStatement(Node):
     attr_names = ()
-    def __init__(self, pre, cond, post, statement, lineno=-1):
+    def __init__(self, pre, cond, post, statement, lineno=0):
         self.lineno = lineno
         self.pre = pre
         self.cond = cond
@@ -525,7 +529,7 @@ class ForStatement(Node):
 
 class WhileStatement(Node):
     attr_names = ()
-    def __init__(self, cond, statement, lineno=-1):
+    def __init__(self, cond, statement, lineno=0):
         self.lineno = lineno
         self.cond = cond
         self.statement = statement
@@ -537,7 +541,7 @@ class WhileStatement(Node):
 
 class CaseStatement(Node):
     attr_names = ()
-    def __init__(self, comp, caselist, lineno=-1):
+    def __init__(self, comp, caselist, lineno=0):
         self.lineno = lineno
         self.comp = comp
         self.caselist = caselist
@@ -551,7 +555,7 @@ class CasexStatement(CaseStatement): pass
 
 class Case(Node):
     attr_names = ()
-    def __init__(self, cond, statement, lineno=-1):
+    def __init__(self, cond, statement, lineno=0):
         self.lineno = lineno
         self.cond = cond
         self.statement = statement
@@ -563,7 +567,7 @@ class Case(Node):
 
 class Block(Node):
     attr_names = ('scope',)
-    def __init__(self, statements, scope=None, lineno=-1):
+    def __init__(self, statements, scope=None, lineno=0):
         self.lineno = lineno
         self.statements = statements
         self.scope = scope
@@ -574,7 +578,7 @@ class Block(Node):
 
 class Initial(Node):
     attr_names = ()
-    def __init__(self, statement, lineno=-1):
+    def __init__(self, statement, lineno=0):
         self.lineno = lineno
         self.statement = statement
     def children(self):
@@ -584,7 +588,7 @@ class Initial(Node):
 
 class EventStatement(Node):
     attr_names = ()
-    def __init__(self, senslist, lineno=-1):
+    def __init__(self, senslist, lineno=0):
         self.lineno = lineno
         self.senslist = senslist
     def children(self):
@@ -594,7 +598,7 @@ class EventStatement(Node):
 
 class WaitStatement(Node):
     attr_names = ()
-    def __init__(self, cond, statement, lineno=-1):
+    def __init__(self, cond, statement, lineno=0):
         self.lineno = lineno
         self.cond = cond
         self.statement = statement
@@ -606,7 +610,7 @@ class WaitStatement(Node):
 
 class ForeverStatement(Node):
     attr_names = ()
-    def __init__(self, statement, lineno=-1):
+    def __init__(self, statement, lineno=0):
         self.lineno = lineno
         self.statement = statement
     def children(self):
@@ -616,7 +620,7 @@ class ForeverStatement(Node):
 
 class DelayStatement(Node):
     attr_names = ()
-    def __init__(self, delay, lineno=-1):
+    def __init__(self, delay, lineno=0):
         self.lineno = lineno
         self.delay = delay
     def children(self):
@@ -626,7 +630,7 @@ class DelayStatement(Node):
 
 class InstanceList(Node):
     attr_names = ('module',)
-    def __init__(self, module, parameterlist, instances, lineno=-1):
+    def __init__(self, module, parameterlist, instances, lineno=0):
         self.lineno = lineno
         self.module = module
         self.parameterlist = parameterlist
@@ -639,7 +643,7 @@ class InstanceList(Node):
 
 class Instance(Node):
     attr_names = ('name', 'module')
-    def __init__(self, module, name, portlist, parameterlist, array=None, lineno=-1):
+    def __init__(self, module, name, portlist, parameterlist, array=None, lineno=0):
         self.lineno = lineno
         self.module = module
         self.name = name
@@ -655,7 +659,7 @@ class Instance(Node):
 
 class ParamArg(Node):
     attr_names = ('paramname',)
-    def __init__(self, paramname, argname, lineno=-1):
+    def __init__(self, paramname, argname, lineno=0):
         self.lineno = lineno
         self.paramname = paramname
         self.argname = argname
@@ -666,7 +670,7 @@ class ParamArg(Node):
 
 class PortArg(Node):
     attr_names = ('portname',)
-    def __init__(self, portname, argname, lineno=-1):
+    def __init__(self, portname, argname, lineno=0):
         self.lineno = lineno
         self.portname = portname
         self.argname = argname
@@ -677,7 +681,7 @@ class PortArg(Node):
 
 class Function(Node):
     attr_names = ('name',)
-    def __init__(self, name, retwidth, statement, lineno=-1):
+    def __init__(self, name, retwidth, statement, lineno=0):
         self.lineno = lineno
         self.name = name
         self.retwidth = retwidth
@@ -692,7 +696,7 @@ class Function(Node):
 
 class FunctionCall(Node):
     attr_names = ()
-    def __init__(self, name, args, lineno=-1):
+    def __init__(self, name, args, lineno=0):
         self.lineno = lineno
         self.name = name
         self.args = args
@@ -706,7 +710,7 @@ class FunctionCall(Node):
 
 class Task(Node):
     attr_names = ('name',)
-    def __init__(self, name, statement, lineno=-1):
+    def __init__(self, name, statement, lineno=0):
         self.lineno = lineno
         self.name = name
         self.statement = statement
@@ -717,7 +721,7 @@ class Task(Node):
 
 class TaskCall(Node):
     attr_names = ()
-    def __init__(self, name, args, lineno=-1):
+    def __init__(self, name, args, lineno=0):
         self.lineno = lineno
         self.name = name
         self.args = args
@@ -729,7 +733,7 @@ class TaskCall(Node):
 
 class GenerateStatement(Node):
     attr_names = ()
-    def __init__(self, items, lineno=-1):
+    def __init__(self, items, lineno=0):
         self.lineno = lineno
         self.items = items
     def children(self):
@@ -739,7 +743,7 @@ class GenerateStatement(Node):
 
 class SystemCall(Node):
     attr_names = ('syscall',)
-    def __init__(self, syscall, args, lineno=-1):
+    def __init__(self, syscall, args, lineno=0):
         self.lineno = lineno
         self.syscall = syscall
         self.args = args
@@ -760,7 +764,7 @@ class SystemCall(Node):
 
 class IdentifierScopeLabel(Node):
     attr_names = ('name', 'loop')
-    def __init__(self, name, loop=None, lineno=-1):
+    def __init__(self, name, loop=None, lineno=0):
         self.lineno = lineno
         self.name = name
         self.loop = loop
@@ -770,7 +774,7 @@ class IdentifierScopeLabel(Node):
 
 class IdentifierScope(Node):
     attr_names = ()
-    def __init__(self, labellist, lineno=-1):
+    def __init__(self, labellist, lineno=0):
         self.lineno = lineno
         self.labellist = labellist
     def children(self):
@@ -780,7 +784,7 @@ class IdentifierScope(Node):
 
 class Pragma(Node):
     attr_names = ()
-    def __init__(self, entry, lineno=-1):
+    def __init__(self, entry, lineno=0):
         self.lineno = lineno
         self.entry = entry
     def children(self):
@@ -790,7 +794,7 @@ class Pragma(Node):
 
 class PragmaEntry(Node):
     attr_names = ('name', )
-    def __init__(self, name, value=None, lineno=-1):
+    def __init__(self, name, value=None, lineno=0):
         self.lineno = lineno
         self.name = name
         self.value = value
@@ -801,7 +805,7 @@ class PragmaEntry(Node):
 
 class Disable(Node):
     attr_names = ('dest',)
-    def __init__(self, dest, lineno=-1):
+    def __init__(self, dest, lineno=0):
         self.lineno = lineno
         self.dest = dest
     def children(self):
@@ -810,7 +814,7 @@ class Disable(Node):
 
 class ParallelBlock(Node):
     attr_names = ('scope',)
-    def __init__(self, statements, scope=None, lineno=-1):
+    def __init__(self, statements, scope=None, lineno=0):
         self.lineno = lineno
         self.statements = statements
         self.scope = scope
@@ -821,7 +825,7 @@ class ParallelBlock(Node):
 
 class SingleStatement(Node):
     attr_names = ()
-    def __init__(self, statement, lineno=-1):
+    def __init__(self, statement, lineno=0):
         self.lineno = lineno
         self.statement = statement
     def children(self):
