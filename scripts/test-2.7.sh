@@ -5,7 +5,7 @@ mkdir 2.7
 cd 2.7
 virtualenv --python=python .
 source bin/activate
-git clone https://github.com/PyHDI/pyverilog.git
+git clone https://github.com/PyHDI/Pyverilog.git
 cd Pyverilog
 python setup.py install
 pip install pytest pytest-pythonpath
