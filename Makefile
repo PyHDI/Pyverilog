@@ -1,9 +1,19 @@
+PYTHON=python3
+#PYTHON=python
+
+.PHONY: all
+all: clean
+
+.PHONY: test
+test:
+	$(PYTHON) -m pytest -vv
+
 .PHONY: clean
 clean:
 	make clean -C ./pyverilog
 	make clean -C ./examples
 	make clean -C ./tests
-	rm -rf *.pyc __pycache__ *.out parsetab.py pyverilog.egg-info build dist
+	rm -rf *.egg-info build dist *.pyc __pycache__ parsetab.py .cache tmp.v uut.vcd *.out *.png *.dot 
 
 .PHONY: release
 release:

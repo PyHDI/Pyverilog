@@ -10,5 +10,5 @@ test:
 
 .PHONY: clean
 clean:
-	rm -rf *.pyc __pycache__ parsetab.py *.out .cache
+	rm -rf *.pyc __pycache__ parsetab.py *.out .cache tmp.v uut.vcd *.png *.dot 
 	find . -maxdepth 1 -type d |grep "./" | xargs -I {} make clean -C {}
