@@ -10,13 +10,9 @@ cd Pyverilog
 python3 setup.py install
 pip install pytest pytest-pythonpath
 mv pyverilog pyverilog.old
-cd examples
-make
-make clean
-cd ..
-cd tests
-make test
-cd ..
+make -C examples
+make clean -C examples
+make test -C tests
 mv pyverilog.old pyverilog
 cd ..
 deactivate

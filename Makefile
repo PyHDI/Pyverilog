@@ -6,7 +6,7 @@ all: clean
 
 .PHONY: test
 test:
-	$(PYTHON) -m pytest -vv
+	$(PYTHON) -m pytest -vv tests
 
 .PHONY: clean
 clean:
