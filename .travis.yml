@@ -7,7 +7,7 @@ python:
 
 install:
   - sudo apt-get install iverilog
-  - pip install pytest pytest-pythonpath
+  - pip install jinja2 pytest pytest-pythonpath
 
 script:
   - python -m pytest .
