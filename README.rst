@@ -1,6 +1,8 @@
 Pyverilog
 =========
 
+|Build Status|
+
 Python-based Hardware Design Processing Toolkit for Verilog HDL
 
 Copyright (C) 2013, Shinya Takamaeda-Yamazaki
@@ -482,3 +484,6 @@ Thanks for your contribution!
 
 `shtaxxx.hatenablog.com <http://shtaxxx.hatenablog.com/entry/2014/01/01/045856>`__
 - Blog entry for introduction and examples of Pyverilog (in Japansese)
+
+.. |Build Status| image:: https://travis-ci.org/PyHDI/Pyverilog.svg
+   :target: https://travis-ci.org/PyHDI/Pyverilog

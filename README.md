@@ -1,6 +1,8 @@
 Pyverilog
 ==============================
 
+[![Build Status](https://travis-ci.org/PyHDI/Pyverilog.svg)](https://travis-ci.org/PyHDI/Pyverilog)
+
 Python-based Hardware Design Processing Toolkit for Verilog HDL
 
 Copyright (C) 2013, Shinya Takamaeda-Yamazaki

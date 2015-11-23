@@ -1,5 +1,8 @@
 include README.md
 include README.rst
+include LICENSE.txt
+include pytest.ini
+include .travis.yml
 include Makefile
 recursive-include tests *
 recursive-include examples *
