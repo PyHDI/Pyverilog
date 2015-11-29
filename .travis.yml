@@ -1,12 +1,18 @@
 language: python
 
+sudo: false
+
 python:
   - 2.7
   - 3.4
   - 3.5
 
+addons:
+  apt:
+    packages:
+    - iverilog
+
 install:
-  - sudo apt-get install iverilog
   - pip install jinja2 pytest pytest-pythonpath
 
 script:
