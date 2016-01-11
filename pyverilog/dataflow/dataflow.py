@@ -120,34 +120,34 @@ class DFIntConst(DFConstant):
     def eval(self):
         targ = self.value.replace('_','')
         signed = False
-        match = re.search(r's(.+)', targ)
+        match = re.search(r'[Ss](.+)', targ)
         if match is not None:
             signed = True
-        match = re.search(r'h(.+)', targ)
+        match = re.search(r'[Hh](.+)', targ)
         if match is not None:
             return int(match.group(1), 16)
-        match = re.search(r'd(.+)', targ)
+        match = re.search(r'[Dd](.+)', targ)
         if match is not None:
             return int(match.group(1), 10)
-        match = re.search(r'o(.+)', targ)
+        match = re.search(r'[Oo](.+)', targ)
         if match is not None:
             return int(match.group(1), 8)
-        match = re.search(r'b(.+)', targ)
+        match = re.search(r'[Bb](.+)', targ)
         if match is not None:
             return int(match.group(1), 2)
         return int(targ, 10)
     def width(self):
         targ = self.value.replace('_','')
-        match = re.search(r'(.+)\'h.+', targ)
+        match = re.search(r'(.+)\'[Hh].+', targ)
         if match is not None:
             return int(match.group(1), 10)
-        match = re.search(r'(.+)\'d.+', targ)
+        match = re.search(r'(.+)\'[Dd].+', targ)
         if match is not None:
             return int(match.group(1), 10)
-        match = re.search(r'(.+)\'o.+', targ)
+        match = re.search(r'(.+)\'[Oo].+', targ)
         if match is not None:
             return int(match.group(1), 10)
-        match = re.search(r'(.+)\'b.+', targ)
+        match = re.search(r'(.+)\'[Bb].+', targ)
         if match is not None:
             return int(match.group(1), 10)
         return 32
