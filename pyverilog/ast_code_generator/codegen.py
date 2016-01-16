@@ -358,6 +358,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'second' : '' if node.second is None else node.second.__class__.__name__.lower(),
             'name' : escape(node.first.name),
             'width' : '' if node.first.width is None else self.visit(node.first.width),
+            'signed' : node.first.signed or (node.second is not None and node.second.signed)
             }
         rslt = template.render(template_dict)
         return rslt
