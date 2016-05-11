@@ -1683,6 +1683,10 @@ class VerilogParser(PLYParser):
         p[0] = (p[1],)
         p.set_lineno(0, p.lineno(1))
 
+    def p_param_args_empty(self, p):
+        'param_args : empty'
+        p[0] = ()
+
     def p_param_arg_noname_exp(self, p):
         'param_arg_noname : expression'
         p[0] = ParamArg(None, p[1], lineno=p.lineno(1))
