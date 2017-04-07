@@ -7,7 +7,7 @@ Python-based Hardware Design Processing Toolkit for Verilog HDL
 
 Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 
-E-mail: shinya\_at\_is.naist.jp
+E-mail: takamaeda\_at\_ist.hokudai.ac.jp
 
 License
 =======
