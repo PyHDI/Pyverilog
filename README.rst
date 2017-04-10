@@ -471,6 +471,9 @@ Related Project and Site
 `Veriloggen <https://github.com/PyHDI/veriloggen>`__ - A library for
 constructing a Verilog HDL source code in Python
 
+`IPgen <https://github.com/PyHDI/ipgen>`__ - IP-core package generator
+for AXI4/Avalon
+
 `PyCoRAM <https://github.com/PyHDI/PyCoRAM>`__ - Python-based Portable
 IP-core Synthesis Framework for FPGA-based Computing
 
