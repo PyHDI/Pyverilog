@@ -1021,4 +1021,4 @@ class ASTCodeGenerator(ConvertVisitor):
         return rslt
 
     def visit_EmbeddedCode(self, node):
-        return self.indent(node.code)
+        return node.code
