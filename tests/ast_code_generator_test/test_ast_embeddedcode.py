@@ -21,7 +21,7 @@ module top
   always @(posedge CLK) begin
     if(RST) begin
       count <= 0;
-      led <= 0;        
+      led <= 0;
     end else begin
       if(count == 1024 - 1) begin
         count <= 0;
@@ -49,7 +49,7 @@ reg [31:0] count;
 always @(posedge CLK) begin
   if(RST) begin
     count <= 0;
-    led <= 0;        
+    led <= 0;
   end else begin
     if(count == 1024 - 1) begin
       count <= 0;
