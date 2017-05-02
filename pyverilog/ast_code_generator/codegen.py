@@ -1019,3 +1019,6 @@ class ASTCodeGenerator(ConvertVisitor):
             }
         rslt = template.render(template_dict)
         return rslt
+
+    def visit_EmbeddedCode(self, node):
+        return self.indent(node.code)

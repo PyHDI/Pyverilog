@@ -832,3 +832,11 @@ class SingleStatement(Node):
         nodelist = []
         if self.statement: nodelist.append(self.statement)
         return tuple(nodelist)
+
+class EmbeddedCode(Node):
+    attr_names = ('code',)
+    def __init__(self, code, lineno=0):
+        self.code = code
+    def children(self):
+        nodelist = []
+        return tuple(nodelist)
