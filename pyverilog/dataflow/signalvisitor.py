@@ -433,7 +433,7 @@ class SignalVisitor(NodeVisitor):
                 if not isinstance(loop, DFEvalValue):
                     raise verror.FormatError('Loop iterator should be constant')
                 scopelist.append( ScopeLabel(b.name, 'for', loop) )
-            scopelsit.append( ScopeLabel(b.name, 'any') )
+            scopelist.append( ScopeLabel(b.name, 'any') )
         return ScopeChain( scopelist )
 
     def searchScopeConstantValue(self, blocklabel, name):
