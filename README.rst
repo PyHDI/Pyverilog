@@ -14,8 +14,8 @@ License
 
 Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-This software package includes PLY-3.4 in "vparser/ply". The license of
-PLY is BSD.
+Note that this software package includes PLY-3.4 in "vparser/ply". The
+license of PLY is BSD.
 
 Publication
 ===========
