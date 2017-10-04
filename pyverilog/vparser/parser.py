@@ -162,10 +162,24 @@ class VerilogParser(PLYParser):
         p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
+    def p_param_signed(self, p):
+        'param : PARAMETER SIGNED param_substitution_list COMMA'
+        paramlist = [Parameter(rname, rvalue, signed=True, lineno=p.lineno(2))
+                     for rname, rvalue in p[3]]
+        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
     def p_param_width(self, p):
         'param : PARAMETER width param_substitution_list COMMA'
         paramlist = [Parameter(rname, rvalue, p[2], lineno=p.lineno(3))
                      for rname, rvalue in p[3]]
+        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_param_signed_width(self, p):
+        'param : PARAMETER SIGNED width param_substitution_list COMMA'
+        paramlist = [Parameter(rname, rvalue, p[3], signed=True, lineno=p.lineno(3))
+                     for rname, rvalue in p[4]]
         p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -183,10 +197,24 @@ class VerilogParser(PLYParser):
         p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
+    def p_param_end_signed(self, p):
+        'param_end : PARAMETER SIGNED param_substitution_list'
+        paramlist = [Parameter(rname, rvalue, signed=True, lineno=p.lineno(2))
+                     for rname, rvalue in p[3]]
+        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
     def p_param_end_width(self, p):
         'param_end : PARAMETER width param_substitution_list'
         paramlist = [Parameter(rname, rvalue, p[2], lineno=p.lineno(3))
                      for rname, rvalue in p[3]]
+        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_param_end_signed_width(self, p):
+        'param_end : PARAMETER SIGNED width param_substitution_list'
+        paramlist = [Parameter(rname, rvalue, p[3], signed=True, lineno=p.lineno(3))
+                     for rname, rvalue in p[4]]
         p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -685,10 +713,24 @@ class VerilogParser(PLYParser):
         p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
+    def p_parameterdecl_signed(self, p):
+        'parameterdecl : PARAMETER SIGNED param_substitution_list SEMICOLON'
+        paramlist = [Parameter(rname, rvalue, signed=True, lineno=p.lineno(2))
+                     for rname, rvalue in p[3]]
+        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
     def p_parameterdecl_width(self, p):
         'parameterdecl : PARAMETER width param_substitution_list SEMICOLON'
         paramlist = [Parameter(rname, rvalue, p[2], lineno=p.lineno(3))
                      for rname, rvalue in p[3]]
+        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_parameterdecl_signed_width(self, p):
+        'parameterdecl : PARAMETER SIGNED width param_substitution_list SEMICOLON'
+        paramlist = [Parameter(rname, rvalue, p[3], signed=True, lineno=p.lineno(3))
+                     for rname, rvalue in p[4]]
         p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -706,10 +748,24 @@ class VerilogParser(PLYParser):
         p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
+    def p_localparamdecl_signed(self, p):
+        'localparamdecl : LOCALPARAM SIGNED param_substitution_list SEMICOLON'
+        paramlist = [Localparam(rname, rvalue, signed=True, lineno=p.lineno(2))
+                     for rname, rvalue in p[3]]
+        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
     def p_localparamdecl_width(self, p):
         'localparamdecl : LOCALPARAM width param_substitution_list SEMICOLON'
         paramlist = [Localparam(rname, rvalue, p[2], lineno=p.lineno(3))
                      for rname, rvalue in p[3]]
+        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_localparamdecl_signed_width(self, p):
+        'localparamdecl : LOCALPARAM SIGNED width param_substitution_list SEMICOLON'
+        paramlist = [Localparam(rname, rvalue, p[3], signed=True, lineno=p.lineno(3))
+                     for rname, rvalue in p[4]]
         p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
