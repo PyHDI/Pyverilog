@@ -1818,16 +1818,19 @@ class LRTable(object):
         self.lr_productions = None
         self.lr_method = None
 
-    def read_table(self,module):
+    def read_table(self,module,outputdir)
         if isinstance(module,types.ModuleType):
             parsetab = module
         else:
+            old_path = sys.path
+            sys.path = [outputdir]
             if sys.version_info[0] < 3:
                 exec("import %s as parsetab" % module)
             else:
                 env = { }
                 exec("import %s as parsetab" % module, env, env)
                 parsetab = env['parsetab']
+            sys.path = old_path
 
         if parsetab._tabversion != __tabversion__:
             raise VersionError("yacc table file version is out of date")
@@ -3070,7 +3073,7 @@ def yacc(method='LALR', debug=yaccdebug, module=None, tabmodule=tab_module, star
         if picklefile:
             read_signature = lr.read_pickle(picklefile)
         else:
-            read_signature = lr.read_table(tabmodule)
+            read_signature = lr.read_table(tabmodule,outputdir)
         if optimize or (read_signature == signature):
             try:
                 lr.bind_callables(pinfo.pdict)
