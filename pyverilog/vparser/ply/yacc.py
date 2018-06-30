@@ -1818,7 +1818,7 @@ class LRTable(object):
         self.lr_productions = None
         self.lr_method = None
 
-    def read_table(self,module,outputdir)
+    def read_table(self,module,outputdir):
         if isinstance(module,types.ModuleType):
             parsetab = module
         else:
