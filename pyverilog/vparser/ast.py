@@ -458,6 +458,12 @@ class Always(Node):
         if self.statement: nodelist.append(self.statement)
         return tuple(nodelist)
 
+class AlwaysFF(Always):
+    pass
+
+class AlwaysComb(Always):
+    pass
+
 class SensList(Node):
     attr_names = ()
     def __init__(self, list, lineno=0):
