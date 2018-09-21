@@ -1372,6 +1372,7 @@ class VerilogParser(PLYParser):
         """basic_statement : if_statement
         | case_statement
         | casex_statement
+        | unique_case_statement
         | for_statement
         | while_statement
         | event_statement
@@ -1613,6 +1614,12 @@ class VerilogParser(PLYParser):
         'casex_statement : CASEX LPAREN case_comp RPAREN casecontent_statements ENDCASE'
         p[0] = CasexStatement(p[3], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+
+    def p_unique_case_statement(self, p):
+        'unique_case_statement : UNIQUE CASE LPAREN case_comp RPAREN casecontent_statements ENDCASE'
+        p[0] = UniqueCaseStatement(p[3], p[5], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
 
     def p_case_comp(self, p):
         'case_comp : expression'
