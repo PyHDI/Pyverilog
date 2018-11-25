@@ -9,7 +9,7 @@ version = m.group(1) if m is not None else '0.0.0'
 
 
 def read(filename):
-    return open(os.path.join(os.path.dirname(__file__), filename)).read()
+    return open(os.path.join(os.path.dirname(__file__), filename), encoding='utf8').read()
 
 
 setup(name='pyverilog',
@@ -22,9 +22,9 @@ setup(name='pyverilog',
       url='https://github.com/PyHDI/Pyverilog',
       packages=find_packages(),
       package_data={'pyverilog.ast_code_generator': ['template/*'], },
-      install_requires=['Jinja2>=2.8'],
+      install_requires=['Jinja2>=2.10'],
       extras_require={
           'graph': ['pygraphviz>=1.3.1'],
-          'test': ['pytest>=2.8.2', 'pytest-pythonpath>=0.7'],
+          'test': ['pytest>=3.2', 'pytest-pythonpath>=0.7'],
       },
       )
