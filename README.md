@@ -59,46 +59,43 @@ Installation
 Requirements
 --------------------
 
-- Python: 2.7, 3.4 or later
+- Python3: 3.6 or later
 
-Python3 is recommended.
+- Icarus Verilog: 10.1 or later
 
-- Icarus Verilog: 0.9.7 or later
+```
+sudo apt install iverilog
+```
 
-Install on your platform. For exmple, on Ubuntu:
+- Jinja2: 2.10 or later
+- pytest: 3.2 or later
+- pytest-pythonpath: 0.7 or later
 
-    sudo apt-get install iverilog
-
-- Jinja2: 2.8 or later
-
-Install on your python environment by using pip.
-
-    pip install jinja2
+```
+pip3 install jinja2 pytest pytest-pythonpath
+```
 
 Options
 --------------------
-
-- pytest: 2.8.2 or later
-- pytest-pythonpath: 0.7 or later
-
-These softwares are required for running the tests in tests and examples.
-
-    pip install pytest pytest-pythonpath
 
 - Graphviz: 2.38.0 or later
 - Pygraphviz: 1.3.1 or later
 
 These softwares are required for graph visualization by dataflow/graphgen.py and controlflow/controlflow_analyzer.py.
 
-    sudo apt-get install graphviz
-    pip install pygraphviz
+```
+sudo apt install graphviz
+pip3 install pygraphviz
+```
 
 Install
 --------------------
 
-Install Pyverilog.
+Install Pyverilog:
 
-    python setup.py install
+```
+python3 setup.py install
+```
 
 
 Tools
@@ -154,7 +151,7 @@ Code parser
 Let's try syntax analysis. Please type the command as below.
 
 ```
-python pyverilog/examples/example_parser.py test.v
+python3 pyverilog/examples/example_parser.py test.v
 ```
 
 Then you got the result as below. The result of syntax analysis is displayed.
@@ -265,7 +262,7 @@ Dataflow analyzer
 Let's try dataflow analysis. Please type the command as below.
 
 ```
-python pyverilog/examples/example_dataflow_analyzer.py -t top test.v 
+python3 pyverilog/examples/example_dataflow_analyzer.py -t top test.v 
 ```
 
 Then you got the result as below. The result of each signal definition and each signal assignment are displayed.
@@ -291,7 +288,7 @@ Bind:
 Let's view the result of dataflow analysis as a picture file. Now we select 'led' as the target. Please type the command as below. In this example, Graphviz and Pygraphviz are installed.
 
 ```
-python pyverilog/examples/example_graphgen.py -t top -s top.led test.v 
+python3 pyverilog/examples/example_graphgen.py -t top -s top.led test.v 
 ```
 
 Then you got a png file (out.png). The picture shows that the definition of 'led' is a part-selection of 'count' from 23-bit to 16-bit.
@@ -304,7 +301,7 @@ Control-flow analyzer
 Let's try control-flow analysis. Please type the command as below. In this example, Graphviz and Pygraphviz are installed. If don't use Graphviz, please append "--nograph" option.
 
 ```
-python pyverilog/examples/example_controlflow_analyzer.py -t top test.v 
+python3 pyverilog/examples/example_controlflow_analyzer.py -t top test.v 
 ```
 
 Then you got the result as below. The result shows that the state machine structure and transition conditions to the next state in the state machine.
@@ -400,7 +397,7 @@ if __name__ == '__main__':
 Please type the command as below at the same directory with Pyverilog.
 
 ```
-python test.py
+python3 test.py
 ```
 
 Then Verilog HDL code generated from the AST instances is displayed.
