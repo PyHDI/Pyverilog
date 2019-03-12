@@ -115,6 +115,7 @@ class VerilogParser(PLYParser):
         p[0] = ModuleDef(name=p[2], paramlist=p[3], portlist=p[4], items=p[5],
                          default_nettype=self.get_default_nettype(), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(6)
 
     def p_modulename(self, p):
         'modulename : ID'
