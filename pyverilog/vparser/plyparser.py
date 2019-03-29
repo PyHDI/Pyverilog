@@ -1,12 +1,10 @@
-#-----------------------------------------------------------------
-# plyparser.py
-#
-# PLYParser class and other utilites for simplifying programming
-# parsers with PLY
-#
-# Copyright (C) 2008-2011, Eli Bendersky
-# License: BSD
-#-----------------------------------------------------------------
+"""
+   Copyright 2008-2011, Eli Bendersky
+
+   License: BSD
+
+   PLYParser class and other utilites for simplifying programming parsers with PLY
+"""
 
 
 class Coord(object):
@@ -15,6 +13,7 @@ class Coord(object):
             - Line number
             - (optional) column number, for the Lexer
     """
+
     def __init__(self, file, line, column=None):
         self.file = file
         self.line = line
@@ -22,11 +21,13 @@ class Coord(object):
 
     def __str__(self):
         str = "%s:%s" % (self.file, self.line)
-        if self.column: str += ":%s" % self.column
+        if self.column:
+            str += ":%s" % self.column
         return str
 
 
-class ParseError(Exception): pass
+class ParseError(Exception):
+    pass
 
 
 class PLYParser(object):
@@ -43,12 +44,12 @@ class PLYParser(object):
         optrule.__doc__ = '%s : empty\n| %s' % (optname, rulename)
         optrule.__name__ = 'p_%s' % optname
         setattr(self.__class__, optrule.__name__, optrule)
-    
+
     def _coord(self, lineno, column=None):
         return Coord(
-                file=self.lexer.filename, 
-                line=lineno,
-                column=column)
+            file=self.lexer.filename,
+            line=lineno,
+            column=column)
 
     def _parse_error(self, msg, coord):
         raise ParseError("%s: %s" % (coord, msg))

@@ -1,12 +1,19 @@
-#-------------------------------------------------------------------------
-# parser.py
-#
-# Verilog Parser
-#
-# Copyright (C) 2013, Shinya Takamaeda-Yamazaki
-# License: Apache 2.0
-# Contributor: ryosuke fukatani
-#-------------------------------------------------------------------------
+"""
+   Copyright 2013, Shinya Takamaeda-Yamazaki and Contributors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+"""
+
 from __future__ import absolute_import
 from __future__ import print_function
 import sys
@@ -63,9 +70,9 @@ class VerilogParser(PLYParser):
     def parse(self, text, debug=0):
         return self.parser.parse(text, lexer=self.lexer, debug=debug)
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Parse Rule Definition
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_source_text(self, p):
         'source_text : description'
         p[0] = Source(name='', description=p[1], lineno=p.lineno(1))
@@ -96,7 +103,7 @@ class VerilogParser(PLYParser):
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_pragma_assign(self, p):
         'pragma : LPAREN TIMES ID EQUALS expression TIMES RPAREN'
         p[0] = Pragma(PragmaEntry(p[3], p[5], lineno=p.lineno(1)),
@@ -109,7 +116,7 @@ class VerilogParser(PLYParser):
                       lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_moduledef(self, p):
         'moduledef : MODULE modulename paramlist portlist items ENDMODULE'
         p[0] = ModuleDef(name=p[2], paramlist=p[3], portlist=p[4], items=p[5],
@@ -324,7 +331,7 @@ class VerilogParser(PLYParser):
         if isinstance(p[3], str):
             t = None
             for r in reversed(p[1]):
-                if isinstance(r.first,  Input):
+                if isinstance(r.first, Input):
                     t = Ioport(Input(name=p[3], width=r.first.width, lineno=p.lineno(3)),
                                lineno=p.lineno(3))
                     break
@@ -338,7 +345,7 @@ class VerilogParser(PLYParser):
                                    lineno=p.lineno(3)),
                                lineno=p.lineno(3))
                     break
-                if isinstance(r.first,  Inout):
+                if isinstance(r.first, Inout):
                     t = Ioport(Inout(name=p[3], width=r.first.width, lineno=p.lineno(3)),
                                lineno=p.lineno(3))
                     break
@@ -801,7 +808,7 @@ class VerilogParser(PLYParser):
         p[0] = Assign(p[3], p[6], p[2], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_lpartselect_lpointer(self, p):
         'lpartselect : pointer LBRACKET expression COLON expression RBRACKET'
         p[0] = Partselect(p[1], p[3], p[5], lineno=p.lineno(1))
@@ -897,7 +904,7 @@ class VerilogParser(PLYParser):
         p[0] = Rvalue(p[1], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Level 1 (Highest Priority)
     def p_expression_uminus(self, p):
         'expression : MINUS expression %prec UMINUS'
@@ -949,14 +956,14 @@ class VerilogParser(PLYParser):
         p[0] = Uxnor(p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Level 2
     def p_expression_power(self, p):
         'expression : expression POWER expression'
         p[0] = Power(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Level 3
     def p_expression_times(self, p):
         'expression : expression TIMES expression'
@@ -973,7 +980,7 @@ class VerilogParser(PLYParser):
         p[0] = Mod(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Level 4
     def p_expression_plus(self, p):
         'expression : expression PLUS expression'
@@ -985,7 +992,7 @@ class VerilogParser(PLYParser):
         p[0] = Minus(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Level 5
     def p_expression_sll(self, p):
         'expression : expression LSHIFT expression'
@@ -1007,7 +1014,7 @@ class VerilogParser(PLYParser):
         p[0] = Sra(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Level 6
     def p_expression_lessthan(self, p):
         'expression : expression LT expression'
@@ -1029,7 +1036,7 @@ class VerilogParser(PLYParser):
         p[0] = GreaterEq(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Level 7
     def p_expression_eq(self, p):
         'expression : expression EQ expression'
@@ -1051,7 +1058,7 @@ class VerilogParser(PLYParser):
         p[0] = NotEql(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Level 8
     def p_expression_And(self, p):
         'expression : expression AND expression'
@@ -1068,41 +1075,41 @@ class VerilogParser(PLYParser):
         p[0] = Xnor(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Level 9
     def p_expression_Or(self, p):
         'expression : expression OR expression'
         p[0] = Or(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Level 10
     def p_expression_land(self, p):
         'expression : expression LAND expression'
         p[0] = Land(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Level 11
     def p_expression_lor(self, p):
         'expression : expression LOR expression'
         p[0] = Lor(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Level 12
     def p_expression_cond(self, p):
         'expression : expression COND expression COLON expression'
         p[0] = Cond(p[1], p[3], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_expression_expr(self, p):
         'expression : LPAREN expression RPAREN'
         p[0] = p[2]
         p.set_lineno(0, p.lineno(2))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_expression_concat(self, p):
         'expression : concat'
         p[0] = p[1]
@@ -1207,7 +1214,7 @@ class VerilogParser(PLYParser):
         p[0] = Pointer(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_const_expression_intnum(self, p):
         'const_expression : intnumber'
         p[0] = IntConst(p[1], lineno=p.lineno(1))
@@ -1241,14 +1248,14 @@ class VerilogParser(PLYParser):
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # String Literal
     def p_stringliteral(self, p):
         'stringliteral : STRING_LITERAL'
         p[0] = p[1][1:-1]  # strip \" and \"
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     # Always
     def p_always(self, p):
         'always : ALWAYS senslist always_statement'
@@ -1377,7 +1384,7 @@ class VerilogParser(PLYParser):
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_blocking_substitution(self, p):
         'blocking_substitution : delays lvalue EQUALS delays rvalue SEMICOLON'
         p[0] = BlockingSubstitution(p[2], p[5], p[1], p[4], lineno=p.lineno(2))
@@ -1394,7 +1401,7 @@ class VerilogParser(PLYParser):
             p[2], p[5], p[1], p[4], lineno=p.lineno(2))
         p.set_lineno(0, p.lineno(2))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_delays(self, p):
         'delays : DELAY LPAREN expression RPAREN'
         p[0] = DelayStatement(p[3], lineno=p.lineno(1))
@@ -1421,7 +1428,7 @@ class VerilogParser(PLYParser):
         'delays : empty'
         p[0] = None
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_block(self, p):
         'block : BEGIN block_statements END'
         p[0] = Block(p[2], lineno=p.lineno(1))
@@ -1447,7 +1454,7 @@ class VerilogParser(PLYParser):
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_namedblock(self, p):
         'namedblock : BEGIN COLON ID namedblock_statements END'
         p[0] = Block(p[4], p[3], lineno=p.lineno(1))
@@ -1478,14 +1485,14 @@ class VerilogParser(PLYParser):
         """
         if isinstance(p[1], Decl):
             for r in p[1].list:
-                if (not isinstance(r, Reg) and not isinstance(r, Wire) and
-                    not isinstance(r, Integer) and not isinstance(r, Real) and
-                        not isinstance(r, Parameter) and not isinstance(r, Localparam)):
+                if (not isinstance(r, Reg) and not isinstance(r, Wire)
+                    and not isinstance(r, Integer) and not isinstance(r, Real)
+                        and not isinstance(r, Parameter) and not isinstance(r, Localparam)):
                     raise ParseError("Syntax Error")
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_parallelblock(self, p):
         'parallelblock : FORK block_statements JOIN'
         p[0] = ParallelBlock(p[2], lineno=p.lineno(1))
@@ -1496,7 +1503,7 @@ class VerilogParser(PLYParser):
         p[0] = ParallelBlock((), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_if_statement(self, p):
         'if_statement : IF LPAREN cond RPAREN true_statement ELSE else_statement'
         p[0] = IfStatement(p[3], p[5], p[7], lineno=p.lineno(1))
@@ -1537,7 +1544,7 @@ class VerilogParser(PLYParser):
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_for_statement(self, p):
         'for_statement : FOR LPAREN forpre forcond forpost RPAREN forcontent_statement'
         p[0] = ForStatement(p[3], p[4], p[5], p[7], lineno=p.lineno(1))
@@ -1577,7 +1584,7 @@ class VerilogParser(PLYParser):
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_while_statement(self, p):
         'while_statement : WHILE LPAREN cond RPAREN whilecontent_statement'
         p[0] = WhileStatement(p[3], p[5], lineno=p.lineno(1))
@@ -1588,7 +1595,7 @@ class VerilogParser(PLYParser):
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_case_statement(self, p):
         'case_statement : CASE LPAREN case_comp RPAREN casecontent_statements ENDCASE'
         p[0] = CaseStatement(p[3], p[5], lineno=p.lineno(1))
@@ -1634,7 +1641,7 @@ class VerilogParser(PLYParser):
         p[0] = Case(None, p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_initial(self, p):
         'initial : INITIAL initial_statement'
         p[0] = Initial(p[2], lineno=p.lineno(1))
@@ -1645,13 +1652,13 @@ class VerilogParser(PLYParser):
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_event_statement(self, p):
         'event_statement : senslist SEMICOLON'
         p[0] = EventStatement(p[1], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_wait_statement(self, p):
         'wait_statement : WAIT LPAREN cond RPAREN waitcontent_statement'
         p[0] = WaitStatement(p[3], p[5], lineno=p.lineno(1))
@@ -1667,13 +1674,13 @@ class VerilogParser(PLYParser):
         p[0] = None
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_forever_statement(self, p):
         'forever_statement : FOREVER basic_statement'
         p[0] = ForeverStatement(p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_instance(self, p):
         'instance : ID parameterlist instance_bodylist SEMICOLON'
         instancelist = []
@@ -1847,7 +1854,7 @@ class VerilogParser(PLYParser):
         p[0] = PortArg(p[2], None, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_genvardecl(self, p):
         'genvardecl : GENVAR genvarlist SEMICOLON'
         p[0] = Decl(p[2], lineno=p.lineno(1))
@@ -1946,7 +1953,7 @@ class VerilogParser(PLYParser):
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_systemcall_noargs(self, p):
         'systemcall : DOLLER ID'
         p[0] = SystemCall(p[2], (), lineno=p.lineno(1))
@@ -1981,7 +1988,7 @@ class VerilogParser(PLYParser):
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_function(self, p):
         'function : FUNCTION width ID SEMICOLON function_statement ENDFUNCTION'
         p[0] = Function(p[3], p[2], p[5], lineno=p.lineno(1))
@@ -2017,8 +2024,8 @@ class VerilogParser(PLYParser):
         """
         if isinstance(p[1], Decl):
             for r in p[1].list:
-                if (not isinstance(r, Input) and not isinstance(r, Reg) and
-                        not isinstance(r, Integer)):
+                if (not isinstance(r, Input) and not isinstance(r, Reg)
+                        and not isinstance(r, Integer)):
                     raise ParseError("Syntax Error")
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
@@ -2055,7 +2062,7 @@ class VerilogParser(PLYParser):
         'func_args : empty'
         p[0] = ()
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_task(self, p):
         'task : TASK ID SEMICOLON task_statement ENDTASK'
         p[0] = Task(p[2], p[4], lineno=p.lineno(1))
@@ -2086,8 +2093,8 @@ class VerilogParser(PLYParser):
         """
         if isinstance(p[1], Decl):
             for r in p[1].list:
-                if (not isinstance(r, Input) and not isinstance(r, Reg) and
-                        not isinstance(r, Integer)):
+                if (not isinstance(r, Input) and not isinstance(r, Reg)
+                        and not isinstance(r, Integer)):
                     raise ParseError("Syntax Error")
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
@@ -2105,7 +2112,7 @@ class VerilogParser(PLYParser):
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_identifier(self, p):
         'identifier : ID'
         p[0] = Identifier(p[1], lineno=p.lineno(1))
@@ -2116,7 +2123,7 @@ class VerilogParser(PLYParser):
         p[0] = Identifier(p[2], p[1], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_scope(self, p):
         'scope : identifier DOT'
         scope = () if p[1].scope is None else p[1].scope.labellist
@@ -2131,13 +2138,13 @@ class VerilogParser(PLYParser):
                                                              p[1].ptr, lineno=p.lineno(1)),), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_disable(self, p):
         'disable : DISABLE ID'
         p[0] = Disable(p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_single_statement_delays(self, p):
         'single_statement : DELAY expression SEMICOLON'
         p[0] = SingleStatement(DelayStatement(
@@ -2170,12 +2177,12 @@ class VerilogParser(PLYParser):
     #    p[0] = FunctionCall(p[1], (), lineno=p.lineno(1))
     #    p.set_lineno(0, p.lineno(1))
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_empty(self, p):
         'empty : '
         pass
 
-    ######################################################################
+    # --------------------------------------------------------------------------
     def p_error(self, p):
         print("Syntax error")
         if p:
@@ -2184,8 +2191,6 @@ class VerilogParser(PLYParser):
                 self._coord(p.lineno))
         else:
             self._parse_error('At end of input', '')
-
-#-------------------------------------------------------------------------
 
 
 class VerilogCodeParser(object):
@@ -2214,8 +2219,6 @@ class VerilogCodeParser(object):
 
     def get_directives(self):
         return self.directives
-
-#-------------------------------------------------------------------------
 
 
 def parse(filelist, preprocess_include=None, preprocess_define=None):
