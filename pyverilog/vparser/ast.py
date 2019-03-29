@@ -25,7 +25,7 @@ class Node(object):
         if self.attr_names:
             if attrnames:
                 nvlist = [(n, getattr(self,n)) for n in self.attr_names]
-                attrstr = ', '.join('%s=%s' & nv for nv in nvlist)
+                attrstr = ', '.join('%s=%s' % (n, v) for (n, v) in nvlist)
             else:
                 vlist = [getattr(self,n) for n in self.attr_names]
                 attrstr = ', '.join('%s' % v for v in vlist)
