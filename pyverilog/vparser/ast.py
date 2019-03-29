@@ -14,10 +14,10 @@ import re
 
 class Node(object):
     '''Abstact class for every element in parser'''
-    
+
     def children(self):
         pass
-    
+
     def show(self, buf=sys.stdout, offset=0, attrnames=False, showlineno=True):
         indent = 2
         lead = ' ' * offset
@@ -35,7 +35,7 @@ class Node(object):
         buf.write('\n')
         for c in self.children():
             c.show(buf, offset + indent, attrnames, showlineno)
-            
+
     def __eq__(self, other):
         if type(self) != type(other): return False
         self_attrs = tuple( [ getattr(self, a) for a in self.attr_names ] )
@@ -45,10 +45,10 @@ class Node(object):
         for i, c in enumerate(self.children()):
             if c != other_children[i]: return False
         return True
-    
+
     def __ne__(self, other):
         return not self.__eq__(other)
-    
+
     def __hash__(self):
         s = hash(tuple([getattr(self, a) for a in self.attr_names]))
         c = hash(self.children())
@@ -458,6 +458,12 @@ class Always(Node):
         if self.statement: nodelist.append(self.statement)
         return tuple(nodelist)
 
+class AlwaysFF(Always):
+    pass
+
+class AlwaysComb(Always):
+    pass
+
 class SensList(Node):
     attr_names = ()
     def __init__(self, list, lineno=0):
@@ -552,6 +558,8 @@ class CaseStatement(Node):
         return tuple(nodelist)
 
 class CasexStatement(CaseStatement): pass
+
+class UniqueCaseStatement(CaseStatement): pass
 
 class Case(Node):
     attr_names = ()

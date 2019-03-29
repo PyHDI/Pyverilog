@@ -43,10 +43,10 @@ class VerilogLexer(object):
     keywords = (
         'MODULE', 'ENDMODULE', 'BEGIN', 'END', 'GENERATE', 'ENDGENERATE', 'GENVAR',
         'FUNCTION', 'ENDFUNCTION', 'TASK', 'ENDTASK',
-        'INPUT', 'INOUT', 'OUTPUT', 'TRI', 'REG', 'WIRE', 'INTEGER', 'REAL', 'SIGNED',
+        'INPUT', 'INOUT', 'OUTPUT', 'TRI', 'REG', 'LOGIC', 'WIRE', 'INTEGER', 'REAL', 'SIGNED',
         'PARAMETER', 'LOCALPARAM', 'SUPPLY0', 'SUPPLY1',
-        'ASSIGN', 'ALWAYS', 'SENS_OR', 'POSEDGE', 'NEGEDGE', 'INITIAL',
-        'IF', 'ELSE', 'FOR', 'WHILE', 'CASE', 'CASEX', 'ENDCASE', 'DEFAULT',
+        'ASSIGN', 'ALWAYS', 'ALWAYS_FF', 'ALWAYS_COMB', 'SENS_OR', 'POSEDGE', 'NEGEDGE', 'INITIAL',
+        'IF', 'ELSE', 'FOR', 'WHILE', 'CASE', 'CASEX', 'UNIQUE', 'ENDCASE', 'DEFAULT',
         'WAIT', 'FOREVER', 'DISABLE', 'FORK', 'JOIN',
         )
 
@@ -266,18 +266,18 @@ def dump_tokens(text):
     def my_error_func(msg, a, b):
         sys.write(msg + "\n")
         sys.exit()
-        
+
     lexer = VerilogLexer(error_func=my_error_func)
     lexer.build()
     lexer.input(text)
 
     ret = []
-    
+
     # Tokenize
     while True:
         tok = lexer.token()
         if not tok: break # No more input
         ret.append("%s %s %d %s %d\n" %
                    (tok.value, tok.type, tok.lineno, lexer.filename, tok.lexpos))
-        
+
     return ''.join(ret)
