@@ -122,6 +122,7 @@ class VerilogParser(PLYParser):
         p[0] = ModuleDef(name=p[2], paramlist=p[3], portlist=p[4], items=p[5],
                          default_nettype=self.get_default_nettype(), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(6)
 
     def p_modulename(self, p):
         'modulename : ID'
@@ -306,6 +307,11 @@ class VerilogParser(PLYParser):
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
+    def p_sigtype_logic(self, p):
+        'sigtype : LOGIC'
+        p[0] = p[1]
+        p.set_lineno(0, p.lineno(1))
+
     def p_sigtype_wire(self, p):
         'sigtype : WIRE'
         p[0] = p[1]
@@ -465,6 +471,8 @@ class VerilogParser(PLYParser):
         | genvardecl
         | assignment
         | always
+        | always_ff
+        | always_comb
         | initial
         | instance
         | function
@@ -1262,6 +1270,14 @@ class VerilogParser(PLYParser):
         p[0] = Always(p[2], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
+    def p_always_ff(self, p):
+        'always_ff : ALWAYS_FF senslist always_statement'
+        p[0] = AlwaysFF(p[2], p[3], lineno=p.lineno(1))
+
+    def p_always_comb(self, p):
+        'always_comb : ALWAYS_COMB senslist always_statement'
+        p[0] = AlwaysComb(p[2], p[3], lineno=p.lineno(1))
+
     def p_sens_egde_paren(self, p):
         'senslist : AT LPAREN edgesigs RPAREN'
         p[0] = SensList(p[3], lineno=p.lineno(1))
@@ -1364,6 +1380,7 @@ class VerilogParser(PLYParser):
         """basic_statement : if_statement
         | case_statement
         | casex_statement
+        | unique_case_statement
         | for_statement
         | while_statement
         | event_statement
@@ -1605,6 +1622,12 @@ class VerilogParser(PLYParser):
         'casex_statement : CASEX LPAREN case_comp RPAREN casecontent_statements ENDCASE'
         p[0] = CasexStatement(p[3], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+
+    def p_unique_case_statement(self, p):
+        'unique_case_statement : UNIQUE CASE LPAREN case_comp RPAREN casecontent_statements ENDCASE'
+        p[0] = UniqueCaseStatement(p[3], p[5], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
 
     def p_case_comp(self, p):
         'case_comp : expression'
