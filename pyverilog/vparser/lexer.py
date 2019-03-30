@@ -1,12 +1,19 @@
-#-------------------------------------------------------------------------------
-# lexer.py
-#
-# Verilog Lexical Analyzer
-#
-# Copyright (C) 2013, Shinya Takamaeda-Yamazaki
-# License: Apache 2.0
-# Contributor: ryosuke fukatani
-#-------------------------------------------------------------------------------
+"""
+   Copyright 2013, Shinya Takamaeda-Yamazaki and Contributors
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+"""
+
 from __future__ import absolute_import
 from __future__ import print_function
 import sys
@@ -15,8 +22,10 @@ import re
 
 from pyverilog.vparser.ply.lex import *
 
+
 class VerilogLexer(object):
     """ Verilog HDL Lexical Analayzer """
+
     def __init__(self, error_func):
         self.filename = ''
         self.error_func = error_func
@@ -25,6 +34,7 @@ class VerilogLexer(object):
 
     def build(self, **kwargs):
         self.lexer = lex(object=self, **kwargs)
+
     def input(self, data):
         self.lexer.input(data)
 
@@ -48,7 +58,7 @@ class VerilogLexer(object):
         'ASSIGN', 'ALWAYS', 'SENS_OR', 'POSEDGE', 'NEGEDGE', 'INITIAL',
         'IF', 'ELSE', 'FOR', 'WHILE', 'CASE', 'CASEX', 'ENDCASE', 'DEFAULT',
         'WAIT', 'FOREVER', 'DISABLE', 'FORK', 'JOIN',
-        )
+    )
 
     reserved = {}
     for keyword in keywords:
@@ -58,31 +68,31 @@ class VerilogLexer(object):
             reserved[keyword.lower()] = keyword
 
     operators = (
-        'PLUS','MINUS','POWER','TIMES','DIVIDE','MOD',
+        'PLUS', 'MINUS', 'POWER', 'TIMES', 'DIVIDE', 'MOD',
         'NOT', 'OR', 'NOR', 'AND', 'NAND', 'XOR', 'XNOR',
         'LOR', 'LAND', 'LNOT',
         'LSHIFTA', 'RSHIFTA', 'LSHIFT', 'RSHIFT',
         'LT', 'GT', 'LE', 'GE', 'EQ', 'NE', 'EQL', 'NEL',
-        'COND', # ?
+        'COND',  # ?
         'EQUALS',
-        )
+    )
 
     tokens = keywords + operators + (
         'ID',
-        'AT','COMMA','COLON','SEMICOLON', 'DOT',
+        'AT', 'COMMA', 'COLON', 'SEMICOLON', 'DOT',
         'PLUSCOLON', 'MINUSCOLON',
         'FLOATNUMBER', 'STRING_LITERAL',
         'INTNUMBER_DEC', 'SIGNED_INTNUMBER_DEC',
         'INTNUMBER_HEX', 'SIGNED_INTNUMBER_HEX',
         'INTNUMBER_OCT', 'SIGNED_INTNUMBER_OCT',
         'INTNUMBER_BIN', 'SIGNED_INTNUMBER_BIN',
-        'LPAREN','RPAREN', 'LBRACKET', 'RBRACKET', 'LBRACE', 'RBRACE',
+        'LPAREN', 'RPAREN', 'LBRACKET', 'RBRACKET', 'LBRACE', 'RBRACE',
         'DELAY', 'DOLLER',
-        )
+    )
 
     skipped = (
         'COMMENTOUT', 'LINECOMMENT', 'DIRECTIVE',
-        )
+    )
 
     # Ignore
     t_ignore = ' \t'
@@ -92,10 +102,11 @@ class VerilogLexer(object):
 
     @TOKEN(directive)
     def t_DIRECTIVE(self, t):
-        self.directives.append( (self.lexer.lineno, t.value) )
+        self.directives.append((self.lexer.lineno, t.value))
         t.lexer.lineno += t.value.count("\n")
         m = re.match("^`default_nettype\s+(.+)\n", t.value)
-        if m: self.default_nettype = m.group(1)
+        if m:
+            self.default_nettype = m.group(1)
         pass
 
     # Comment
@@ -181,14 +192,15 @@ class VerilogLexer(object):
 
     exponent_part = r"""([eE][-+]?[0-9]+)"""
     fractional_constant = r"""([0-9]*\.[0-9]+)|([0-9]+\.)"""
-    float_number = '(((('+fractional_constant+')'+exponent_part+'?)|([0-9]+'+exponent_part+')))'
+    float_number = '((((' + fractional_constant + ')' + \
+        exponent_part + '?)|([0-9]+' + exponent_part + ')))'
 
     simple_escape = r"""([a-zA-Z\\?'"])"""
     octal_escape = r"""([0-7]{1,3})"""
     hex_escape = r"""(x[0-9a-fA-F]+)"""
-    escape_sequence = r"""(\\("""+simple_escape+'|'+octal_escape+'|'+hex_escape+'))'
-    string_char = r"""([^"\\\n]|"""+escape_sequence+')'
-    string_literal = '"'+string_char+'*"'
+    escape_sequence = r"""(\\(""" + simple_escape + '|' + octal_escape + '|' + hex_escape + '))'
+    string_char = r"""([^"\\\n]|""" + escape_sequence + ')'
+    string_literal = '"' + string_char + '*"'
 
     identifier = r"""(([a-zA-Z_])([a-zA-Z_0-9$])*)|((\\\S)(\S)*)"""
 
@@ -218,11 +230,11 @@ class VerilogLexer(object):
 
     @TOKEN(signed_hex_number)
     def t_SIGNED_INTNUMBER_HEX(self, t):
-         return t
+        return t
 
     @TOKEN(hex_number)
     def t_INTNUMBER_HEX(self, t):
-         return t
+        return t
 
     @TOKEN(signed_decimal_number)
     def t_SIGNED_INTNUMBER_DEC(self, t):
@@ -254,30 +266,32 @@ class VerilogLexer(object):
     def _find_tok_column(self, token):
         i = token.lexpos
         while i > 0:
-            if self.lexer.lexdata[i] == '\n': break
+            if self.lexer.lexdata[i] == '\n':
+                break
             i -= 1
         return (token.lexpos - i) + 1
 
     def _make_tok_location(self, token):
         return (token.lineno, self._find_tok_column(token))
 
-#-------------------------------------------------------------------------------
+
 def dump_tokens(text):
     def my_error_func(msg, a, b):
         sys.write(msg + "\n")
         sys.exit()
-        
+
     lexer = VerilogLexer(error_func=my_error_func)
     lexer.build()
     lexer.input(text)
 
     ret = []
-    
+
     # Tokenize
     while True:
         tok = lexer.token()
-        if not tok: break # No more input
+        if not tok:
+            break  # No more input
         ret.append("%s %s %d %s %d\n" %
                    (tok.value, tok.type, tok.lineno, lexer.filename, tok.lexpos))
-        
+
     return ''.join(ret)
