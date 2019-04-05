@@ -69,7 +69,7 @@ tracker <https://github.com/PyHDI/Pyverilog/issues>`__ on GitHub.
 for pull requests
 ~~~~~~~~~~~~~~~~~
 
-Please check CONTRIBUTORS.md for the contributors who provided pull
+Please check “CONTRIBUTORS.md” for the contributors who provided pull
 requests.
 
 Pyverilog uses **pytest** for the integration testing. **When you send a

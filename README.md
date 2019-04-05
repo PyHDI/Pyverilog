@@ -61,7 +61,7 @@ Please leave your comment on the [issue tracker](https://github.com/PyHDI/Pyveri
 
 ### for pull requests
 
-Please check CONTRIBUTORS.md for the contributors who provided pull requests.
+Please check "CONTRIBUTORS.md" for the contributors who provided pull requests.
 
 Pyverilog uses **pytest** for the integration testing. **When you send a pull request, please include a testing example with pytest.** 
 To write a testing code, please refer the existing testing examples in "tests" directory.
