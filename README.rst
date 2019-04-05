@@ -57,20 +57,26 @@ Contribute to Pyverilog
 =======================
 
 Pyverilog project always welcomes questions, bug reports, feature
-proposals, and pull requests on GitHub.
+proposals, and pull requests on
+`GitHub <https://github.com/PyHDI/Pyverilog>`__.
 
 for questions, bug reports, and feature proposals
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Please leave your comment on the issue tracker on GitHub.
+Please leave your comment on the `issue
+tracker <https://github.com/PyHDI/Pyverilog/issues>`__ on GitHub.
 
 for pull requests
 ~~~~~~~~~~~~~~~~~
 
+Please check CONTRIBUTORS.md for the contributors who provided pull
+requests.
+
 Pyverilog uses **pytest** for the integration testing. **When you send a
 pull request, please include a test example with pytest.** If the
 requested codes passes the testing successfully and have no obvious
-problem, they will be merged to the *develop* branch.
+problem, they will be merged to the *develop* branch by the main
+committers.
 
 Documentation
 =============
