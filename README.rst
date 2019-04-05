@@ -59,8 +59,18 @@ Contribute to Pyverilog
 Pyverilog project always welcomes questions, bug reports, feature
 proposals, and pull requests on GitHub.
 
-Pyverilog uses pytest for the integration testing. When you send a pull
-request, please include a test example with pytest.
+for questions, bug reports, and feature proposals
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Please leave your comment on the issue tracker on GitHub.
+
+for pull requests
+~~~~~~~~~~~~~~~~~
+
+Pyverilog uses **pytest** for the integration testing. **When you send a
+pull request, please include a test example with pytest.** If the
+requested codes passes the testing successfully and have no obvious
+problem, they will be merged to the *develop* branch.
 
 Documentation
 =============
