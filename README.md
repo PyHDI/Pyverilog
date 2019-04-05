@@ -63,7 +63,9 @@ Please leave your comment on the [issue tracker](https://github.com/PyHDI/Pyveri
 
 Please check CONTRIBUTORS.md for the contributors who provided pull requests.
 
-Pyverilog uses **pytest** for the integration testing. **When you send a pull request, please include a test example with pytest.**
+Pyverilog uses **pytest** for the integration testing. **When you send a pull request, please include a testing example with pytest.** 
+To write a testing code, please refer the existing testing examples in "tests" directory.
+
 If the requested codes passes the testing successfully and have no obvious problem, they will be merged to the *develop* branch by the main committers.
 
 
