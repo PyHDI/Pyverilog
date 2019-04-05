@@ -5,7 +5,7 @@ Pyverilog
 
 Python-based Hardware Design Processing Toolkit for Verilog HDL
 
-Copyright 2013, Shinya Takamaeda-Yamazaki
+Copyright 2013, Shinya Takamaeda-Yamazaki and Contributors
 
 License
 =======
@@ -52,6 +52,20 @@ Pyverilog includes **(1) code parser, (2) dataflow analyzer, (3)
 control-flow analyzer and (4) code generator**. You can create your own
 design analyzer, code translator and code generator of Verilog HDL based
 on this toolkit.
+
+Contribute to Pyverilog
+=======================
+
+Pyverilog project always welcomes questions, bug reports, feature
+proposals, and pull requests on GitHub.
+
+Pyverilog uses pytest for the integration testing. When you send a pull
+request, please include a test example with pytest.
+
+Documentation
+=============
+
+To be described.
 
 Installation
 ============
