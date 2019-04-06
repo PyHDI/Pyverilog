@@ -1,4 +1,4 @@
-Main Committer
+Main Committers
 ====================
 
 - Shinya Takamaeda-Yamazaki (@shtaxxx)
