@@ -18,7 +18,7 @@ license of PLY is BSD.
 Publication
 ===========
 
-If you use Pyverilog in your research, please cite my paper.
+If you use Pyverilog in your research, please cite the following paper.
 
 -  Shinya Takamaeda-Yamazaki: Pyverilog: A Python-based Hardware Design
    Processing Toolkit for Verilog HDL, 11th International Symposium on

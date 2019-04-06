@@ -19,7 +19,7 @@ Note that this software package includes PLY-3.4 in "vparser/ply". The license o
 Publication
 ==============================
 
-If you use Pyverilog in your research, please cite my paper.
+If you use Pyverilog in your research, please cite the following paper.
 
 - Shinya Takamaeda-Yamazaki: Pyverilog: A Python-based Hardware Design Processing Toolkit for Verilog HDL, 11th International Symposium on Applied Reconfigurable Computing (ARC 2015) (Poster), Lecture Notes in Computer Science, Vol.9040/2015, pp.451-460, April 2015.
 [Paper](http://link.springer.com/chapter/10.1007/978-3-319-16214-0_42)
