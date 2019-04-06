@@ -77,8 +77,8 @@ pull request, please include a testing example with pytest.** To write a
 testing code, please refer the existing testing examples in “tests”
 directory.
 
-If the requested codes passes the testing successfully and have no
-obvious problem, they will be merged to the *develop* branch by the main
+If the pull request code passes all the tests successfully and has no
+obvious problem, it will be merged to the *develop* branch by the main
 committers.
 
 Documentation
