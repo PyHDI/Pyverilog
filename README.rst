@@ -61,13 +61,13 @@ proposals, and pull requests on
 `GitHub <https://github.com/PyHDI/Pyverilog>`__.
 
 for questions, bug reports, and feature proposals
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------------
 
 Please leave your comment on the `issue
 tracker <https://github.com/PyHDI/Pyverilog/issues>`__ on GitHub.
 
 for pull requests
-~~~~~~~~~~~~~~~~~
+-----------------
 
 Please check “CONTRIBUTORS.md” for the contributors who provided pull
 requests.

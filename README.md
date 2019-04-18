@@ -55,11 +55,13 @@ Contribute to Pyverilog
 
 Pyverilog project always welcomes questions, bug reports, feature proposals, and pull requests on [GitHub](https://github.com/PyHDI/Pyverilog).
 
-### for questions, bug reports, and feature proposals
+for questions, bug reports, and feature proposals
+--------------------
 
 Please leave your comment on the [issue tracker](https://github.com/PyHDI/Pyverilog/issues) on GitHub.
 
-### for pull requests
+for pull requests
+--------------------
 
 Please check "CONTRIBUTORS.md" for the contributors who provided pull requests.
 
