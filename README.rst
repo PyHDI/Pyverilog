@@ -101,21 +101,29 @@ Requirements
    sudo apt install iverilog
 
 -  Jinja2: 2.10 or later
--  pytest: 3.2 or later
--  pytest-pythonpath: 0.7 or later
 
 ::
 
-   pip3 install jinja2 pytest pytest-pythonpath
+   pip3 install jinja2
 
-Options
--------
+Optional Installation
+---------------------
+
+-  pytest: 3.2 or later
+-  pytest-pythonpath: 0.7 or later
+
+These are required for the testing execution of test codes in tests and
+examples.
+
+::
+
+   pip3 install pytest pytest-pythonpath
 
 -  Graphviz: 2.38.0 or later
 -  Pygraphviz: 1.3.1 or later
 
-These softwares are required for graph visualization by
-dataflow/graphgen.py and controlflow/controlflow_analyzer.py.
+These are required for graph visualization by dataflow/graphgen.py and
+controlflow/controlflow_analyzer.py.
 
 ::
 
