@@ -742,6 +742,10 @@ class AlwaysComb(Always):
     pass
 
 
+class AlwaysLatch(Always):
+    pass
+
+
 class SensList(Node):
     attr_names = ()
 
