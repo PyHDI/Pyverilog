@@ -1307,6 +1307,11 @@ class VerilogParser(PLYParser):
         'edgesigs : edgesigs SENS_OR edgesig'
         p[0] = p[1] + (p[3],)
         p.set_lineno(0, p.lineno(1))
+    
+    def p_edgesigs_comma(self, p):
+        'edgesigs : edgesigs COMMA edgesig'
+        p[0] = p[1] + (p[3],)
+        p.set_lineno(0, p.lineno(1))
 
     def p_edgesigs_one(self, p):
         'edgesigs : edgesig'
