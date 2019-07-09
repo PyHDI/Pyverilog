@@ -76,6 +76,8 @@ class VerilogDataflowMerge(object):
             return 'localparam'
         if signaltype.isOutput(termtype):
             return 'assign'
+        if signaltype.isInout(termtype):
+            return 'assign'
         if signaltype.isInput(termtype):
             return 'assign'
         if signaltype.isFunction(termtype):
