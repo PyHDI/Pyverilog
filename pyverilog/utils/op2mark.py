@@ -33,10 +33,11 @@ operator_order = {
     'Sll':4, 'Srl':4, 'Sla':4, 'Sra':4,
     'LessThan':5, 'GreaterThan':5, 'LessEq':5, 'GreaterEq':5,
     'Eq':6, 'NotEq':6, 'Eql':6, 'NotEql':6,
-    'And':7, 'Xor':7, 'Xnor':7,
-    'Or':8,
-    'Land':9,
-    'Lor':10
+    'And':7,
+    'Xor':8, 'Xnor':8,
+    'Or':9,
+    'Land':10,
+    'Lor':11
     }
 
 def op2order(op):
