@@ -1015,7 +1015,7 @@ class VerilogParser(PLYParser):
 
     def p_expression_sla(self, p):
         'expression : expression LSHIFTA expression'
-        p[0] = Sll(p[1], p[3], lineno=p.lineno(1))
+        p[0] = Sla(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_expression_sra(self, p):
