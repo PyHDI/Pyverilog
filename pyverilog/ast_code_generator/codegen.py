@@ -258,6 +258,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'name': escape(node.name),
             'width': '' if node.width is None else self.visit(node.width),
             'signed': node.signed,
+            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
         }
         rslt = template.render(template_dict)
         return rslt
@@ -269,6 +270,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'name': escape(node.name),
             'width': '' if node.width is None else self.visit(node.width),
             'signed': node.signed,
+            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
         }
         rslt = template.render(template_dict)
         return rslt
@@ -280,6 +282,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'name': escape(node.name),
             'width': '' if node.width is None else self.visit(node.width),
             'signed': node.signed,
+            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
         }
         rslt = template.render(template_dict)
         return rslt
@@ -291,6 +294,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'name': escape(node.name),
             'width': '' if node.width is None else self.visit(node.width),
             'signed': node.signed,
+            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
         }
         rslt = template.render(template_dict)
         return rslt
@@ -302,6 +306,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'name': escape(node.name),
             'width': '' if node.width is None else self.visit(node.width),
             'signed': node.signed,
+            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
         }
         rslt = template.render(template_dict)
         return rslt
@@ -313,6 +318,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'name': escape(node.name),
             'width': '' if node.width is None else self.visit(node.width),
             'signed': node.signed,
+            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
         }
         rslt = template.render(template_dict)
         return rslt
@@ -324,30 +330,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'name': escape(node.name),
             'width': '' if node.width is None else self.visit(node.width),
             'signed': node.signed,
-        }
-        rslt = template.render(template_dict)
-        return rslt
-
-    def visit_WireArray(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'name': escape(node.name),
-            'width': '' if node.width is None else self.visit(node.width),
-            'length': self.visit(node.length),
-            'signed': node.signed,
-        }
-        rslt = template.render(template_dict)
-        return rslt
-
-    def visit_RegArray(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'name': escape(node.name),
-            'width': '' if node.width is None else self.visit(node.width),
-            'length': self.visit(node.length),
-            'signed': node.signed,
+            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
         }
         rslt = template.render(template_dict)
         return rslt

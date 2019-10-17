@@ -183,6 +183,20 @@ class Length(Width):
     pass
 
 
+class Dimensions(Node):
+    attr_names = ()
+
+    def __init__(self, lengths, lineno=0):
+        self.lineno = lineno
+        self.lengths = lengths
+
+    def children(self):
+        nodelist = []
+        if self.lengths:
+            nodelist = self.lengths
+        return tuple(nodelist)
+
+
 class Identifier(Node):
     attr_names = ('name',)
 
@@ -247,16 +261,19 @@ class StringConst(Constant):
 class Variable(Value):
     attr_names = ('name', 'signed')
 
-    def __init__(self, name, width=None, signed=False, lineno=0):
+    def __init__(self, name, width=None, signed=False, dimensions=None, lineno=0):
         self.lineno = lineno
         self.name = name
         self.width = width
         self.signed = signed
+        self.dimensions = dimensions
 
     def children(self):
         nodelist = []
         if self.width:
             nodelist.append(self.width)
+        if self.dimensions:
+            nodelist.append(self.dimensions)
         return tuple(nodelist)
 
 
@@ -282,44 +299,6 @@ class Wire(Variable):
 
 class Reg(Variable):
     pass
-
-
-class WireArray(Variable):
-    attr_names = ('name', 'signed')
-
-    def __init__(self, name, width, length, signed=False, lineno=0):
-        self.lineno = lineno
-        self.name = name
-        self.width = width
-        self.length = length
-        self.signed = signed
-
-    def children(self):
-        nodelist = []
-        if self.width:
-            nodelist.append(self.width)
-        if self.length:
-            nodelist.append(self.length)
-        return tuple(nodelist)
-
-
-class RegArray(Variable):
-    attr_names = ('name', 'signed')
-
-    def __init__(self, name, width, length, signed=False, lineno=0):
-        self.lineno = lineno
-        self.name = name
-        self.width = width
-        self.length = length
-        self.signed = signed
-
-    def children(self):
-        nodelist = []
-        if self.width:
-            nodelist.append(self.width)
-        if self.length:
-            nodelist.append(self.length)
-        return tuple(nodelist)
 
 
 class Integer(Variable):

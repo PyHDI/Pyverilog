@@ -1,1 +1,0 @@
-wire {% if signed %}signed {% endif %}{% if width != '' %}{{ width }} {% endif %}{{ name }} {{ length }};

@@ -440,6 +440,18 @@ class VerilogParser(PLYParser):
         p[0] = Length(p[2], p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
+    def p_dimensions(self,p):
+        'dimensions : dimensions length'
+        dims = p[1].lengths + [p[2]]
+        p[0] = Dimensions(dims, lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_dimensions_one(self, p):
+        'dimensions : length'
+        dims = [p[1]]
+        p[0] = Dimensions(dims, lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
     def p_items(self, p):
         'items : items item'
         p[0] = p[1] + (p[2],)
@@ -484,38 +496,30 @@ class VerilogParser(PLYParser):
         p.set_lineno(0, p.lineno(1))
 
     # Signal Decl
-    def create_decl(self, sigtypes, name, width=None, length=None, lineno=0):
-        self.typecheck_decl(sigtypes, length)
+    def create_decl(self, sigtypes, name, width=None, dimensions=None, lineno=0):
+        self.typecheck_decl(sigtypes, dimensions)
         decls = []
         signed = False
         if 'signed' in sigtypes:
             signed = True
         if 'input' in sigtypes:
             decls.append(Input(name=name, width=width,
-                               signed=signed, lineno=lineno))
+                               signed=signed, lineno=lineno, dimensions=dimensions))
         if 'output' in sigtypes:
             decls.append(Output(name=name, width=width,
-                                signed=signed, lineno=lineno))
+                                signed=signed, lineno=lineno, dimensions=dimensions))
         if 'inout' in sigtypes:
             decls.append(Inout(name=name, width=width,
-                               signed=signed, lineno=lineno))
+                               signed=signed, lineno=lineno, dimensions=dimensions))
         if 'wire' in sigtypes:
-            if length:
-                decls.append(WireArray(name=name, width=width,
-                                       signed=signed, length=length, lineno=lineno))
-            else:
-                decls.append(Wire(name=name, width=width,
-                                  signed=signed, lineno=lineno))
+            decls.append(Wire(name=name, width=width,
+                              signed=signed, lineno=lineno, dimensions=dimensions))
         if 'reg' in sigtypes:
-            if length:
-                decls.append(RegArray(name=name, width=width,
-                                      signed=signed, length=length, lineno=lineno))
-            else:
-                decls.append(Reg(name=name, width=width,
-                                 signed=signed, lineno=lineno))
+            decls.append(Reg(name=name, width=width,
+                             signed=signed, lineno=lineno, dimensions=dimensions))
         if 'tri' in sigtypes:
             decls.append(Tri(name=name, width=width,
-                             signed=signed, lineno=lineno))
+                             signed=signed, lineno=lineno, dimensions=dimensions))
         if 'supply0' in sigtypes:
             decls.append(Supply(name=name, value=IntConst('0', lineno=lineno),
                                 width=width, signed=signed, lineno=lineno))
@@ -524,13 +528,10 @@ class VerilogParser(PLYParser):
                                 width=width, signed=signed, lineno=lineno))
         return decls
 
-    def typecheck_decl(self, sigtypes, length=None):
-        if length and 'input' in sigtypes:
-            raise ParseError("Syntax Error")
-        if length and 'output' in sigtypes:
-            raise ParseError("Syntax Error")
-        if length and 'inout' in sigtypes:
-            raise ParseError("Syntax Error")
+    def typecheck_decl(self, sigtypes, dimensions=None):
+        if ('supply0' in sigtypes or 'supply1' in sigtypes) and \
+           dimensions is not None:
+            raise ParseError("SyntaxError")
         if len(sigtypes) == 1 and 'signed' in sigtypes:
             raise ParseError("Syntax Error")
         if 'input' in sigtypes and 'output' in sigtypes:
@@ -551,8 +552,8 @@ class VerilogParser(PLYParser):
     def p_decl(self, p):
         'decl : sigtypes declnamelist SEMICOLON'
         decllist = []
-        for rname, rlength in p[2]:
-            decllist.extend(self.create_decl(p[1], rname, length=rlength,
+        for rname, rdimensions in p[2]:
+            decllist.extend(self.create_decl(p[1], rname, dimensions=rdimensions,
                                              lineno=p.lineno(2)))
         p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
@@ -560,8 +561,8 @@ class VerilogParser(PLYParser):
     def p_decl_width(self, p):
         'decl : sigtypes width declnamelist SEMICOLON'
         decllist = []
-        for rname, rlength in p[3]:
-            decllist.extend(self.create_decl(p[1], rname, width=p[2], length=rlength,
+        for rname, rdimensions in p[3]:
+            decllist.extend(self.create_decl(p[1], rname, width=p[2], dimensions=rdimensions,
                                              lineno=p.lineno(3)))
         p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
@@ -582,7 +583,7 @@ class VerilogParser(PLYParser):
         p.set_lineno(0, p.lineno(1))
 
     def p_declarray(self, p):
-        'declname : ID length'
+        'declname : ID dimensions'
         p[0] = (p[1], p[2])
         p.set_lineno(0, p.lineno(1))
 
