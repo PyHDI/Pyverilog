@@ -365,7 +365,7 @@ class VerilogParser(PLYParser):
         p[0] = (p[1],)
         p.set_lineno(0, p.lineno(1))
 
-    def create_ioport(self, sigtypes, name, width=None, lineno=0):
+    def create_ioport(self, sigtypes, name, width=None, dimensions=None, lineno=0):
         self.typecheck_ioport(sigtypes)
         first = None
         second = None
@@ -373,18 +373,17 @@ class VerilogParser(PLYParser):
         if 'signed' in sigtypes:
             signed = True
         if 'input' in sigtypes:
-            first = Input(name=name, width=width, signed=signed, lineno=lineno)
+            first = Input(name=name, width=width, signed=signed, dimensions=dimensions, lineno=lineno)
         if 'output' in sigtypes:
-            first = Output(name=name, width=width,
-                           signed=signed, lineno=lineno)
+            first = Output(name=name, width=width, signed=signed, dimensions=dimensions, lineno=lineno)
         if 'inout' in sigtypes:
-            first = Inout(name=name, width=width, signed=signed, lineno=lineno)
+            first = Inout(name=name, width=width, signed=signed, dimensions=dimensions, lineno=lineno)
         if 'wire' in sigtypes:
-            second = Wire(name=name, width=width, signed=signed, lineno=lineno)
+            second = Wire(name=name, width=width, signed=signed, dimensions=dimensions, lineno=lineno)
         if 'reg' in sigtypes:
-            second = Reg(name=name, width=width, signed=signed, lineno=lineno)
+            second = Reg(name=name, width=width, signed=signed, dimensions=dimensions, lineno=lineno)
         if 'tri' in sigtypes:
-            second = Tri(name=name, width=width, signed=signed, lineno=lineno)
+            second = Tri(name=name, width=width, signed=signed, dimensions=dimensions, lineno=lineno)
         return Ioport(first, second, lineno=lineno)
 
     def typecheck_ioport(self, sigtypes):
@@ -415,6 +414,11 @@ class VerilogParser(PLYParser):
         p[0] = self.create_ioport(p[1], p[3], width=p[2], lineno=p.lineno(3))
         p.set_lineno(0, p.lineno(1))
 
+    def p_ioport_dimensions(self, p):
+        'ioport : sigtypes width portname dimensions'
+        p[0] = self.create_ioport(p[1], p[3], width=p[2], dimensions=p[4], lineno=p.lineno(3))
+        p.set_lineno(0, p.lineno(1))
+
     def p_ioport_head(self, p):
         'ioport_head : sigtypes portname'
         p[0] = self.create_ioport(p[1], p[2], lineno=p.lineno(2))
@@ -423,6 +427,11 @@ class VerilogParser(PLYParser):
     def p_ioport_head_width(self, p):
         'ioport_head : sigtypes width portname'
         p[0] = self.create_ioport(p[1], p[3], width=p[2], lineno=p.lineno(3))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_ioport_head_dimensions(self, p):
+        'ioport_head : sigtypes width portname dimensions'
+        p[0] = self.create_ioport(p[1], p[3], width=p[2], dimensions=p[4], lineno=p.lineno(3))
         p.set_lineno(0, p.lineno(1))
 
     def p_ioport_portname(self, p):
