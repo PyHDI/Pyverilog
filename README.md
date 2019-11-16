@@ -464,7 +464,10 @@ Related Project and Site
 ==============================
 
 [Veriloggen](https://github.com/PyHDI/veriloggen)
-- A library for constructing a Verilog HDL source code in Python
+- A Mixed-Paradigm Hardware Construction Framework
+
+[NNgen](https://github.com/NNgen/nngen)
+- A Fully-Customizable Hardware Synthesis Compiler for Deep Neural Network
 
 [IPgen](https://github.com/PyHDI/ipgen)
 - IP-core package generator for AXI4/Avalon

@@ -828,9 +828,6 @@ class BindVisitor(NodeVisitor):
 
         lenmsb = None
         lenlsb = None
-        if isinstance(node, RegArray) or isinstance(node, WireArray):
-            lenmsb = self.makeDFTree(node.length.msb, scope)
-            lenlsb = self.makeDFTree(node.length.lsb, scope)
 
         term = Term(name, termtypes, msb, lsb, lenmsb, lenlsb)
         self.dataflow.addTerm(name, term)

@@ -493,8 +493,11 @@ Then Verilog HDL code generated from the AST instances is displayed.
 Related Project and Site
 ========================
 
-`Veriloggen <https://github.com/PyHDI/veriloggen>`__ - A library for
-constructing a Verilog HDL source code in Python
+`Veriloggen <https://github.com/PyHDI/veriloggen>`__ - A Mixed-Paradigm
+Hardware Construction Framework
+
+`NNgen <https://github.com/NNgen/nngen>`__ - A Fully-Customizable
+Hardware Synthesis Compiler for Deep Neural Network
 
 `IPgen <https://github.com/PyHDI/ipgen>`__ - IP-core package generator
 for AXI4/Avalon
