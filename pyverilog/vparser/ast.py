@@ -29,7 +29,9 @@ class Node(object):
     def show(self, buf=sys.stdout, offset=0, attrnames=False, showlineno=True):
         indent = 2
         lead = ' ' * offset
+
         buf.write(lead + self.__class__.__name__ + ': ')
+
         if self.attr_names:
             if attrnames:
                 nvlist = [(n, getattr(self, n)) for n in self.attr_names]
@@ -38,23 +40,31 @@ class Node(object):
                 vlist = [getattr(self, n) for n in self.attr_names]
                 attrstr = ', '.join('%s' % v for v in vlist)
             buf.write(attrstr)
+
         if showlineno:
             buf.write(' (at %s)' % self.lineno)
+
         buf.write('\n')
+
         for c in self.children():
             c.show(buf, offset + indent, attrnames, showlineno)
 
     def __eq__(self, other):
         if type(self) != type(other):
             return False
+
         self_attrs = tuple([getattr(self, a) for a in self.attr_names])
         other_attrs = tuple([getattr(other, a) for a in other.attr_names])
+
         if self_attrs != other_attrs:
             return False
+
         other_children = other.children()
+
         for i, c in enumerate(self.children()):
             if c != other_children[i]:
                 return False
+
         return True
 
     def __ne__(self, other):
