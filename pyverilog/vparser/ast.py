@@ -203,7 +203,7 @@ class Dimensions(Node):
     def children(self):
         nodelist = []
         if self.lengths:
-            nodelist = self.lengths
+            nodelist.extend(self.lengths)
         return tuple(nodelist)
 
 
@@ -349,6 +349,7 @@ class Parameter(Node):
         self.value = value
         self.width = width
         self.signed = signed
+        self.dimensions = None
 
     def children(self):
         nodelist = []
