@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 import sys
 import os
+import pathlib
 
 from pyverilog.vparser.ply.yacc import yacc
 from pyverilog.vparser.plyparser import PLYParser, Coord, ParseError
@@ -48,14 +49,18 @@ class VerilogParser(PLYParser):
         # -> Strong
     )
 
-    def __init__(self):
+    def __init__(self, outputdir=".", debug=True):
         self.lexer = VerilogLexer(error_func=self._lexer_error_func)
         self.lexer.build()
 
         self.tokens = self.lexer.tokens
-        #self.parser = yacc(module=self)
-        # Use this if you want to build the parser using LALR(1) instead of SLR
-        self.parser = yacc(module=self, method="LALR")
+        pathlib.Path(outputdir).mkdir(parents=True, exist_ok=True)
+        self.parser = yacc(
+            module=self,
+            method="LALR",
+            outputdir=outputdir,
+            debug=debug
+        )
 
     def _lexer_error_func(self, msg, line, column):
         self._parse_error(msg, self._coord(line, column))
@@ -2243,13 +2248,16 @@ class VerilogCodeParser(object):
 
     def __init__(self, filelist, preprocess_output='preprocess.output',
                  preprocess_include=None,
-                 preprocess_define=None):
+                 preprocess_define=None,
+                 outputdir=".",
+                 debug=True
+                 ):
         self.preprocess_output = preprocess_output
         self.directives = ()
         self.preprocessor = VerilogPreprocessor(filelist, preprocess_output,
                                                 preprocess_include,
                                                 preprocess_define)
-        self.parser = VerilogParser()
+        self.parser = VerilogParser(outputdir=outputdir, debug=debug)
 
     def preprocess(self):
         self.preprocessor.preprocess()
@@ -2267,10 +2275,20 @@ class VerilogCodeParser(object):
         return self.directives
 
 
-def parse(filelist, preprocess_include=None, preprocess_define=None):
-    codeparser = VerilogCodeParser(filelist,
-                                   preprocess_include=preprocess_include,
-                                   preprocess_define=preprocess_define)
+def parse(
+    filelist,
+    preprocess_include=None,
+    preprocess_define=None,
+    outputdir=".",
+    debug=True
+):
+    codeparser = VerilogCodeParser(
+        filelist,
+        preprocess_include=preprocess_include,
+        preprocess_define=preprocess_define,
+        outputdir=outputdir,
+        debug=debug
+    )
     ast = codeparser.parse()
     directives = codeparser.get_directives()
     return ast, directives
