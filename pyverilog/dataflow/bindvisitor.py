@@ -77,12 +77,6 @@ class BindVisitor(NodeVisitor):
     def visit_Wire(self, node):
         self.addTerm(node)
 
-    def visit_RegArray(self, node):
-        self.addTerm(node)
-
-    def visit_WireArray(self, node):
-        self.addTerm(node)
-
     def visit_Tri(self, node):
         self.addTerm(node)
 
@@ -700,9 +694,9 @@ class BindVisitor(NodeVisitor):
         term = self.dataflow.getTerm(name)
         return term.msb, term.lsb
 
-    def getTermLength(self, name):
+    def getTermShape(self, name):
         term = self.dataflow.getTerm(name)
-        return term.lenmsb, term.lenlsb
+        return term.shape
 
     def getTermtype(self, name):
         term = self.dataflow.getTerm(name)
@@ -714,7 +708,7 @@ class BindVisitor(NodeVisitor):
     def renameVar(self, name):
         renamedvar = (name[:-1] +
                       ScopeLabel('_rn' + str(self.renamecnt) +
-                                   '_' + name[-1].scopename, 'signal'))
+                                 '_' + name[-1].scopename, 'signal'))
         self.renamecnt += 1
         return renamedvar
 
@@ -872,10 +866,16 @@ class BindVisitor(NodeVisitor):
             msb = DFIntConst('0') if node.width is None else self.makeDFTree(node.width.msb, scope)
         lsb = DFIntConst('0') if node.width is None else self.makeDFTree(node.width.lsb, scope)
 
-        lenmsb = None
-        lenlsb = None
+        shape = None
+        if node.dimensions is not None:
+            shape = []
+            for length in node.dimensions.lengths:
+                l = self.makeDFTree(length.msb, scope)
+                r = self.makeDFTree(length.lsb, scope)
+                shape.append((l, r))
+            shape = tuple(shape)
 
-        term = Term(name, termtypes, msb, lsb, lenmsb, lenlsb)
+        term = Term(name, termtypes, msb, lsb, shape)
         self.dataflow.addTerm(name, term)
         self.setConstantTerm(name, term)
 
@@ -1057,9 +1057,7 @@ class BindVisitor(NodeVisitor):
             var_df = self.makeDFTree(node.var, scope)
             ptr_df = self.makeDFTree(node.ptr, scope)
 
-            if (isinstance(var_df, DFTerminal) and
-                (signaltype.isRegArray(self.getTermtype(var_df.name)) or
-                     signaltype.isWireArray(self.getTermtype(var_df.name)))):
+            if isinstance(var_df, DFTerminal) and self.getTermShape(var_df.name) is not None:
                 return DFPointer(var_df, ptr_df)
             return DFPartselect(var_df, ptr_df, copy.deepcopy(ptr_df))
 
@@ -1249,7 +1247,7 @@ class BindVisitor(NodeVisitor):
         if isinstance(tree, DFPointer):
             resolved_ptr = self.resolveBlockingAssign(tree.ptr, scope)
             if (isinstance(tree.var, DFTerminal) and
-                    signaltype.isRegArray(self.getTermtype(tree.var.name))):
+                self.getTermShape(tree.var.name) is not None):
                 current_bindlist = self.frames.getBlockingAssign(tree.var.name, scope)
                 if len(current_bindlist) == 0:
                     return DFPointer(tree.var, resolved_ptr)
@@ -1275,7 +1273,7 @@ class BindVisitor(NodeVisitor):
             if bind.msb is None and bind.lsb is None:
                 return bind.tree
             if (self.optimize(bind.msb) == optimized_msb and
-                    self.optimize(bind.lsb) == optimized_lsb):
+                self.optimize(bind.lsb) == optimized_lsb):
                 return bind.tree
         return self.getMergedTree(bindlist)
 
@@ -1288,8 +1286,8 @@ class BindVisitor(NodeVisitor):
             lsb = 0 if x.lsb is None else x.lsb.value
             ptr = 0 if not isinstance(x.ptr, DFEvalValue) else x.ptr.value
             term = self.getTerm(x.dest)
-            length = (abs(self.optimize(term.msb).value -
-                          self.optimize(term.lsb).value) + 1)
+            length = (abs(self.optimize(term.msb).value
+                          - self.optimize(term.lsb).value) + 1)
             return ptr * length + lsb
         for bind in sorted(bindlist, key=bindkey):
             lsb = 0 if bind.lsb is None else bind.lsb.value
@@ -1386,8 +1384,7 @@ class BindVisitor(NodeVisitor):
             if left.var.scope is not None:
                 name = left.var.scope + ScopeLabel(left.var.name, 'signal')
             ptr = self.optimize(self.makeDFTree(left.ptr, scope))
-            if (signaltype.isRegArray(self.getTermtype(name)) or
-                    signaltype.isWireArray(self.getTermtype(name))):
+            if self.getTermShape(name) is not None:
                 return (name, None, None, ptr)
             return (name, ptr, copy.deepcopy(ptr), None)
 

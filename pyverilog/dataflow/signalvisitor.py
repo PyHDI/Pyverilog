@@ -1,11 +1,11 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # signalvisitor.py
 #
 # Signal definition visitor
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 from __future__ import absolute_import
 from __future__ import print_function
 import sys
@@ -20,6 +20,7 @@ from pyverilog.dataflow.visit import *
 from pyverilog.dataflow.optimizer import VerilogOptimizer
 import pyverilog.dataflow.reorder as reorder
 
+
 class SignalVisitor(NodeVisitor):
     def __init__(self, moduleinfotable, top):
         self.moduleinfotable = moduleinfotable
@@ -31,11 +32,9 @@ class SignalVisitor(NodeVisitor):
         # set the top frame of top module
         self.stackInstanceFrame(top, top)
 
-    ################################################################################
     def getFrameTable(self):
         return self.frames
 
-    ################################################################################
     def start_visit(self):
         return self.visit(self.moduleinfotable.getDefinition(self.top))
 
@@ -55,12 +54,6 @@ class SignalVisitor(NodeVisitor):
         self.frames.addSignal(node)
 
     def visit_Supply(self, node):
-        self.frames.addSignal(node)
-
-    def visit_RegArray(self, node):
-        self.frames.addSignal(node)
-
-    def visit_WireArray(self, node):
         self.frames.addSignal(node)
 
     def visit_Tri(self, node):
@@ -105,18 +98,19 @@ class SignalVisitor(NodeVisitor):
     def visit_Initial(self, node):
         pass
         #label = self.labels.get( self.frames.getLabelKey('initial') )
-        #current = self.frames.addFrame(ScopeLabel(label, 'initial'),
+        # current = self.frames.addFrame(ScopeLabel(label, 'initial'),
         #                               generate=self.frames.isGenerate(),
         #                               initial=True)
-        #self.generic_visit(node)
-        #self.frames.setCurrent(current)
+        # self.generic_visit(node)
+        # self.frames.setCurrent(current)
 
     def visit_InstanceList(self, node):
         for i in node.instances:
             self.visit(i)
 
     def visit_Instance(self, node):
-        if node.array: return self._visit_Instance_array(node)
+        if node.array:
+            return self._visit_Instance_array(node)
         nodename = node.name
         return self._visit_Instance_body(node, nodename)
 
@@ -128,12 +122,13 @@ class SignalVisitor(NodeVisitor):
         msb = self.optimize(self.getTree(node.array.msb, current)).value
         lsb = self.optimize(self.getTree(node.array.lsb, current)).value
 
-        for i in range(lsb, msb+1):
+        for i in range(lsb, msb + 1):
             nodename = node.name + '_' + str(i)
             self._visit_Instance_body(node, nodename)
 
     def _visit_Instance_body(self, node, nodename):
-        if node.module in primitives: return self._visit_Instance_primitive(node)
+        if node.module in primitives:
+            return self._visit_Instance_primitive(node)
 
         if nodename == '':
             raise verror.FormatError("Module %s requires an instance name" % node.module)
@@ -164,7 +159,7 @@ class SignalVisitor(NodeVisitor):
         pass
 
     def visit_Always(self, node):
-        label = self.labels.get( self.frames.getLabelKey('always') )
+        label = self.labels.get(self.frames.getLabelKey('always'))
         current = self.frames.addFrame(ScopeLabel(label, 'always'),
                                        generate=self.frames.isGenerate(),
                                        always=True)
@@ -173,10 +168,10 @@ class SignalVisitor(NodeVisitor):
 
     def visit_IfStatement(self, node):
 
-        if (self.frames.isGenerate() and
-            not self.frames.isAlways() and not self.frames.isInitial() and
-            not self.frames.isFunctioncall() and not self.frames.isTaskcall() and
-            not self.frames.isFunctiondef() and not self.frames.isTaskdef()):
+        if (self.frames.isGenerate()
+            and not self.frames.isAlways() and not self.frames.isInitial()
+            and not self.frames.isFunctioncall() and not self.frames.isTaskcall()
+                and not self.frames.isFunctiondef() and not self.frames.isTaskdef()):
             # generate-if statement
             current = self.frames.getCurrent()
             tree = self.getTree(node.cond, current)
@@ -186,7 +181,7 @@ class SignalVisitor(NodeVisitor):
             if rslt.value > 0:
                 label = self._if_true(node)
             else:
-                label = self.labels.get( self.frames.getLabelKey('if') )
+                label = self.labels.get(self.frames.getLabelKey('if'))
                 self._if_false(node, label)
             return
 
@@ -197,8 +192,9 @@ class SignalVisitor(NodeVisitor):
         return label + '_ELSE'
 
     def _if_true(self, node):
-        if node.true_statement is None: return None
-        label = self.labels.get( self.frames.getLabelKey('if') )
+        if node.true_statement is None:
+            return None
+        label = self.labels.get(self.frames.getLabelKey('if'))
         current = self.frames.addFrame(ScopeLabel(label, 'if'),
                                        frametype='ifthen',
                                        condition=node.cond,
@@ -212,7 +208,8 @@ class SignalVisitor(NodeVisitor):
         return label
 
     def _if_false(self, node, label):
-        if node.false_statement is None: return
+        if node.false_statement is None:
+            return
         label = self._toELSE(label)
         current = self.frames.addFrame(ScopeLabel(label, 'if'),
                                        frametype='ifelse',
@@ -233,9 +230,10 @@ class SignalVisitor(NodeVisitor):
 
     def visit_CasexStatement(self, node):
         return self.visit_CaseStatement(node)
-        
+
     def _case(self, comp, caselist):
-        if len(caselist) == 0: return
+        if len(caselist) == 0:
+            return
         case = caselist[0]
         cond = IntConst('1')
         if case.cond is not None:
@@ -245,7 +243,7 @@ class SignalVisitor(NodeVisitor):
                     cond = Lor(cond, Eq(comp, c))
             else:
                 cond = Eq(comp, case.cond[0])
-        label = self.labels.get( self.frames.getLabelKey('if') )
+        label = self.labels.get(self.frames.getLabelKey('if'))
         current = self.frames.addFrame(ScopeLabel(label, 'if'),
                                        frametype='ifthen',
                                        condition=cond,
@@ -254,9 +252,11 @@ class SignalVisitor(NodeVisitor):
                                        generate=self.frames.isGenerate(),
                                        always=self.frames.isAlways(),
                                        initial=self.frames.isInitial())
-        if case.statement is not None: self.visit(case.statement)
+        if case.statement is not None:
+            self.visit(case.statement)
         self.frames.setCurrent(current)
-        if len(caselist) == 1: return
+        if len(caselist) == 1:
+            return
         label = self._toELSE(label)
         current = self.frames.addFrame(ScopeLabel(label, 'if'),
                                        frametype='ifelse',
@@ -269,7 +269,7 @@ class SignalVisitor(NodeVisitor):
         self._case(comp, caselist[1:])
 
     def visit_ForStatement(self, node):
-        ## pre-statement
+        # pre-statement
         current = self.frames.getCurrent()
         pre_right = self.getTree(node.pre.right, current)
         pre_right_value = self.optimize(pre_right)
@@ -277,10 +277,10 @@ class SignalVisitor(NodeVisitor):
         self.frames.setForPre()
         self.visit(node.pre)
         self.frames.unsetForPre()
-        label = self.labels.get( self.frames.getLabelKey('for') )
+        label = self.labels.get(self.frames.getLabelKey('for'))
         #loop = 0
         while True:
-            ## cond-statement
+            # cond-statement
             current = self.frames.getCurrent()
             tree = self.getTree(node.cond, current)
             rslt = self.optimize(tree)
@@ -288,9 +288,10 @@ class SignalVisitor(NodeVisitor):
                 raise verror.FormatError(("Can not process the for-statement. "
                                           "for-condition should be evaluated statically."))
             # loop termination
-            if rslt.value <= 0: break
+            if rslt.value <= 0:
+                break
 
-            ## main-statement
+            # main-statement
             current = self.frames.addFrame(ScopeLabel(label, 'for', loop),
                                            frametype='for',
                                            functioncall=self.frames.isFunctioncall(),
@@ -302,7 +303,7 @@ class SignalVisitor(NodeVisitor):
             self.visit(node.statement)
             self.frames.setCurrent(current)
 
-            ## post-statement
+            # post-statement
             current = self.frames.getCurrent()
             post_right = self.getTree(node.post.right, current)
             post_right_value = self.optimize(post_right)
@@ -316,7 +317,7 @@ class SignalVisitor(NodeVisitor):
         pass
 
     def visit_GenerateStatement(self, node):
-        label = self.labels.get( self.frames.getLabelKey('generate') )
+        label = self.labels.get(self.frames.getLabelKey('generate'))
         current = self.frames.addFrame(ScopeLabel(label, 'generate'),
                                        generate=True)
         self.generic_visit(node)
@@ -327,7 +328,7 @@ class SignalVisitor(NodeVisitor):
         if node.scope is not None:
             label = node.scope
         else:
-            label = self.labels.get( self.frames.getLabelKey('block') )
+            label = self.labels.get(self.frames.getLabelKey('block'))
         current = self.frames.addFrame(ScopeLabel(label, 'block'),
                                        frametype='block',
                                        functioncall=self.frames.isFunctioncall(),
@@ -353,7 +354,6 @@ class SignalVisitor(NodeVisitor):
     def visit_NonblockingSubstitution(self, node):
         pass
 
-    ############################################################################
     def optimize(self, node):
         return self.optimizer.optimize(node)
 
@@ -424,7 +424,6 @@ class SignalVisitor(NodeVisitor):
     def hasConstantTerm(self, name):
         self.optimizer.hasTerm(name)
 
-    ############################################################################
     def toScopeChain(self, blocklabel):
         scopelist = []
         for b in blocklabel.labellist:
@@ -432,9 +431,9 @@ class SignalVisitor(NodeVisitor):
                 loop = self.optimize(b.loop)
                 if not isinstance(loop, DFEvalValue):
                     raise verror.FormatError('Loop iterator should be constant')
-                scopelist.append( ScopeLabel(b.name, 'for', loop) )
-            scopelist.append( ScopeLabel(b.name, 'any') )
-        return ScopeChain( scopelist )
+                scopelist.append(ScopeLabel(b.name, 'for', loop))
+            scopelist.append(ScopeLabel(b.name, 'any'))
+        return ScopeChain(scopelist)
 
     def searchScopeConstantValue(self, blocklabel, name):
         currentmodule = self.frames.getCurrentModuleScopeChain()
@@ -444,7 +443,7 @@ class SignalVisitor(NodeVisitor):
         const = self.getConstant(varname)
         return const
 
-    #def searchScopeConstantDefinition(self, blocklabel, name):
+    # def searchScopeConstantDefinition(self, blocklabel, name):
     #    currentmodule = self.frames.getCurrentModuleScopeChain()
     #    localchain = currentmodule[-1:] + self.toScopeChain(blocklabel)
     #    matchedchain = self.frames.searchMatchedScopeChain(currentmodule, localchain)
@@ -466,7 +465,6 @@ class SignalVisitor(NodeVisitor):
         const = self.getConstant(foundkey)
         return const
 
-    ############################################################################
     def makeConstantTerm(self, name, node, scope):
         termtype = node.__class__.__name__
         termtypes = set([termtype])
@@ -531,11 +529,7 @@ class SignalVisitor(NodeVisitor):
             var_df = self.makeDFTree(node.var, scope)
             ptr_df = self.makeDFTree(node.ptr, scope)
 
-            if (isinstance(var_df, DFTerminal) and
-                (signaltype.isRegArray(self.getTermtype(var_df.name)) or
-                 signaltype.isWireArray(self.getTermtype(var_df.name)))):
-                return DFPointer(var_df, ptr_df)
-            return DFPartselect(var_df, ptr_df, copy.deepcopy(ptr_df))
+            return DFPointer(var_df, ptr_df)
 
         if isinstance(node, Concat):
             nextnodes = []
@@ -563,4 +557,3 @@ class SignalVisitor(NodeVisitor):
 
         raise verror.FormatError("unsupported AST node type: %s %s" %
                                  (str(type(node)), str(node)))
-
