@@ -585,9 +585,11 @@ class Sll(Operator):
 class Srl(Operator):
     pass
 
+
 class Sla(Operator):
     pass
-        
+
+
 class Sra(Operator):
     pass
 
