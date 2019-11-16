@@ -12,7 +12,7 @@ operator_mark = {
     'Uor':'|', 'Unor':'~|', 'Uxor':'^', 'Uxnor':'~^',
     'Power':'**', 'Times':'*', 'Divide':'/', 'Mod':'%', 
     'Plus':'+', 'Minus':'-',
-    'Sll':'<<', 'Srl':'>>', 'Sra':'>>>',
+    'Sll':'<<', 'Srl':'>>', 'Sla':'<<<', 'Sra':'>>>',
     'LessThan':'<', 'GreaterThan':'>', 'LessEq':'<=', 'GreaterEq':'>=',
     'Eq':'==', 'NotEq':'!=', 'Eql':'===', 'NotEql':'!==',
     'And':'&', 'Xor':'^', 'Xnor':'~^',
@@ -30,13 +30,14 @@ operator_order = {
     'Power':1,
     'Times':2, 'Divide':2, 'Mod':2, 
     'Plus':3, 'Minus':3,
-    'Sll':4, 'Srl':4, 'Sra':4,
+    'Sll':4, 'Srl':4, 'Sla':4, 'Sra':4,
     'LessThan':5, 'GreaterThan':5, 'LessEq':5, 'GreaterEq':5,
     'Eq':6, 'NotEq':6, 'Eql':6, 'NotEql':6,
-    'And':7, 'Xor':7, 'Xnor':7,
-    'Or':8,
-    'Land':9,
-    'Lor':10
+    'And':7,
+    'Xor':8, 'Xnor':8,
+    'Or':9,
+    'Land':10,
+    'Lor':11
     }
 
 def op2order(op):
