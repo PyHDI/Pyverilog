@@ -6,6 +6,7 @@ Portlist
 Port
 Width
 Length
+Dimensions
 Identifier
 Value
 Constant
@@ -19,8 +20,6 @@ Inout
 Tri
 Wire
 Reg
-WireArray
-RegArray
 Integer
 Real
 Genvar
