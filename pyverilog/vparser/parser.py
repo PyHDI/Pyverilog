@@ -379,17 +379,23 @@ class VerilogParser(PLYParser):
         if 'signed' in sigtypes:
             signed = True
         if 'input' in sigtypes:
-            first = Input(name=name, width=width, signed=signed, dimensions=dimensions, lineno=lineno)
+            first = Input(name=name, width=width, signed=signed,
+                          dimensions=dimensions, lineno=lineno)
         if 'output' in sigtypes:
-            first = Output(name=name, width=width, signed=signed, dimensions=dimensions, lineno=lineno)
+            first = Output(name=name, width=width, signed=signed,
+                           dimensions=dimensions, lineno=lineno)
         if 'inout' in sigtypes:
-            first = Inout(name=name, width=width, signed=signed, dimensions=dimensions, lineno=lineno)
+            first = Inout(name=name, width=width, signed=signed,
+                          dimensions=dimensions, lineno=lineno)
         if 'wire' in sigtypes:
-            second = Wire(name=name, width=width, signed=signed, dimensions=dimensions, lineno=lineno)
+            second = Wire(name=name, width=width, signed=signed,
+                          dimensions=dimensions, lineno=lineno)
         if 'reg' in sigtypes:
-            second = Reg(name=name, width=width, signed=signed, dimensions=dimensions, lineno=lineno)
+            second = Reg(name=name, width=width, signed=signed,
+                         dimensions=dimensions, lineno=lineno)
         if 'tri' in sigtypes:
-            second = Tri(name=name, width=width, signed=signed, dimensions=dimensions, lineno=lineno)
+            second = Tri(name=name, width=width, signed=signed,
+                         dimensions=dimensions, lineno=lineno)
         return Ioport(first, second, lineno=lineno)
 
     def typecheck_ioport(self, sigtypes):
@@ -455,7 +461,7 @@ class VerilogParser(PLYParser):
         p[0] = Length(p[2], p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    def p_dimensions(self,p):
+    def p_dimensions(self, p):
         'dimensions : dimensions length'
         dims = p[1].lengths + [p[2]]
         p[0] = Dimensions(dims, lineno=p.lineno(1))
@@ -1331,7 +1337,7 @@ class VerilogParser(PLYParser):
         'edgesigs : edgesigs SENS_OR edgesig'
         p[0] = p[1] + (p[3],)
         p.set_lineno(0, p.lineno(1))
-    
+
     def p_edgesigs_comma(self, p):
         'edgesigs : edgesigs COMMA edgesig'
         p[0] = p[1] + (p[3],)
@@ -1531,9 +1537,9 @@ class VerilogParser(PLYParser):
         """
         if isinstance(p[1], Decl):
             for r in p[1].list:
-                if (not isinstance(r, Reg) and not isinstance(r, Wire)
-                    and not isinstance(r, Integer) and not isinstance(r, Real)
-                        and not isinstance(r, Parameter) and not isinstance(r, Localparam)):
+                if (not isinstance(r, Reg) and not isinstance(r, Wire) and
+                    not isinstance(r, Integer) and not isinstance(r, Real) and
+                        not isinstance(r, Parameter) and not isinstance(r, Localparam)):
                     raise ParseError("Syntax Error")
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
@@ -1656,7 +1662,6 @@ class VerilogParser(PLYParser):
         'unique_case_statement : UNIQUE CASE LPAREN case_comp RPAREN casecontent_statements ENDCASE'
         p[0] = UniqueCaseStatement(p[3], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
-
 
     def p_case_comp(self, p):
         'case_comp : expression'
@@ -2076,8 +2081,8 @@ class VerilogParser(PLYParser):
         """
         if isinstance(p[1], Decl):
             for r in p[1].list:
-                if (not isinstance(r, Input) and not isinstance(r, Reg)
-                        and not isinstance(r, Integer)):
+                if (not isinstance(r, Input) and not isinstance(r, Reg) and
+                        not isinstance(r, Integer)):
                     raise ParseError("Syntax Error")
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
@@ -2145,8 +2150,8 @@ class VerilogParser(PLYParser):
         """
         if isinstance(p[1], Decl):
             for r in p[1].list:
-                if (not isinstance(r, Input) and not isinstance(r, Reg)
-                        and not isinstance(r, Integer)):
+                if (not isinstance(r, Input) and not isinstance(r, Reg) and
+                        not isinstance(r, Integer)):
                     raise ParseError("Syntax Error")
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))

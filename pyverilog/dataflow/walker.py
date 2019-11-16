@@ -1,11 +1,11 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # walker.py
 #
 # Dataflow graph walker
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 from __future__ import absolute_import
 from __future__ import print_function
 import sys
@@ -19,20 +19,20 @@ from pyverilog.dataflow.dataflow import *
 from pyverilog.dataflow.visit import *
 from pyverilog.dataflow.merge import VerilogDataflowMerge
 
+
 class VerilogDataflowWalker(VerilogDataflowMerge):
     def __init__(self, topmodule, terms, binddict, resolved_terms, resolved_binddict, constlist):
         VerilogDataflowMerge.__init__(self, topmodule, terms, binddict,
                                       resolved_terms, resolved_binddict, constlist)
 
-    ############################################################################
     def walkBind(self, name, step=0):
         termname = util.toTermname(name)
-        if not termname in self.terms: raise verror.DefinitionError('No such signals: %s' % str(name))
+        if not termname in self.terms:
+            raise verror.DefinitionError('No such signals: %s' % str(name))
         tree = self.getTree(termname)
         walked_tree = self.walkTree(tree, visited=set(), step=step)
         return replace.replaceUndefined(walked_tree, termname)
 
-    ############################################################################
     def walkTree(self, tree, visited=set([]), step=0, delay=False, msb=None, lsb=None, ptr=None):
         if tree is None:
             return DFUndefined(32)
@@ -52,31 +52,33 @@ class VerilogDataflowWalker(VerilogDataflowMerge):
         if isinstance(tree, DFTerminal):
             scope = util.getScope(tree.name)
             termname = tree.name
-            if termname in visited: return tree
+            if termname in visited:
+                return tree
 
             termtype = self.getTermtype(termname)
             if util.isTopmodule(scope) and signaltype.isInput(termtype):
                 return tree
 
             nptr = None
-            if signaltype.isRegArray(termtype) or signaltype.isWireArray(termtype):
+            if self.getTermShape(termname) is not None:
                 if ptr is None:
                     raise verror.FormatError('Array variable requires an pointer.')
-                if msb is not None and lsb is not None: return tree
+                if msb is not None and lsb is not None:
+                    return tree
                 nptr = ptr
 
             nextstep = step
-            if signaltype.isReg(termtype) or signaltype.isRegArray(termtype):
+            if signaltype.isReg(termtype):
                 if (not self.isCombination(termname) and
-                    not signaltype.isRename(termtype) and 
-                    nextstep == 0):
+                    not signaltype.isRename(termtype) and
+                        nextstep == 0):
                     return tree
-                if (not self.isCombination(termname) and
-                    not signaltype.isRename(termtype)):
+                if (not self.isCombination(termname)
+                        and not signaltype.isRename(termtype)):
                     nextstep -= 1
 
             return self.walkTree(self.getTree(termname, nptr),
-                                 visited|set([termname,]), nextstep, delay)
+                                 visited | set([termname, ]), nextstep, delay)
 
         if isinstance(tree, DFBranch):
             condnode = self.walkTree(tree.condnode, visited, step, delay)
@@ -104,10 +106,8 @@ class VerilogDataflowWalker(VerilogDataflowMerge):
             ptr = self.walkTree(tree.ptr, visited, step, delay)
             var = self.walkTree(tree.var, visited, step, delay, ptr=ptr)
             if isinstance(tree.var, DFTerminal):
-                termtype = self.getTermtype(tree.var.name)
-                if ((signaltype.isRegArray(termtype) or 
-                     signaltype.isWireArray(termtype)) and 
-                    not (isinstance(var, DFTerminal) and var.name == tree.var.name)):
+                if (self.getTermShape(tree.var.name) is not None and
+                        not (isinstance(var, DFTerminal) and var.name == tree.var.name)):
                     return var
             return DFPointer(var, ptr)
 

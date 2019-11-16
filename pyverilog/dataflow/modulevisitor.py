@@ -1,11 +1,11 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # modulevisitor.py
-# 
+#
 # Module definition visitor
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 from __future__ import absolute_import
 from __future__ import print_function
 import sys
@@ -14,6 +14,7 @@ import os
 import pyverilog.vparser.parser
 from pyverilog.vparser.ast import *
 from pyverilog.dataflow.visit import *
+
 
 class ModuleVisitor(NodeVisitor):
     def __init__(self):

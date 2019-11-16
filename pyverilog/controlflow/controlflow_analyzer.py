@@ -1,13 +1,13 @@
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # controlflow_analyzer.py
 #
-# Controlflow analyzer 
+# Controlflow analyzer
 #
 # for visualization, graphviz and pygraphviz are required
 #
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 from __future__ import absolute_import
 from __future__ import print_function
 import sys
@@ -23,33 +23,37 @@ from pyverilog.dataflow.dataflow import *
 import pyverilog.controlflow.splitter as splitter
 import pyverilog.controlflow.transition as transition
 
+
 class VerilogControlflowAnalyzer(VerilogSubset):
     def __init__(self, topmodule, terms, binddict,
-                 resolved_terms, resolved_binddict, 
-                 constlist, fsm_vars=('fsm', 'state', 'count', 'cnt', 'step', 'mode') ):
+                 resolved_terms, resolved_binddict,
+                 constlist, fsm_vars=('fsm', 'state', 'count', 'cnt', 'step', 'mode')):
         VerilogSubset.__init__(self, topmodule, terms, binddict,
                                resolved_terms, resolved_binddict, constlist)
-        self.treewalker = VerilogDataflowWalker(topmodule, terms, binddict, 
+        self.treewalker = VerilogDataflowWalker(topmodule, terms, binddict,
                                                 resolved_terms, resolved_binddict, constlist)
         self.fsm_vars = fsm_vars
 
-    ############################################################################
     def getLoops(self):
         fsms = self.getFiniteStateMachines()
         loops = {}
         for signame, fsm in fsms.items():
             loop_set = fsm.get_loop()
-            if len(loop_set) == 0: continue
-            if not signame in loops: loops[signame] = set([])
+            if len(loop_set) == 0:
+                continue
+            if not signame in loops:
+                loops[signame] = set([])
             loops[signame].update(loop_set)
         return loops, fsms
 
     def getFiniteStateMachines(self):
         statemachines = {}
         for termname, bindlist in self.resolved_binddict.items():
-            if not self.isFsmVar(termname): continue
+            if not self.isFsmVar(termname):
+                continue
             funcdict, delaycnt = self.getFuncdict(termname)
-            if len(funcdict) > 0: print("FSM signal: %s, Condition list length: %d" % (str(termname), len(funcdict)))
+            if len(funcdict) > 0:
+                print("FSM signal: %s, Condition list length: %d" % (str(termname), len(funcdict)))
             fsm = self.getFiniteStateMachine(termname, funcdict)
             if fsm.size() > 0:
                 fsm.set_delaycnt(delaycnt)
@@ -57,37 +61,43 @@ class VerilogControlflowAnalyzer(VerilogSubset):
                 statemachines[termname] = fsm
         return statemachines
 
-    ############################################################################
     def getFiniteStateMachine(self, termname, funcdict):
         fsm = FiniteStateMachine(util.toFlatname(termname))
-        if len(funcdict) == 0: return fsm
+        if len(funcdict) == 0:
+            return fsm
         width = self.getWidth(termname)
-        for condlist, func in sorted(funcdict.items(), key=lambda x:len(x[0])):
-            if not isinstance(func, DFEvalValue): continue
+        for condlist, func in sorted(funcdict.items(), key=lambda x: len(x[0])):
+            if not isinstance(func, DFEvalValue):
+                continue
             print("Condition: %s, Inferring transition condition" % str(condlist))
             node = transition.walkCondlist(condlist, termname, width)
-            if node is None: continue
-            statenode_list = node.nodelist if isinstance(node, transition.StateNodeList) else [node,]
-            for statenode in statenode_list: fsm.construct(func.value, statenode)
+            if node is None:
+                continue
+            statenode_list = node.nodelist if isinstance(
+                node, transition.StateNodeList) else [node, ]
+            for statenode in statenode_list:
+                fsm.construct(func.value, statenode)
         return fsm
 
     def getFuncdict(self, termname, delaycnt=0):
         termtype = self.getTermtype(termname)
-        if not self.isClockEdge(termname): return {}, 0
-        if signaltype.isRename(termtype): return {}, 0
-        if signaltype.isRegArray(termtype): return {}, 0 # currently unsupported
+        if not self.isClockEdge(termname):
+            return {}, 0
+        if signaltype.isRename(termtype):
+            return {}, 0
         tree = self.makeTree(termname)
         funcdict = splitter.split(tree)
         funcdict = splitter.remove_reset_condition(funcdict)
         if len(funcdict) == 1 and len(funcdict.keys()[0]) == 0:
             next_term = funcdict.values()[0]
             if isinstance(next_term, DFTerminal):
-                return self.getFuncdict(next_term.name, delaycnt+1)
+                return self.getFuncdict(next_term.name, delaycnt + 1)
         return funcdict, delaycnt
 
     def isFsmVar(self, termname):
         for v in self.fsm_vars:
-            if re.search(v.lower(), str(termname).lower()): return True
+            if re.search(v.lower(), str(termname).lower()):
+                return True
         return False
 
     def getWidth(self, termname):
@@ -107,12 +117,12 @@ class VerilogControlflowAnalyzer(VerilogSubset):
         tree = replace.replaceUndefined(tree, termname)
         return tree
 
-################################################################################
+
 class FiniteStateMachine(object):
     def __init__(self, name):
         self.name = name
-        self.fsm = {} # key:src, value: dict[cond]=dst
-        self.any = {} # key:cond, value:dst
+        self.fsm = {}  # key:src, value: dict[cond]=dst
+        self.any = {}  # key:cond, value:dst
         self.delaycnt = 0
 
     def set_delaycnt(self, delaycnt):
@@ -130,48 +140,60 @@ class FiniteStateMachine(object):
         minval = None
         maxval = None
         for src, dstdict in self.fsm.items():
-            if minval is None: minval = src
-            elif src < minval: minval = src
-            if maxval is None: maxval = src
-            elif src > maxval: maxval = src
+            if minval is None:
+                minval = src
+            elif src < minval:
+                minval = src
+            if maxval is None:
+                maxval = src
+            elif src > maxval:
+                maxval = src
             for cond, dst in dstdict.items():
-                if minval is None: minval = dst
-                elif dst < minval: minval = dst
-                if maxval is None: maxval = dst
-                elif dst > maxval: maxval = dst
+                if minval is None:
+                    minval = dst
+                elif dst < minval:
+                    minval = dst
+                if maxval is None:
+                    maxval = dst
+                elif dst > maxval:
+                    maxval = dst
         return (minval, maxval)
 
     def construct(self, dst, node):
-        if node is None: return
+        if node is None:
+            return
         if node.isany:
             transcond = node.transcond
             self.add_any(dst, transcond)
         for rp in node.range_pairs:
             transcond = node.transcond
             self.add(rp, dst, transcond)
-        
+
     def add_any(self, dst, cond):
         self.any[cond] = dst
 
     def add(self, srcs, dst, cond):
         sb, se = srcs
-        for src in range(sb, se+1):
+        for src in range(sb, se + 1):
             if not src in self.fsm:
                 self.fsm[src] = {}
             self.fsm[src][cond] = dst
-    
+
     def resolve(self, evaluate):
         new_fsm = {}
-        for src, dstdict in sorted(self.fsm.items(), key=lambda x:x[0]):
+        for src, dstdict in sorted(self.fsm.items(), key=lambda x: x[0]):
             dst_cond_dict = {}
-            for cond, dst in sorted(dstdict.items(), key=lambda x:x[1]):
+            for cond, dst in sorted(dstdict.items(), key=lambda x: x[1]):
                 if not dst in dst_cond_dict:
                     dst_cond_dict[dst] = cond
                 else:
                     cur_cond = dst_cond_dict[dst]
-                    if cur_cond is None: pass
-                    elif cond is None: dst_cond_dict[dst] = None
-                    else: dst_cond_dict[dst] = evaluate.optimize(DFOperator((cur_cond, cond), 'Lor'))
+                    if cur_cond is None:
+                        pass
+                    elif cond is None:
+                        dst_cond_dict[dst] = None
+                    else:
+                        dst_cond_dict[dst] = evaluate.optimize(DFOperator((cur_cond, cond), 'Lor'))
             new_dstdict = {}
             for dst, cond in dst_cond_dict.items():
                 if isinstance(cond, DFEvalValue) and cond.value > 0:
@@ -180,21 +202,25 @@ class FiniteStateMachine(object):
                     new_dstdict[cond] = dst
             new_fsm[src] = new_dstdict
         self.fsm = new_fsm
-                        
+
     def view(self):
         for cond, dst in self.any.items():
             s = []
             s.append('any -- ')
-            if cond is not None: s.append(cond.tocode())
-            else: s.append('None')
+            if cond is not None:
+                s.append(cond.tocode())
+            else:
+                s.append('None')
             s.append('--> %d' % dst)
             print(''.join(s))
         for src, dstdict in self.fsm.items():
             for cond, dst in dstdict.items():
                 s = []
                 s.append('%d --' % src)
-                if cond is not None: s.append(cond.tocode())
-                else: s.append('None')
+                if cond is not None:
+                    s.append(cond.tocode())
+                else:
+                    s.append('None')
                 s.append('--> %d' % dst)
                 print(''.join(s))
 
@@ -223,14 +249,14 @@ class FiniteStateMachine(object):
         graph.layout(prog='dot')
         graph.draw(filename)
 
-    ############################################################################
     def get_loop(self):
         loops = set([])
         loop_node_cnt = {}
         for k in sorted(self.fsm.keys()):
             if not k in self.fsm:
                 continue
-            if not k in loop_node_cnt: loop_node_cnt[k] = 0
+            if not k in loop_node_cnt:
+                loop_node_cnt[k] = 0
             if loop_node_cnt[k] >= len(self.fsm[k].values()):
                 continue
             paths = self.get_looppath(k)
@@ -239,7 +265,8 @@ class FiniteStateMachine(object):
                 if rotated not in loops:
                     loops.add(rotated)
                     for r in rotated:
-                        if not r in loop_node_cnt: loop_node_cnt[r] = 0
+                        if not r in loop_node_cnt:
+                            loop_node_cnt[r] = 0
                         loop_node_cnt[r] += 1
         return loops
 
@@ -250,11 +277,13 @@ class FiniteStateMachine(object):
 
     def get_looppath(self, src):
         paths = set([])
-        if not src in self.fsm: return paths
+        if not src in self.fsm:
+            return paths
         nextnodes = set(self.fsm[src].values())
         for n in nextnodes:
             r = self._looppath(src, n, visited=set([n]))
-            if len(r) > 0: paths |= r
+            if len(r) > 0:
+                paths |= r
         return paths
 
     def _looppath(self, src, node, visited, cnt=0):
@@ -262,13 +291,14 @@ class FiniteStateMachine(object):
         if cnt > 50:
             return paths
         if src == node:
-            paths.add( (src,) )
+            paths.add((src,))
             return paths
         if not node in self.fsm:
             return paths
         nextnodes = set(self.fsm[node].values()) - visited
         for n in nextnodes:
-            r = self._looppath(src, n, visited=visited|set([node]), cnt=cnt+1)
+            r = self._looppath(src, n, visited=visited | set([node]), cnt=cnt + 1)
             if len(r) > 0:
-                for np in r: paths.add( (node,) + np )
+                for np in r:
+                    paths.add((node,) + np)
         return paths
