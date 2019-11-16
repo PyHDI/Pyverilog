@@ -88,8 +88,8 @@ class VerilogControlflowAnalyzer(VerilogSubset):
         tree = self.makeTree(termname)
         funcdict = splitter.split(tree)
         funcdict = splitter.remove_reset_condition(funcdict)
-        if len(funcdict) == 1 and len(funcdict.keys()[0]) == 0:
-            next_term = funcdict.values()[0]
+        if len(funcdict) == 1 and len(list(funcdict.keys())[0]) == 0:
+            next_term = list(funcdict.values())[0]
             if isinstance(next_term, DFTerminal):
                 return self.getFuncdict(next_term.name, delaycnt + 1)
         return funcdict, delaycnt
