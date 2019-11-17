@@ -159,10 +159,11 @@ class Portlist(Node):
 class Port(Node):
     attr_names = ('name', 'type',)
 
-    def __init__(self, name, width, type, lineno=0):
+    def __init__(self, name, width, dimensions, type, lineno=0):
         self.lineno = lineno
         self.name = name
         self.width = width
+        self.dimensions = dimensions
         self.type = type
 
     def children(self):
