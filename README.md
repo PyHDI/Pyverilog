@@ -100,8 +100,8 @@ pip3 install jinja2
 Optional Installation
 --------------------
 
-- pytest: 3.2 or later
-- pytest-pythonpath: 0.7 or later
+- pytest: 3.8.1 or later
+- pytest-pythonpath: 0.7.3 or later
 
 These are required for the testing execution of test codes in tests and examples.
 

@@ -3,7 +3,7 @@ language: python
 sudo: false
 
 python:
-  - 3.6
+  - 3.7
 
 addons:
   apt:
@@ -11,7 +11,7 @@ addons:
     - iverilog
 
 install:
-  - pip install jinja2 pytest pytest-pythonpath
+  - pip install pytest pytest-pythonpath jinja2
 
 script:
   - python -m pytest tests
