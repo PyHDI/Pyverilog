@@ -146,7 +146,7 @@ class VerilogOptimizer(object):
             term = self.getTerm(tree.var.name)
             var = self.optimizeConstant(tree.var)
             ptr = self.optimizeConstant(tree.ptr)
-            if term.shape is not None:
+            if term.dims is not None:
                 return DFPointer(var, ptr)
             if isinstance(var, DFEvalValue) and isinstance(ptr, DFEvalValue):
                 evalcc = self.evalPointer(var, ptr)
@@ -335,7 +335,7 @@ class VerilogOptimizer(object):
             if not isinstance(node.var, DFTerminal):
                 return 1
             term = self.getTerm(node.var.name)
-            if term.shape is not None:
+            if term.dims is not None:
                 msb = self.optimizeConstant(term.msb).value
                 lsb = self.optimizeConstant(term.lsb).value
                 width = abs(msb - lsb) + 1
@@ -1023,10 +1023,10 @@ class VerilogDataflowOptimizer(VerilogOptimizer):
             if tv.lsb is not None:
                 rslt = self.optimizeConstant(tv.lsb)
                 self.resolved_terms[tk].lsb = rslt
-            if tv.shape is not None:
-                shape = []
-                for l, r in tv.shape:
+            if tv.dims is not None:
+                dims = []
+                for l, r in tv.dims:
                     l = self.optimizeConstant(l)
                     r = self.optimizeConstant(r)
-                    shape.append((l, r))
-                self.resolved_terms[tk].shape = tuple(shape)
+                    dims.append((l, r))
+                self.resolved_terms[tk].dims = tuple(dims)

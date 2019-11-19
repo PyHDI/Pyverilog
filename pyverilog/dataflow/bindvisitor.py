@@ -694,9 +694,9 @@ class BindVisitor(NodeVisitor):
         term = self.dataflow.getTerm(name)
         return term.msb, term.lsb
 
-    def getTermShape(self, name):
+    def getTermDims(self, name):
         term = self.dataflow.getTerm(name)
-        return term.shape
+        return term.dims
 
     def getTermtype(self, name):
         term = self.dataflow.getTerm(name)
@@ -708,7 +708,7 @@ class BindVisitor(NodeVisitor):
     def renameVar(self, name):
         renamedvar = (name[:-1] +
                       ScopeLabel('_rn' + str(self.renamecnt) +
-                                 '_' + name[-1].scopename, 'signal'))
+                                   '_' + name[-1].scopename, 'signal'))
         self.renamecnt += 1
         return renamedvar
 
@@ -866,16 +866,16 @@ class BindVisitor(NodeVisitor):
             msb = DFIntConst('0') if node.width is None else self.makeDFTree(node.width.msb, scope)
         lsb = DFIntConst('0') if node.width is None else self.makeDFTree(node.width.lsb, scope)
 
-        shape = None
+        dims = None
         if node.dimensions is not None:
-            shape = []
+            dims = []
             for length in node.dimensions.lengths:
                 l = self.makeDFTree(length.msb, scope)
                 r = self.makeDFTree(length.lsb, scope)
-                shape.append((l, r))
-            shape = tuple(shape)
+                dims.append((l, r))
+            dims = tuple(dims)
 
-        term = Term(name, termtypes, msb, lsb, shape)
+        term = Term(name, termtypes, msb, lsb, dims)
         self.dataflow.addTerm(name, term)
         self.setConstantTerm(name, term)
 
@@ -1057,7 +1057,7 @@ class BindVisitor(NodeVisitor):
             var_df = self.makeDFTree(node.var, scope)
             ptr_df = self.makeDFTree(node.ptr, scope)
 
-            if isinstance(var_df, DFTerminal) and self.getTermShape(var_df.name) is not None:
+            if isinstance(var_df, DFTerminal) and self.getTermDims(var_df.name) is not None:
                 return DFPointer(var_df, ptr_df)
             return DFPartselect(var_df, ptr_df, copy.deepcopy(ptr_df))
 
@@ -1247,7 +1247,7 @@ class BindVisitor(NodeVisitor):
         if isinstance(tree, DFPointer):
             resolved_ptr = self.resolveBlockingAssign(tree.ptr, scope)
             if (isinstance(tree.var, DFTerminal) and
-                self.getTermShape(tree.var.name) is not None):
+                    self.getTermDims(tree.var.name) is not None):
                 current_bindlist = self.frames.getBlockingAssign(tree.var.name, scope)
                 if len(current_bindlist) == 0:
                     return DFPointer(tree.var, resolved_ptr)
@@ -1273,7 +1273,7 @@ class BindVisitor(NodeVisitor):
             if bind.msb is None and bind.lsb is None:
                 return bind.tree
             if (self.optimize(bind.msb) == optimized_msb and
-                self.optimize(bind.lsb) == optimized_lsb):
+                    self.optimize(bind.lsb) == optimized_lsb):
                 return bind.tree
         return self.getMergedTree(bindlist)
 
@@ -1384,7 +1384,7 @@ class BindVisitor(NodeVisitor):
             if left.var.scope is not None:
                 name = left.var.scope + ScopeLabel(left.var.name, 'signal')
             ptr = self.optimize(self.makeDFTree(left.ptr, scope))
-            if self.getTermShape(name) is not None:
+            if self.getTermDims(name) is not None:
                 return (name, None, None, ptr)
             return (name, ptr, copy.deepcopy(ptr), None)
 
@@ -1480,8 +1480,8 @@ class BindVisitor(NodeVisitor):
         if len(current_bindlist) > 0:
             for current_bind in current_bindlist:
                 if (current_bind.msb == msb and
-                    current_bind.lsb == lsb and
-                        current_bind.ptr == ptr ):
+                    current_bind.lsb == lsb
+                        and current_bind.ptr == ptr ):
                     current_tree = current_bind.tree
                     current_msb = current_bind.msb
                     current_lsb = current_bind.lsb
@@ -1494,8 +1494,8 @@ class BindVisitor(NodeVisitor):
 
         match_flowlist = ()
         if (current_msb == msb and
-            current_lsb == lsb and
-                current_ptr == ptr ):
+            current_lsb == lsb
+                and current_ptr == ptr ):
             (rest_tree,
              rest_condlist,
              rest_flowlist,
