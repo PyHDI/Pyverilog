@@ -81,11 +81,6 @@ If the pull request code passes all the tests successfully and has no
 obvious problem, it will be merged to the *develop* branch by the main
 committers.
 
-Documentation
-=============
-
-To be described.
-
 Installation
 ============
 
@@ -93,7 +88,6 @@ Requirements
 ------------
 
 -  Python3: 3.6 or later
-
 -  Icarus Verilog: 10.1 or later
 
 ::
@@ -106,24 +100,27 @@ Requirements
 
    pip3 install jinja2
 
-Optional Installation
----------------------
+Optional installation for testing
+---------------------------------
 
--  pytest: 3.2 or later
--  pytest-pythonpath: 0.7 or later
+These are required for automatic testing of **tests**. We recommend to
+install these testing library to verify experimental features.
 
-These are required for the testing execution of test codes in tests and
-examples.
+-  pytest: 3.8.1 or later
+-  pytest-pythonpath: 0.7.3 or later
 
 ::
 
    pip3 install pytest pytest-pythonpath
 
--  Graphviz: 2.38.0 or later
--  Pygraphviz: 1.3.1 or later
+Optional installation for visualization
+---------------------------------------
 
 These are required for graph visualization by dataflow/graphgen.py and
 controlflow/controlflow_analyzer.py.
+
+-  Graphviz: 2.38.0 or later
+-  Pygraphviz: 1.3.1 or later
 
 ::
 
@@ -133,7 +130,7 @@ controlflow/controlflow_analyzer.py.
 Install
 -------
 
-Install Pyverilog:
+Now you can install Pyverilog using setup.py script:
 
 ::
 

@@ -261,15 +261,13 @@ class VerilogParser(PLYParser):
 
     def p_ports(self, p):
         'ports : ports COMMA portname'
-        wid = None
-        port = Port(name=p[3], width=wid, type=None, lineno=p.lineno(1))
+        port = Port(name=p[3], width=None, dimensions=None, type=None, lineno=p.lineno(1))
         p[0] = p[1] + (port,)
         p.set_lineno(0, p.lineno(1))
 
     def p_ports_one(self, p):
         'ports : portname'
-        wid = None
-        port = Port(name=p[1], width=wid, type=None, lineno=p.lineno(1))
+        port = Port(name=p[1], width=None, dimensions=None, type=None, lineno=p.lineno(1))
         p[0] = (port,)
         p.set_lineno(0, p.lineno(1))
 

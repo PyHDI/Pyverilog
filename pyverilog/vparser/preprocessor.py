@@ -29,23 +29,39 @@ import subprocess
 
 class VerilogPreprocessor(object):
     def __init__(self, filelist, outputfile='pp.out', include=None, define=None):
+
+        if not isinstance(filelist, (tuple, list)):
+            filelist = list(filelist)
+
         self.filelist = filelist
-        iverilog_invocable = os.environ.get("PYVERILOG_IVERILOG") or "iverilog"
-        include = include or []
-        define = define or []
-        includes = map(
-            lambda includable: "-I '{0}'".format(includable), include
-        )
-        defines = map(lambda definable: "-D {0}".format(definable), define)
-        self.iv = "'{0}' {1} {2} -E -o '{3}'".format(
-            iverilog_invocable, ' '.join(includes), ' '.join(defines),
-            outputfile
-        )
+
+        iverilog = os.environ.get('PYVERILOG_IVERILOG')
+        if iverilog is None:
+            iverilog = 'iverilog'
+
+        if include is None:
+            include = ()
+
+        if define is None:
+            define = ()
+
+        self.iv = [iverilog]
+
+        for inc in include:
+            self.iv.append('-I')
+            self.iv.append(inc)
+
+        for dfn in define:
+            self.iv.append('-D')
+            self.iv.append(dfn)
+
+        self.iv.append('-E')
+        self.iv.append('-o')
+        self.iv.append(outputfile)
 
     def preprocess(self):
-        files = map(lambda file: "'{0}'".format(file), self.filelist)
-        cmd = "{0} {1}".format(self.iv, ' '.join(files))
-        subprocess.call(cmd, shell=True)
+        cmd = self.iv + list(self.filelist)
+        subprocess.call(cmd)
 
 
 def preprocess(
