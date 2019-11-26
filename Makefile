@@ -15,6 +15,6 @@ clean:
 	make clean -C ./tests
 	rm -rf *.egg-info build dist *.pyc __pycache__ parsetab.py .cache tmp.v uut.vcd *.out *.png *.dot 
 
-.PHONY: release
-release:
-	pandoc README.md -t rst > README.rst
+#.PHONY: release
+#release:
+#	pandoc README.md -t rst > README.rst
