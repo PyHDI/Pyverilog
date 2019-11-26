@@ -1,11 +1,8 @@
 from setuptools import setup, find_packages
 
-import pyverilog.utils.version
 import re
 import os
-
-m = re.search(r'(\d+\.\d+\.\d+(-.+)?)', pyverilog.utils.version.VERSION)
-version = m.group(1) if m is not None else '0.0.0'
+import pyverilog
 
 
 def read(filename):
@@ -13,7 +10,7 @@ def read(filename):
 
 
 setup(name='pyverilog',
-      version=version,
+      version=pyverilog.__version__,
       description='Python-based Hardware Design Processing Toolkit for Verilog HDL: Parser, Dataflow Analyzer, Controlflow Analyzer and Code Generator',
       long_description=read('README.md'),
       long_description_content_type="text/markdown",
