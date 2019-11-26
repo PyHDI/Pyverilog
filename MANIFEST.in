@@ -1,5 +1,4 @@
 include README.md
-include README.rst
 include LICENSE
 include pytest.ini
 include .travis.yml
