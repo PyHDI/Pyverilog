@@ -9,7 +9,7 @@ def read(filename):
 
 
 setup(name='pyverilog',
-      version=read('pyverilog/VERSION'),
+      version=read('pyverilog/VERSION').splitlines()[0],
       description='Python-based Hardware Design Processing Toolkit for Verilog HDL: Parser, Dataflow Analyzer, Controlflow Analyzer and Code Generator',
       long_description=read('README.md'),
       long_description_content_type="text/markdown",
