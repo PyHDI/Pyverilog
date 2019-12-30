@@ -711,7 +711,7 @@ class VerilogParser(PLYParser):
         p.set_lineno(0, p.lineno(1))
 
     def p_integername_init(self, p):
-        'integername: ID EQUALS rvalue'
+        'integername : ID EQUALS rvalue'
         p[0] = (p[1], p[3])
         p.set_lineno(0, p.lineno(1))
 
