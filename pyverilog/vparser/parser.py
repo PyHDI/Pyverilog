@@ -682,21 +682,21 @@ class VerilogParser(PLYParser):
     # Integer
     def p_integerdecl(self, p):
         'integerdecl : INTEGER integernamelist SEMICOLON'
-        intlist = [Integer(r,
+        intlist = [Integer(rname, rvalue,
                            Width(msb=IntConst('31', lineno=p.lineno(2)),
                                  lsb=IntConst('0', lineno=p.lineno(2)),
                                  lineno=p.lineno(2)),
-                           signed=True, lineno=p.lineno(2)) for r in p[2]]
+                           signed=True, lineno=p.lineno(2)) for rname, rvalue in p[2]]
         p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_integerdecl_signed(self, p):
         'integerdecl : INTEGER SIGNED integernamelist SEMICOLON'
-        intlist = [Integer(r,
+        intlist = [Integer(rname, rvalue, 
                            Width(msb=IntConst('31', lineno=p.lineno(3)),
                                  lsb=IntConst('0', lineno=p.lineno(3)),
                                  lineno=p.lineno(3)),
-                           signed=True, lineno=p.lineno(3)) for r in p[2]]
+                           signed=True, lineno=p.lineno(3)) for rname, rvalue in p[2]]
         p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -710,9 +710,14 @@ class VerilogParser(PLYParser):
         p[0] = (p[1],)
         p.set_lineno(0, p.lineno(1))
 
+    def p_integername_init(self, p):
+        'integername : ID EQUALS rvalue'
+        p[0] = (p[1], p[3])
+        p.set_lineno(0, p.lineno(1))
+
     def p_integername(self, p):
         'integername : ID'
-        p[0] = p[1]
+        p[0] = (p[1], None)
         p.set_lineno(0, p.lineno(1))
 
     # Real
