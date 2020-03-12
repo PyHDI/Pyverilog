@@ -885,6 +885,10 @@ class CasexStatement(CaseStatement):
     pass
 
 
+class CasezStatement(CaseStatement):
+    pass
+
+
 class UniqueCaseStatement(CaseStatement):
     pass
 
