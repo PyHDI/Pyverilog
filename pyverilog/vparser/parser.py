@@ -682,21 +682,25 @@ class VerilogParser(PLYParser):
     # Integer
     def p_integerdecl(self, p):
         'integerdecl : INTEGER integernamelist SEMICOLON'
-        intlist = [Integer(r,
+        intlist = [Integer(rname,
                            Width(msb=IntConst('31', lineno=p.lineno(2)),
                                  lsb=IntConst('0', lineno=p.lineno(2)),
                                  lineno=p.lineno(2)),
-                           signed=True, lineno=p.lineno(2)) for r in p[2]]
+                           signed=True,
+                           value=rvalue,
+                           lineno=p.lineno(2)) for rname, rvalue in p[2]]
         p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_integerdecl_signed(self, p):
         'integerdecl : INTEGER SIGNED integernamelist SEMICOLON'
-        intlist = [Integer(r,
+        intlist = [Integer(rname,
                            Width(msb=IntConst('31', lineno=p.lineno(3)),
                                  lsb=IntConst('0', lineno=p.lineno(3)),
                                  lineno=p.lineno(3)),
-                           signed=True, lineno=p.lineno(3)) for r in p[2]]
+                           signed=True,
+                           value=rvalue,
+                           lineno=p.lineno(3)) for rname, rvalue in p[2]]
         p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -710,9 +714,14 @@ class VerilogParser(PLYParser):
         p[0] = (p[1],)
         p.set_lineno(0, p.lineno(1))
 
+    def p_integername_init(self, p):
+        'integername : ID EQUALS rvalue'
+        p[0] = (p[1], p[3])
+        p.set_lineno(0, p.lineno(1))
+
     def p_integername(self, p):
         'integername : ID'
-        p[0] = p[1]
+        p[0] = (p[1], None)
         p.set_lineno(0, p.lineno(1))
 
     # Real
@@ -1413,6 +1422,7 @@ class VerilogParser(PLYParser):
         """basic_statement : if_statement
         | case_statement
         | casex_statement
+        | casez_statement
         | unique_case_statement
         | for_statement
         | while_statement
@@ -1654,6 +1664,11 @@ class VerilogParser(PLYParser):
     def p_casex_statement(self, p):
         'casex_statement : CASEX LPAREN case_comp RPAREN casecontent_statements ENDCASE'
         p[0] = CasexStatement(p[3], p[5], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_casez_statement(self, p):
+        'casez_statement : CASEZ LPAREN case_comp RPAREN casecontent_statements ENDCASE'
+        p[0] = CasezStatement(p[3], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_unique_case_statement(self, p):
@@ -2058,6 +2073,15 @@ class VerilogParser(PLYParser):
                         p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
+    def p_function_integer(self, p):
+        'function : FUNCTION INTEGER ID SEMICOLON function_statement ENDFUNCTION'
+        p[0] = Function(p[3],
+                        Width(IntConst('31', lineno=p.lineno(1)),
+                              IntConst('0', lineno=p.lineno(1)),
+                              lineno=p.lineno(1)),
+                        p[5], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
     def p_function_statement(self, p):
         'function_statement : funcvardecls function_calc'
         p[0] = p[1] + (p[2],)
@@ -2092,6 +2116,7 @@ class VerilogParser(PLYParser):
         | while_statement
         | case_statement
         | casex_statement
+        | casez_statement
         | block
         | namedblock
         """
@@ -2161,6 +2186,7 @@ class VerilogParser(PLYParser):
         | while_statement
         | case_statement
         | casex_statement
+        | casez_statement
         | block
         | namedblock
         """

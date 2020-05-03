@@ -56,7 +56,7 @@ class VerilogLexer(object):
         'INPUT', 'INOUT', 'OUTPUT', 'TRI', 'REG', 'LOGIC', 'WIRE', 'INTEGER', 'REAL', 'SIGNED',
         'PARAMETER', 'LOCALPARAM', 'SUPPLY0', 'SUPPLY1',
         'ASSIGN', 'ALWAYS', 'ALWAYS_FF', 'ALWAYS_COMB', 'ALWAYS_LATCH', 'SENS_OR', 'POSEDGE', 'NEGEDGE', 'INITIAL',
-        'IF', 'ELSE', 'FOR', 'WHILE', 'CASE', 'CASEX', 'UNIQUE', 'ENDCASE', 'DEFAULT',
+        'IF', 'ELSE', 'FOR', 'WHILE', 'CASE', 'CASEX', 'CASEZ', 'UNIQUE', 'ENDCASE', 'DEFAULT',
         'WAIT', 'FOREVER', 'DISABLE', 'FORK', 'JOIN',
     )
 
