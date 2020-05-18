@@ -50,15 +50,35 @@ class VerilogLexer(object):
     def token(self):
         return self.lexer.token()
 
-    keywords = (
+    vh_keywords = (
         'MODULE', 'ENDMODULE', 'BEGIN', 'END', 'GENERATE', 'ENDGENERATE', 'GENVAR',
         'FUNCTION', 'ENDFUNCTION', 'TASK', 'ENDTASK',
-        'INPUT', 'INOUT', 'OUTPUT', 'TRI', 'REG', 'LOGIC', 'WIRE', 'INTEGER', 'REAL', 'SIGNED',
-        'PARAMETER', 'LOCALPARAM', 'SUPPLY0', 'SUPPLY1',
-        'ASSIGN', 'ALWAYS', 'ALWAYS_FF', 'ALWAYS_COMB', 'ALWAYS_LATCH', 'SENS_OR', 'POSEDGE', 'NEGEDGE', 'INITIAL',
-        'IF', 'ELSE', 'FOR', 'WHILE', 'CASE', 'CASEX', 'CASEZ', 'UNIQUE', 'ENDCASE', 'DEFAULT',
+        'INPUT', 'INOUT', 'OUTPUT', 'TRI', 'REG', 'WIRE',
+        'INTEGER', 'TIME',
+        'REAL', 'REALTIME',
+        'SIGNED',
+        'SUPPLY0', 'SUPPLY1',
+        'PARAMETER', 'LOCALPARAM',
+        'ASSIGN', 'ALWAYS', 'SENS_OR', 'POSEDGE', 'NEGEDGE', 'INITIAL',
+        'IF', 'ELSE', 'FOR', 'WHILE', 'CASE', 'ENDCASE', 'DEFAULT',
         'WAIT', 'FOREVER', 'DISABLE', 'FORK', 'JOIN',
+        'AUTOMATIC', 'STATIC', 'VOID',
     )
+
+    sv_keywords = (
+        'INTERFACE', 'ENDINTERFACE', 'MODPORT',
+        # 'CLASS', 'ENDCLASS',
+        'STRUCT', 'UNION', 'PACKED', 'ENUM', 'TYPEDEF',
+        'LOGIC',
+        'SHORTINT', 'INT', 'LONGINT', 'BYTE', 'BIT',
+        'SHORTREAL',
+        'UNSIGNED',
+        'ALWAYS_FF', 'ALWAYS_COMB', 'ALWAYS_LATCH',
+        'FOREACH', 'CASEX', 'CASEZ', 'UNIQUE', 'PRIORITY',
+        'REF', 'CONST',
+    )
+
+    keywords = tuple(list(vh_keywords) + list(sv_keywords))
 
     reserved = {}
     for keyword in keywords:
@@ -67,7 +87,7 @@ class VerilogLexer(object):
         else:
             reserved[keyword.lower()] = keyword
 
-    operators = (
+    vh_operators = (
         'PLUS', 'MINUS', 'POWER', 'TIMES', 'DIVIDE', 'MOD',
         'NOT', 'OR', 'NOR', 'AND', 'NAND', 'XOR', 'XNOR',
         'LOR', 'LAND', 'LNOT',
@@ -76,6 +96,16 @@ class VerilogLexer(object):
         'COND',  # ?
         'EQUALS',
     )
+
+    sv_operators = (
+        'PLUSEQUALS', 'MINUSEQUALS', 'TIMESEQUALS', 'DIVIDEEQUALS', 'MODEQUALS',
+        'OREQUALS', 'ANDEQUALS', 'XOREQUALS',
+        'LSHIFTAEQUALS', 'RSHIFTAEQUALS', 'LSHIFTEQUALS', 'RSHIFTEQUALS',
+        'INCREMENT', 'DECREMENT',
+        'CAST',  # casting_type'(expression), width'([01ZzXx])
+    )
+
+    operators = tuple(list(vh_operators) + list(sv_operators))
 
     tokens = keywords + operators + (
         'ID',
@@ -104,10 +134,9 @@ class VerilogLexer(object):
     def t_DIRECTIVE(self, t):
         self.directives.append((self.lexer.lineno, t.value))
         t.lexer.lineno += t.value.count("\n")
-        m = re.match("^`default_nettype\s+(.+)\n", t.value)
+        m = re.match(r"^`default_nettype\s+(.+)\n", t.value)
         if m:
             self.default_nettype = m.group(1)
-        pass
 
     # Comment
     linecomment = r"""//.*?\n"""
@@ -116,12 +145,10 @@ class VerilogLexer(object):
     @TOKEN(linecomment)
     def t_LINECOMMENT(self, t):
         t.lexer.lineno += t.value.count("\n")
-        pass
 
     @TOKEN(commentout)
     def t_COMMENTOUT(self, t):
         t.lexer.lineno += t.value.count("\n")
-        pass
 
     # Operator
     t_LOR = r'\|\|'
@@ -160,6 +187,25 @@ class VerilogLexer(object):
 
     t_COND = r'\?'
     t_EQUALS = r'='
+
+    t_PLUSEQUALS = r'\+='
+    t_MINUSEQUALS = r'-='
+    t_TIMESEQUALS = r'\*='
+    t_DIVIDEEQUALS = r'/='
+    t_MODEQUALS = r'%='
+    t_OREQUALS = r'\|='
+    t_ANDEQUALS = r'\&='
+    t_XOREQUALS = r'\^='
+
+    t_LSHIFTAEQUALS = r'<<<='
+    t_RSHIFTAEQUALS = r'>>>='
+    t_LSHIFTEQUALS = r'<<='
+    t_RSHIFTEQUALS = r'>>='
+
+    t_INCREMENT = r'\+\+'
+    t_DECREMENT = r'--'
+
+    t_CAST = r"'"
 
     t_PLUSCOLON = r'\+:'
     t_MINUSCOLON = r'-:'
@@ -252,7 +298,6 @@ class VerilogLexer(object):
     def t_NEWLINE(self, t):
         r'\n+'
         t.lexer.lineno += t.value.count("\n")
-        pass
 
     def t_error(self, t):
         msg = 'Illegal character %s' % repr(t.value[0])

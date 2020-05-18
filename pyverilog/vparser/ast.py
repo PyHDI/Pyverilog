@@ -156,27 +156,36 @@ class Portlist(Node):
         return tuple(nodelist)
 
 
+# pdims: Packed Dimensions
+# udims: Unpacked Dimensions
+# {pdims} {width} name {udims}
+
 class Port(Node):
     attr_names = ('name', 'type',)
 
-    def __init__(self, name, width, dimensions, type, lineno=0):
+    def __init__(self, name, width, pdims, udims, type, lineno=0):
         self.lineno = lineno
         self.name = name
         self.width = width
-        self.dimensions = dimensions
+        self.pdims = pdims
+        self.udims = udims
         self.type = type
 
     def children(self):
         nodelist = []
         if self.width:
             nodelist.append(self.width)
+        if self.pdims:
+            nodelist.append(self.pdims)
+        if self.udims:
+            nodelist.append(self.udims)
         return tuple(nodelist)
 
 
 class Width(Node):
     attr_names = ()
 
-    def __init__(self, msb, lsb, lineno=0):
+    def __init__(self, msb, lsb=None, lineno=0):
         self.lineno = lineno
         self.msb = msb
         self.lsb = lsb
@@ -194,7 +203,7 @@ class Length(Width):
     pass
 
 
-class Dimensions(Node):
+class Dims(Node):
     attr_names = ()
 
     def __init__(self, lengths, lineno=0):
@@ -228,7 +237,7 @@ class Identifier(Node):
         return self.scope.__repr__() + '.' + self.name
 
 
-class Value(Node):
+class _Value(Node):
     attr_names = ()
 
     def __init__(self, value, lineno=0):
@@ -242,7 +251,7 @@ class Value(Node):
         return tuple(nodelist)
 
 
-class Constant(Value):
+class _Constant(_Value):
     attr_names = ('value',)
 
     def __init__(self, value, lineno=0):
@@ -257,74 +266,158 @@ class Constant(Value):
         return str(self.value)
 
 
-class IntConst(Constant):
+class IntConst(_Constant):
     pass
 
 
-class FloatConst(Constant):
+class FloatConst(_Constant):
     pass
 
 
-class StringConst(Constant):
+class StringConst(_Constant):
     pass
 
 
-class Variable(Value):
+class _Variable(_Value):
     attr_names = ('name', 'signed')
 
-    def __init__(self, name, width=None, signed=False, dimensions=None, value=None, lineno=0):
+    def __init__(self, name, width=None, signed=False, pdims=None, udims=None, value=None, lineno=0):
         self.lineno = lineno
         self.name = name
         self.width = width
         self.signed = signed
-        self.dimensions = dimensions
+        self.pdims = pdims
+        self.udims = udims
         self.value = value
 
     def children(self):
         nodelist = []
         if self.width:
             nodelist.append(self.width)
-        if self.dimensions:
-            nodelist.append(self.dimensions)
+        if self.pdims:
+            nodelist.append(self.pdims)
+        if self.udims:
+            nodelist.append(self.udims)
         if self.value:
             nodelist.append(self.value)
         return tuple(nodelist)
 
 
-class Input(Variable):
+class _Variable4State(_Variable):
     pass
 
 
-class Output(Variable):
+class _Variable2State(_Variable):
     pass
 
 
-class Inout(Variable):
+class _VariableReal(_Variable):
     pass
 
 
-class Tri(Variable):
+class Input(_Variable4State):
     pass
 
 
-class Wire(Variable):
+class Output(_Variable4State):
     pass
 
 
-class Reg(Variable):
+class Inout(_Variable4State):
     pass
 
 
-class Integer(Variable):
+class Tri(_Variable4State):
     pass
 
 
-class Real(Variable):
+class Wire(_Variable4State):
     pass
 
 
-class Genvar(Variable):
+class Reg(_Variable4State):
     pass
+
+
+class Integer(_Variable4State):
+
+    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+        width = Width(msb=IntConst('31', lineno=lineno), lsb=IntConst('0', lineno=lineno))
+        _Variable4State.__init__(self, name, width, signed, pdims, udims, value, lineno)
+
+
+class Time(_Variable4State):
+
+    def __init__(self, name, signed=False, pdims=None, udims=None, value=None, lineno=0):
+        width = Width(msb=IntConst('64', lineno=lineno), lsb=IntConst('0', lineno=lineno))
+        _Variable4State.__init__(self, name, width, signed, pdims, udims, value, lineno)
+
+
+class Real(_VariableReal):
+
+    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+        width = Width(msb=IntConst('63', lineno=lineno), lsb=IntConst('0', lineno=lineno))
+        _Variable4State.__init__(self, name, width, signed, pdims, udims, value, lineno)
+
+
+class RealTime(_VariableReal):
+
+    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+        width = Width(msb=IntConst('63', lineno=lineno), lsb=IntConst('0', lineno=lineno))
+        _Variable4State.__init__(self, name, width, signed, pdims, udims, value, lineno)
+
+
+class Logic(_Variable4State):
+    pass
+
+
+class ShortInt(_Variable2State):
+
+    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+        width = Width(msb=IntConst('16', lineno=lineno), lsb=IntConst('0', lineno=lineno))
+        _Variable2State.__init__(self, name, width, signed, pdims, udims, value, lineno)
+
+
+class Int(_Variable2State):
+
+    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+        width = Width(msb=IntConst('31', lineno=lineno), lsb=IntConst('0', lineno=lineno))
+        _Variable2State.__init__(self, name, width, signed, pdims, udims, value, lineno)
+
+
+class LongInt(_Variable2State):
+
+    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+        width = Width(msb=IntConst('63', lineno=lineno), lsb=IntConst('0', lineno=lineno))
+        _Variable2State.__init__(self, name, width, signed, pdims, udims, value, lineno)
+
+
+class Byte(_Variable2State):
+
+    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+        width = Width(msb=IntConst('7', lineno=lineno), lsb=IntConst('0', lineno=lineno))
+        _Variable2State.__init__(self, name, width, signed, pdims, udims, value, lineno)
+
+
+class Bit(_Variable2State):
+    pass
+
+
+class ShortReal(_VariableReal):
+
+    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+        width = Width(msb=IntConst('31', lineno=lineno), lsb=IntConst('0', lineno=lineno))
+        _Variable4State.__init__(self, name, width, signed, pdims, udims, value, lineno)
+
+
+class CustomVariable(_Variable):
+    attr_names = ('name', 'typename', 'modportname')
+
+    def __init__(self, typename, name, modportname=None, width=None, signed=False,
+                 pdims=None, udims=None, value=None, lineno=0):
+        _Variable.__init__(self, name, width, signed, pdims, udims, value, lineno)
+        self.typename = typename
+        self.modportname = modportname
 
 
 class Ioport(Node):
@@ -347,13 +440,13 @@ class Ioport(Node):
 class Parameter(Node):
     attr_names = ('name', 'signed')
 
-    def __init__(self, name, value, width=None, signed=False, lineno=0):
+    def __init__(self, name, value, width=None, udims=None, signed=False, lineno=0):
         self.lineno = lineno
         self.name = name
         self.value = value
         self.width = width
         self.signed = signed
-        self.dimensions = None
+        self.udims = udims
 
     def children(self):
         nodelist = []
@@ -361,6 +454,8 @@ class Parameter(Node):
             nodelist.append(self.value)
         if self.width:
             nodelist.append(self.width)
+        if self.udims:
+            nodelist.append(self.udims)
         return tuple(nodelist)
 
 
@@ -487,7 +582,7 @@ class Rvalue(Node):
 
 
 # ------------------------------------------------------------------------------
-class Operator(Node):
+class _Operator(Node):
     attr_names = ()
 
     def __init__(self, left, right, lineno=0):
@@ -511,7 +606,11 @@ class Operator(Node):
         return ret
 
 
-class UnaryOperator(Operator):
+class _BinaryOperator(_Operator):
+    pass
+
+
+class _UnaryOperator(_Operator):
     attr_names = ()
 
     def __init__(self, right, lineno=0):
@@ -526,153 +625,153 @@ class UnaryOperator(Operator):
 
 
 # Level 1 (Highest Priority)
-class Uplus(UnaryOperator):
+class Uplus(_UnaryOperator):
     pass
 
 
-class Uminus(UnaryOperator):
+class Uminus(_UnaryOperator):
     pass
 
 
-class Ulnot(UnaryOperator):
+class Ulnot(_UnaryOperator):
     pass
 
 
-class Unot(UnaryOperator):
+class Unot(_UnaryOperator):
     pass
 
 
-class Uand(UnaryOperator):
+class Uand(_UnaryOperator):
     pass
 
 
-class Unand(UnaryOperator):
+class Unand(_UnaryOperator):
     pass
 
 
-class Uor(UnaryOperator):
+class Uor(_UnaryOperator):
     pass
 
 
-class Unor(UnaryOperator):
+class Unor(_UnaryOperator):
     pass
 
 
-class Uxor(UnaryOperator):
+class Uxor(_UnaryOperator):
     pass
 
 
-class Uxnor(UnaryOperator):
+class Uxnor(_UnaryOperator):
     pass
 
 
 # Level 2
-class Power(Operator):
+class Power(_BinaryOperator):
     pass
 
 
-class Times(Operator):
+class Times(_BinaryOperator):
     pass
 
 
-class Divide(Operator):
+class Divide(_BinaryOperator):
     pass
 
 
-class Mod(Operator):
+class Mod(_BinaryOperator):
     pass
 
 
 # Level 3
-class Plus(Operator):
+class Plus(_BinaryOperator):
     pass
 
 
-class Minus(Operator):
+class Minus(_BinaryOperator):
     pass
 
 
 # Level 4
-class Sll(Operator):
+class Sll(_BinaryOperator):
     pass
 
 
-class Srl(Operator):
+class Srl(_BinaryOperator):
     pass
 
 
-class Sla(Operator):
+class Sla(_BinaryOperator):
     pass
 
 
-class Sra(Operator):
+class Sra(_BinaryOperator):
     pass
 
 
 # Level 5
-class LessThan(Operator):
+class LessThan(_BinaryOperator):
     pass
 
 
-class GreaterThan(Operator):
+class GreaterThan(_BinaryOperator):
     pass
 
 
-class LessEq(Operator):
+class LessEq(_BinaryOperator):
     pass
 
 
-class GreaterEq(Operator):
+class GreaterEq(_BinaryOperator):
     pass
 
 
 # Level 6
-class Eq(Operator):
+class Eq(_BinaryOperator):
     pass
 
 
-class NotEq(Operator):
+class NotEq(_BinaryOperator):
     pass
 
 
-class Eql(Operator):
+class Eql(_BinaryOperator):
     pass  # ===
 
 
-class NotEql(Operator):
+class NotEql(_BinaryOperator):
     pass  # !==
 
 
 # Level 7
-class And(Operator):
+class And(_BinaryOperator):
     pass
 
 
-class Xor(Operator):
+class Xor(_BinaryOperator):
     pass
 
 
-class Xnor(Operator):
+class Xnor(_BinaryOperator):
     pass
 
 
 # Level 8
-class Or(Operator):
+class Or(_BinaryOperator):
     pass
 
 
 # Level 9
-class Land(Operator):
+class Land(_BinaryOperator):
     pass
 
 
 # Level 10
-class Lor(Operator):
+class Lor(_BinaryOperator):
     pass
 
 
 # Level 11
-class Cond(Operator):
+class Cond(_Operator):
     attr_names = ()
 
     def __init__(self, cond, true_value, false_value, lineno=0):
@@ -689,6 +788,38 @@ class Cond(Operator):
             nodelist.append(self.true_value)
         if self.false_value:
             nodelist.append(self.false_value)
+        return tuple(nodelist)
+
+
+class TypeCast(_Operator):
+    attr_names = ('casting_type',)
+
+    def __init__(self, casting_type, right, lineno=0):
+        self.lineno = lineno
+        self.casting_type = casting_type
+        self.right = right
+
+    def children(self):
+        nodelist = []
+        if self.right:
+            nodelist.append(self.right)
+        return tuple(nodelist)
+
+
+class WidthCast(_Operator):
+    attr_names = ()
+
+    def __init__(self, width, right, lineno=0):
+        self.lineno = lineno
+        self.width = width
+        self.right = right
+
+    def children(self):
+        nodelist = []
+        if self.width:
+            nodelist.append(self.width)
+        if self.right:
+            nodelist.append(self.right)
         return tuple(nodelist)
 
 
@@ -804,6 +935,81 @@ class NonblockingSubstitution(Substitution):
     pass
 
 
+class _SubstitutionOperator(BlockingSubstitution):
+
+    def __init__(self, left, right, ldelay=None, rdelay=None, lineno=0):
+        BlockingSubstitution.__init__(self, left, right, ldelay, rdelay, lineno)
+
+    def children(self):
+        return BlockingSubstitution.children(self)
+
+
+class PlusEquals(_SubstitutionOperator):
+    pass
+
+
+class MinusEquals(_SubstitutionOperator):
+    pass
+
+
+class TimesEquals(_SubstitutionOperator):
+    pass
+
+
+class DivideEquals(_SubstitutionOperator):
+    pass
+
+
+class ModEquals(_SubstitutionOperator):
+    pass
+
+
+class OrEquals(_SubstitutionOperator):
+    pass
+
+
+class AndEquals(_SubstitutionOperator):
+    pass
+
+
+class XorEquals(_SubstitutionOperator):
+    pass
+
+
+class SlaEquals(_SubstitutionOperator):
+    pass
+
+
+class SraEquals(_SubstitutionOperator):
+    pass
+
+
+class SllEquals(_SubstitutionOperator):
+    pass
+
+
+class SrlEquals(_SubstitutionOperator):
+    pass
+
+
+class Increment(_SubstitutionOperator):
+
+    def __init__(self, left, lineno=0):
+        right = IntConst('1', lineno=lineno)
+        ldelay = None
+        rdelay = None
+        _SubstitutionOperator.__init__(self, left, right, ldelay, rdelay, lineno)
+
+
+class Decrement(_SubstitutionOperator):
+
+    def __init__(self, left, lineno=0):
+        right = IntConst('1', lineno=lineno)
+        ldelay = None
+        rdelay = None
+        _SubstitutionOperator.__init__(self, left, right, ldelay, rdelay, lineno)
+
+
 class IfStatement(Node):
     attr_names = ()
 
@@ -822,6 +1028,10 @@ class IfStatement(Node):
         if self.false_statement:
             nodelist.append(self.false_statement)
         return tuple(nodelist)
+
+
+class PriorityIf(IfStatement):
+    pass
 
 
 class ForStatement(Node):
@@ -1069,13 +1279,14 @@ class PortArg(Node):
 
 
 class Function(Node):
-    attr_names = ('name',)
+    attr_names = ('name', 'automatic')
 
-    def __init__(self, name, retwidth, statement, lineno=0):
+    def __init__(self, name, retwidth, statement, automatic=False, lineno=0):
         self.lineno = lineno
         self.name = name
         self.retwidth = retwidth
         self.statement = statement
+        self.automatic = automatic
 
     def children(self):
         nodelist = []
@@ -1110,12 +1321,13 @@ class FunctionCall(Node):
 
 
 class Task(Node):
-    attr_names = ('name',)
+    attr_names = ('name', 'automatic')
 
-    def __init__(self, name, statement, lineno=0):
+    def __init__(self, name, statement, automatic=False, lineno=0):
         self.lineno = lineno
         self.name = name
         self.statement = statement
+        self.automatic = automatic
 
     def children(self):
         nodelist = []
@@ -1153,6 +1365,10 @@ class GenerateStatement(Node):
         if self.items:
             nodelist.extend(self.items)
         return tuple(nodelist)
+
+
+class Genvar(_Variable):
+    pass
 
 
 class SystemCall(Node):
@@ -1275,6 +1491,142 @@ class SingleStatement(Node):
         nodelist = []
         if self.statement:
             nodelist.append(self.statement)
+        return tuple(nodelist)
+
+
+class Interface(Node):
+    attr_names = ('name',)
+
+    def __init__(self, name, paramlist, portlist, items, lineno=0):
+        self.lineno = lineno
+        self.name = name
+        self.paramlist = paramlist
+        self.portlist = portlist
+        self.items = items
+
+    def children(self):
+        nodelist = []
+        if self.paramlist:
+            nodelist.append(self.paramlist)
+        if self.portlist:
+            nodelist.append(self.portlist)
+        if self.items:
+            nodelist.extend(self.items)
+        return tuple(nodelist)
+
+
+class Modport(Node):
+    attr_names = ('name',)
+
+    def __init__(self, name, ports, lineno=0):
+        self.lineno = lineno
+        self.name = name
+        self.ports = ports
+
+    def children(self):
+        nodelist = []
+        if self.ports:
+            nodelist.extend(self.ports)
+        return tuple(nodelist)
+
+
+class Struct(Node):
+    attr_names = ('name', 'packed')
+
+    def __init__(self, name, items, packed=False, lineno=0):
+        self.lineno = lineno
+        self.name = name
+        self.items = items
+        self.packed = packed
+
+    def children(self):
+        nodelist = []
+        if self.items:
+            nodelist.extend(self.items)
+        return tuple(nodelist)
+
+
+class Union(Node):
+    attr_names = ('name', 'packed')
+
+    def __init__(self, name, items, packed=False, lineno=0):
+        self.lineno = lineno
+        self.name = name
+        self.items = items
+        self.packed = packed
+
+    def children(self):
+        nodelist = []
+        if self.items:
+            nodelist.extend(self.items)
+        return tuple(nodelist)
+
+
+class Enum(Node):
+    attr_names = ('name',)
+
+    def __init__(self, name, enumlist, lineno=0):
+        self.lineno = lineno
+        self.name = name
+        self.enumlist = enumlist
+
+    def children(self):
+        nodelist = []
+        if self.enumlist:
+            nodelist.append(self.enumlist)
+        return tuple(nodelist)
+
+
+class Enumlist(Node):
+    attr_names = ('name',)
+
+    def __init__(self, items=None,
+                 name=None, length=None, start=None, end=None, value=None,
+                 lineno=0):
+        self.lineno = lineno
+        self.items = items
+        self.name = name
+        self.length = length
+        self.start = start
+        self.end = end
+        self.value = value
+
+    def children(self):
+        nodelist = []
+        if self.items:
+            nodelist.extend(self.items)
+        if self.length:
+            nodelist.append(self.length)
+        if self.start:
+            nodelist.append(self.start)
+        if self.end:
+            nodelist.append(self.end)
+        if self.value:
+            nodelist.append(self.value)
+        return tuple(nodelist)
+
+
+class TypeDef(Node):
+    attr_names = ('name',)
+
+    def __init__(self, name, types, width=None, pdims=None, udims=None, lineno=0):
+        self.lineno = lineno
+        self.name = name
+        self.types = types
+        self.width = width
+        self.pdims = pdims
+        self.udims = udims
+
+    def children(self):
+        nodelist = []
+        if self.types:
+            nodelist.extend(self.types)
+        if self.width:
+            nodelist.append(self.width)
+        if self.pdims:
+            nodelist.append(self.pdims)
+        if self.udims:
+            nodelist.append(self.udims)
         return tuple(nodelist)
 
 
