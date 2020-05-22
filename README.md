@@ -13,8 +13,6 @@ License
 
 Apache License 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-Note that this software package includes PLY-3.4 in "vparser/ply". The license of PLY is BSD.
-
 
 Publication
 ==============================
@@ -65,7 +63,7 @@ for pull requests
 
 Please check "CONTRIBUTORS.md" for the contributors who provided pull requests.
 
-Pyverilog uses **pytest** for the integration testing. **When you send a pull request, please include a testing example with pytest.** 
+Pyverilog uses **pytest** for the integration testing. **When you send a pull request, please include a testing example with pytest.**
 To write a testing code, please refer the existing testing examples in "tests" directory.
 
 If the pull request code passes all the tests successfully and has no obvious problem, it will be merged to the *develop* branch by the main committers.
@@ -85,9 +83,10 @@ sudo apt install iverilog
 ```
 
 - Jinja2: 2.10 or later
+- PLY: 3.4 or later
 
 ```
-pip3 install jinja2
+pip3 install jinja2 ply
 ```
 
 Optional installation for testing
