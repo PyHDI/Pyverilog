@@ -291,13 +291,15 @@ class VerilogParser(PLYParser):
 
     def p_ports(self, p):
         'ports : ports COMMA portname'
-        port = Port(name=p[3], width=None, pdims=None, udims=None, type=None, lineno=p.lineno(1))
+        port = Port(name=p[3], width=None,
+                    pdims=None, udims=None, type=None, lineno=p.lineno(1))
         p[0] = p[1] + (port,)
         p.set_lineno(0, p.lineno(1))
 
     def p_ports_one(self, p):
         'ports : portname'
-        port = Port(name=p[1], width=None, pdims=None, udims=None, type=None, lineno=p.lineno(1))
+        port = Port(name=p[1], width=None,
+                    pdims=None, udims=None, type=None, lineno=p.lineno(1))
         p[0] = (port,)
         p.set_lineno(0, p.lineno(1))
 
@@ -546,7 +548,8 @@ class VerilogParser(PLYParser):
     def p_ioport_pdims_width_udims(self, p):
         'ioport : sigtypes pdims_width portname udims'
         pdims, width = p[2]
-        p[0] = self.create_ioport(p[1], p[3], width=width, pdims=pdims, udims=p[4], lineno=p.lineno(1))
+        p[0] = self.create_ioport(p[1], p[3], width=width,
+                                  pdims=pdims, udims=p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_ioport_head(self, p):
@@ -563,7 +566,8 @@ class VerilogParser(PLYParser):
     def p_ioport_head_pdims_width_udims(self, p):
         'ioport_head : sigtypes pdims_width portname udims'
         pdims, width = p[2]
-        p[0] = self.create_ioport(p[1], p[3], width=width, pdims=pdims, udims=p[4], lineno=p.lineno(1))
+        p[0] = self.create_ioport(p[1], p[3], width=width,
+                                  pdims=pdims, udims=p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_ioport_portname(self, p):
@@ -3402,7 +3406,7 @@ class VerilogCodeParser(object):
                  preprocess_include=None,
                  preprocess_define=None,
                  outputdir=".",
-                 debug=True
+                 debug=False
                  ):
         self.preprocess_output = preprocess_output
         self.directives = ()
@@ -3427,13 +3431,12 @@ class VerilogCodeParser(object):
         return self.directives
 
 
-def parse(
-    filelist,
-    preprocess_include=None,
-    preprocess_define=None,
-    outputdir=".",
-    debug=True
-):
+def parse(filelist,
+          preprocess_include=None,
+          preprocess_define=None,
+          outputdir=".",
+          debug=False):
+
     codeparser = VerilogCodeParser(
         filelist,
         preprocess_include=preprocess_include,
@@ -3441,6 +3444,8 @@ def parse(
         outputdir=outputdir,
         debug=debug
     )
+
     ast = codeparser.parse()
     directives = codeparser.get_directives()
+
     return ast, directives
