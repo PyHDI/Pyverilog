@@ -7,15 +7,16 @@ from optparse import OptionParser
 # the next line can be removed after installation
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import pyverilog.utils.version
+import pyverilog
 import pyverilog.utils.util as util
 from pyverilog.dataflow.dataflow_analyzer import VerilogDataflowAnalyzer
 from pyverilog.dataflow.optimizer import VerilogDataflowOptimizer
 from pyverilog.dataflow.merge import VerilogDataflowMerge
 
+
 def main():
     INFO = "Dataflow merge module"
-    VERSION = pyverilog.utils.version.VERSION
+    VERSION = pyverilog.__version__
     USAGE = "Usage: python example_merge.py -t TOPMODULE file ..."
 
     def showVersion():
@@ -23,22 +24,22 @@ def main():
         print(VERSION)
         print(USAGE)
         sys.exit()
-    
+
     optparser = OptionParser()
-    optparser.add_option("-v","--version",action="store_true",dest="showversion",
-                         default=False,help="Show the version")
-    optparser.add_option("-I","--include",dest="include",action="append",
-                         default=[],help="Include path")
-    optparser.add_option("-D",dest="define",action="append",
-                         default=[],help="Macro Definition")
-    optparser.add_option("-t","--top",dest="topmodule",
-                         default="TOP",help="Top module, Default=TOP")
-    optparser.add_option("--nobind",action="store_true",dest="nobind",
-                         default=False,help="No binding traversal, Default=False")
-    optparser.add_option("--noreorder",action="store_true",dest="noreorder",
-                         default=False,help="No reordering of binding dataflow, Default=False")
-    optparser.add_option("-s","--search",dest="searchtarget",action="append",
-                         default=[],help="Search Target Signal")
+    optparser.add_option("-v", "--version", action="store_true", dest="showversion",
+                         default=False, help="Show the version")
+    optparser.add_option("-I", "--include", dest="include", action="append",
+                         default=[], help="Include path")
+    optparser.add_option("-D", dest="define", action="append",
+                         default=[], help="Macro Definition")
+    optparser.add_option("-t", "--top", dest="topmodule",
+                         default="TOP", help="Top module, Default=TOP")
+    optparser.add_option("--nobind", action="store_true", dest="nobind",
+                         default=False, help="No binding traversal, Default=False")
+    optparser.add_option("--noreorder", action="store_true", dest="noreorder",
+                         default=False, help="No reordering of binding dataflow, Default=False")
+    optparser.add_option("-s", "--search", dest="searchtarget", action="append",
+                         default=[], help="Search Target Signal")
     (options, args) = optparser.parse_args()
 
     filelist = args
@@ -46,7 +47,8 @@ def main():
         showVersion()
 
     for f in filelist:
-        if not os.path.exists(f): raise IOError("file not found: " + f)
+        if not os.path.exists(f):
+            raise IOError("file not found: " + f)
 
     if len(filelist) == 0:
         showVersion()
@@ -76,6 +78,7 @@ def main():
         tree = merge.getTree(termname)
         print('target: %s' % target)
         print(tree.tostr())
+
 
 if __name__ == '__main__':
     main()

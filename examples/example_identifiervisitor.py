@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pyverilog.vparser.ast as vast
 from pyverilog.utils.identifiervisitor import getIdentifiers
 
+
 def main():
     a = vast.Identifier('a')
     b = vast.Identifier('b')
@@ -16,6 +17,7 @@ def main():
 
     ids = getIdentifiers(c)
     print(ids)
+
 
 if __name__ == '__main__':
     main()
