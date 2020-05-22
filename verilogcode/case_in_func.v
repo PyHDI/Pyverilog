@@ -1,10 +1,9 @@
 module TOP(IN1,SEL);
   input IN1,SEL;
-  reg bit;
-
+  reg b;
 
   always @* begin
-      bit <= func1(IN1,SEL);
+      b <= func1(IN1,SEL);
   end
 
   function func1;
@@ -22,9 +21,9 @@ module TOP(IN1,SEL);
   always @* begin
     case(SEL)
         'h0:
-          bit = IN1;
+          b = IN1;
         default:
-          bit = 1'b0;
+          b = 1'b0;
     endcase
   end
 */

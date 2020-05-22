@@ -59,11 +59,17 @@ class VerilogDataflowMerge(object):
             raise verror.DefinitionError('No such Term: %s' % termname)
         return term.termtype
 
-    def getTermDims(self, termname):
+    def getTermPackedDims(self, termname):
         term = self.getTerm(termname)
         if term is None:
             raise verror.DefinitionError('No such Term: %s' % termname)
-        return term.dims
+        return term.pdims
+
+    def getTermUnpackedDims(self, termname):
+        term = self.getTerm(termname)
+        if term is None:
+            raise verror.DefinitionError('No such Term: %s' % termname)
+        return term.udims
 
     def getAssignType(self, termname, bind):
         termtype = self.getTermtype(termname)
@@ -115,7 +121,9 @@ class VerilogDataflowMerge(object):
         if len(bindlist) == 0:
             return None
 
-        if self.getTermDims(termname) is not None:
+        if (self.getTermPackedDims(termname) is not None or
+                self.getTermUnpackedDims(termname) is not None):
+
             discretebinds = {}
             for bind in bindlist:
                 if isinstance(bind.ptr, DFEvalValue):
@@ -416,7 +424,8 @@ class VerilogDataflowMerge(object):
         lsb = self.optimizer.optimizeConstant(bind.lsb)
         ptr = self.optimizer.optimizeConstant(bind.ptr)
         if ptr is not None and msb is None or lsb is None:
-            if self.getTermDims(bind.dest) is not None:
+            if (self.getTermPackedDims(bind.dest) is not None or
+                    self.getTermUnpackedDims(bind.dest) is not None):
                 msb = self.optimizer.optimizeConstant(copy.deepcopy(term.msb))
                 lsb = self.optimizer.optimizeConstant(copy.deepcopy(term.lsb))
             else:

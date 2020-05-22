@@ -11,7 +11,7 @@ codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file
 expected = """\
 TOP.IN1: TOP_IN1
 TOP.SEL: TOP_SEL
-TOP.bit: (((TOP_SEL=='d0))? TOP_IN1 : 1'd0)
+TOP.b: (((TOP_SEL=='d0))? TOP_IN1 : 1'd0)
 TOP.md_always0.al_block0.al_functioncall0._rn0_func1: TOP_IN1
 TOP.md_always0.al_block0.al_functioncall0._rn1_func1: 1'd0
 TOP.md_always0.al_block0.al_functioncall0.func1: (((TOP_SEL=='d0))? TOP_IN1 : 1'd0)
@@ -57,7 +57,7 @@ def test():
     rslt = '\n'.join(output) + '\n'
 
     print(rslt)
-    
+
     assert(expected == rslt)
 
 if __name__ == '__main__':

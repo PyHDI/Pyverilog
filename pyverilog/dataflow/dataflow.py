@@ -687,12 +687,13 @@ class DFSyscall(DFNotTerminal):
 
 
 class Term(object):
-    def __init__(self, name, termtype=(), msb=None, lsb=None, dims=None):
+    def __init__(self, name, termtype=(), msb=None, lsb=None, pdims=None, udims=None):
         self.name = name  # tuple (str)
         self.termtype = termtype  # set (str)
         self.msb = msb  # DFNode
         self.lsb = lsb  # DFNode
-        self.dims = dims  # tuple/list of pair of DFNode
+        self.pdims = pdims  # tuple/list of pair of DFNode
+        self.udims = udims  # tuple/list of pair of DFNode
 
     def __repr__(self):
         return str(self.name)
@@ -704,10 +705,14 @@ class Term(object):
             ret += ' msb:' + self.msb.tostr()
         if self.lsb is not None:
             ret += ' lsb:' + self.lsb.tostr()
-        if self.dims is not None:
-            ret += ' dims:'
+        if self.pdims is not None:
+            ret += ' pdims:'
             ret += ''.join(['[' + l.tostr() + ':' + r.tostr() + ']'
-                            for l, r in self.dims])
+                            for l, r in self.pdims])
+        if self.udims is not None:
+            ret += ' udims:'
+            ret += ''.join(['[' + l.tostr() + ':' + r.tostr() + ']'
+                            for l, r in self.udims])
         ret += ')'
         return ret
 
@@ -721,10 +726,11 @@ class Term(object):
                 and self.termtype == other.termtype
                 and self.msb == other.msb
                 and self.lsb == other.lsb
-                and self.dims == other.dims)
+                and self.pdims == other.pdims
+                and self.udims == other.udims)
 
     def __hash__(self):
-        return hash((self.name, self.termtype, self.msb, self.lsb, self.dims))
+        return hash((self.name, self.termtype, self.msb, self.lsb, self.pdims, self.udims))
 
     def getScope(self, termname):
         return termname[:-1]
@@ -768,9 +774,12 @@ class Term(object):
                 and self.msb is not None and self.lsb is not None):
             code += '[' + self.msb.tocode(None) + ':' + self.lsb.tocode(None) + '] '
         code += flatname  # signal name
-        if self.dims is not None:
+        if self.pdims is not None:
             code += ''.join(['[' + l.tocode() + ':' + r.tocode() + ']'
-                             for l, r in self.dims])
+                             for l, r in self.pdims])
+        if self.udims is not None:
+            code += ''.join(['[' + l.tocode() + ':' + r.tocode() + ']'
+                             for l, r in self.udims])
         code += ';\n'
         return code
 
@@ -969,8 +978,10 @@ class DataFlow(object):
             self.terms[name].msb = term.msb
         if self.terms[name].lsb is None:
             self.terms[name].lsb = term.lsb
-        if self.terms[name].dims is None:
-            self.terms[name].dims = term.dims
+        if self.terms[name].pdims is None:
+            self.terms[name].pdims = term.pdims
+        if self.terms[name].udims is None:
+            self.terms[name].udims = term.udims
 
     def hasTerm(self, name):
         return name in self.terms

@@ -60,7 +60,9 @@ class VerilogDataflowWalker(VerilogDataflowMerge):
                 return tree
 
             nptr = None
-            if self.getTermDims(termname) is not None:
+            if (self.getTermPackedDims(termname) is not None or
+                    self.getTermUnpackedDims(termname) is not None):
+
                 if ptr is None:
                     raise verror.FormatError('Array variable requires an pointer.')
                 if msb is not None and lsb is not None:
@@ -106,7 +108,8 @@ class VerilogDataflowWalker(VerilogDataflowMerge):
             ptr = self.walkTree(tree.ptr, visited, step, delay)
             var = self.walkTree(tree.var, visited, step, delay, ptr=ptr)
             if isinstance(tree.var, DFTerminal):
-                if (self.getTermDims(tree.var.name) is not None and
+                if ((self.getTermPackedDims(tree.var.name) is not None or
+                     self.getTermUnpackedDims(tree.var.name) is not None) and
                         not (isinstance(var, DFTerminal) and var.name == tree.var.name)):
                     return var
             return DFPointer(var, ptr)

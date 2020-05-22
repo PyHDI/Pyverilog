@@ -14,8 +14,7 @@ import sys
 import os
 import re
 
-from pyverilog.vparser.ast import *
-import pyverilog.utils.util as util
+import pyverilog.vparser.ast as vast
 import pyverilog.utils.verror as verror
 import pyverilog.utils.signaltype as signaltype
 from pyverilog.utils.scope import ScopeLabel, ScopeChain
@@ -71,16 +70,22 @@ class BindVisitor(NodeVisitor):
     def visit_Inout(self, node):
         self.addTerm(node)
 
+    def visit_Tri(self, node):
+        self.addTerm(node)
+
     def visit_Reg(self, node):
         self.addTerm(node)
 
     def visit_Wire(self, node):
         self.addTerm(node)
 
-    def visit_Tri(self, node):
+    def visit_Logic(self, node):
         self.addTerm(node)
 
     def visit_Integer(self, node):
+        self.addTerm(node)
+
+    def visit_Time(self, node):
         self.addTerm(node)
 
     def visit_Parameter(self, node):
@@ -94,12 +99,6 @@ class BindVisitor(NodeVisitor):
         if len(self.dataflow.getBindlist(name)) == 0:
             self.addBind(node.name, node.value, bindtype='parameter')
 
-    def visit_Supply(self, node):
-        self.addTerm(node)
-        current = self.frames.getCurrent()
-        name = current + ScopeLabel(node.name, 'signal')
-        self.addBind(node.name, node.value, bindtype='parameter')
-
     def visit_Localparam(self, node):
         self.addTerm(node)
         current = self.frames.getCurrent()
@@ -109,6 +108,12 @@ class BindVisitor(NodeVisitor):
             self.setConstant(name, value)
 
         self.addBind(node.name, node.value, bindtype='localparam')
+
+    def visit_Supply(self, node):
+        self.addTerm(node)
+        current = self.frames.getCurrent()
+        name = current + ScopeLabel(node.name, 'signal')
+        self.addBind(node.name, node.value, bindtype='parameter')
 
     def visit_Genvar(self, node):
         self.addTerm(node)
@@ -231,12 +236,21 @@ class BindVisitor(NodeVisitor):
         self.generic_visit(node)
         self.frames.setCurrent(current)
 
+    def visit_AlwaysFF(self, node):
+        return self.visit_Always(node)
+
+    def visit_AlwaysComb(self, node):
+        return self.visit_Always(node)
+
+    def visit_AlwaysLatch(self, node):
+        return self.visit_Always(node)
+
     def _get_signal_name(self, n):
-        if isinstance(n, Identifier):
+        if isinstance(n, vast.Identifier):
             return n.name
-        if isinstance(n, Pointer):
+        if isinstance(n, vast.Pointer):
             return self._get_signal_name(n.var)
-        if isinstance(n, Partselect):
+        if isinstance(n, vast.Partselect):
             return self._get_signal_name(n.var)
         return None
 
@@ -254,7 +268,7 @@ class BindVisitor(NodeVisitor):
             if l.sig is None:
                 continue
 
-            if isinstance(l.sig, pyverilog.vparser.ast.Pointer):
+            if isinstance(l.sig, vast.Pointer):
                 signame = self._get_signal_name(l.sig.var)
                 bit = int(l.sig.ptr.value)
             else:
@@ -616,7 +630,7 @@ class BindVisitor(NodeVisitor):
                     continue
 
                 for definition in definitions:
-                    if isinstance(definition, Genvar):
+                    if isinstance(definition, vast.Genvar):
                         continue
                     value = self.optimize(self.getTree(definition.value, current))
                     if not isinstance(value, DFEvalValue):
@@ -694,9 +708,13 @@ class BindVisitor(NodeVisitor):
         term = self.dataflow.getTerm(name)
         return term.msb, term.lsb
 
-    def getTermDims(self, name):
+    def getTermPackedDims(self, name):
         term = self.dataflow.getTerm(name)
-        return term.dims
+        return term.pdims
+
+    def getTermUnpackedDims(self, name):
+        term = self.dataflow.getTerm(name)
+        return term.udims
 
     def getTermtype(self, name):
         term = self.dataflow.getTerm(name)
@@ -860,22 +878,31 @@ class BindVisitor(NodeVisitor):
             termtype = 'Task'
         termtypes = set([termtype])
 
-        if isinstance(node, (Parameter, Localparam)):
+        if isinstance(node, (vast.Parameter, vast.Localparam)):
             msb = DFIntConst('31') if node.width is None else self.makeDFTree(node.width.msb, scope)
         else:
             msb = DFIntConst('0') if node.width is None else self.makeDFTree(node.width.msb, scope)
         lsb = DFIntConst('0') if node.width is None else self.makeDFTree(node.width.lsb, scope)
 
-        dims = None
-        if node.dimensions is not None:
-            dims = []
-            for length in node.dimensions.lengths:
+        pdims = None
+        if node.pdims is not None:
+            pdims = []
+            for length in node.pdims.lengths:
                 l = self.makeDFTree(length.msb, scope)
                 r = self.makeDFTree(length.lsb, scope)
-                dims.append((l, r))
-            dims = tuple(dims)
+                pdims.append((l, r))
+            pdims = tuple(pdims)
 
-        term = Term(name, termtypes, msb, lsb, dims)
+        udims = None
+        if node.udims is not None:
+            udims = []
+            for length in node.udims.lengths:
+                l = self.makeDFTree(length.msb, scope)
+                r = self.makeDFTree(length.lsb, scope)
+                udims.append((l, r))
+            udims = tuple(udims)
+
+        term = Term(name, termtypes, msb, lsb, pdims, udims)
         self.dataflow.addTerm(name, term)
         self.setConstantTerm(name, term)
 
@@ -991,7 +1018,7 @@ class BindVisitor(NodeVisitor):
         return tuple(ret)
 
     def getTree(self, node, scope):
-        expr = node.var if isinstance(node, Rvalue) else node
+        expr = node.var if isinstance(node, vast.Rvalue) else node
         tree = self.makeDFTree(expr, scope)
         tree = self.resolveBlockingAssign(tree, scope)
         if not self.noreorder:
@@ -1003,7 +1030,7 @@ class BindVisitor(NodeVisitor):
             name = self.searchTerminal(node, scope)
             return DFTerminal(name)
 
-        if isinstance(node, Identifier):
+        if isinstance(node, vast.Identifier):
             if node.scope is not None:
                 name = self.searchScopeTerminal(node.scope, node.name, scope)
                 if name is None:
@@ -1014,16 +1041,16 @@ class BindVisitor(NodeVisitor):
                 raise verror.DefinitionError('No such signal: %s' % node.name)
             return DFTerminal(name)
 
-        if isinstance(node, IntConst):
+        if isinstance(node, vast.IntConst):
             return DFIntConst(node.value)
 
-        if isinstance(node, FloatConst):
+        if isinstance(node, vast.FloatConst):
             return DFFloatConst(node.value)
 
-        if isinstance(node, StringConst):
+        if isinstance(node, vast.StringConst):
             return DFStringConst(node.value)
 
-        if isinstance(node, Cond):
+        if isinstance(node, vast.Cond):
             true_df = self.makeDFTree(node.true_value, scope)
             false_df = self.makeDFTree(node.false_value, scope)
             cond_df = self.makeDFTree(node.cond, scope)
@@ -1031,20 +1058,20 @@ class BindVisitor(NodeVisitor):
                 return reorder.insertCond(cond_df, true_df, false_df)
             return DFBranch(cond_df, true_df, false_df)
 
-        if isinstance(node, UnaryOperator):
+        if isinstance(node, vast._UnaryOperator):
             right_df = self.makeDFTree(node.right, scope)
             if isinstance(right_df, DFBranch):
                 return reorder.insertUnaryOp(right_df, node.__class__.__name__)
             return DFOperator((right_df,), node.__class__.__name__)
 
-        if isinstance(node, Operator):
+        if isinstance(node, vast._Operator):
             left_df = self.makeDFTree(node.left, scope)
             right_df = self.makeDFTree(node.right, scope)
             if isinstance(left_df, DFBranch) or isinstance(right_df, DFBranch):
                 return reorder.insertOp(left_df, right_df, node.__class__.__name__)
             return DFOperator((left_df, right_df,), node.__class__.__name__)
 
-        if isinstance(node, Partselect):
+        if isinstance(node, vast.Partselect):
             var_df = self.makeDFTree(node.var, scope)
             msb_df = self.makeDFTree(node.msb, scope)
             lsb_df = self.makeDFTree(node.lsb, scope)
@@ -1053,15 +1080,18 @@ class BindVisitor(NodeVisitor):
                 return reorder.insertPartselect(var_df, msb_df, lsb_df)
             return DFPartselect(var_df, msb_df, lsb_df)
 
-        if isinstance(node, Pointer):
+        if isinstance(node, vast.Pointer):
             var_df = self.makeDFTree(node.var, scope)
             ptr_df = self.makeDFTree(node.ptr, scope)
 
-            if isinstance(var_df, DFTerminal) and self.getTermDims(var_df.name) is not None:
+            if (isinstance(var_df, DFTerminal) and
+                (self.getTermPackedDims(var_df.name) is not None or
+                 self.getTermUnpackedDims(var_df.name) is not None)):
                 return DFPointer(var_df, ptr_df)
+
             return DFPartselect(var_df, ptr_df, copy.deepcopy(ptr_df))
 
-        if isinstance(node, Concat):
+        if isinstance(node, vast.Concat):
             nextnodes = []
             for n in node.list:
                 nextnodes.append(self.makeDFTree(n, scope))
@@ -1070,7 +1100,7 @@ class BindVisitor(NodeVisitor):
                     return reorder.insertConcat(tuple(nextnodes))
             return DFConcat(tuple(nextnodes))
 
-        if isinstance(node, Repeat):
+        if isinstance(node, vast.Repeat):
             nextnodes = []
             times = self.optimize(self.getTree(node.times, scope)).value
             value = self.makeDFTree(node.value, scope)
@@ -1078,7 +1108,7 @@ class BindVisitor(NodeVisitor):
                 nextnodes.append(copy.deepcopy(value))
             return DFConcat(tuple(nextnodes))
 
-        if isinstance(node, FunctionCall):
+        if isinstance(node, vast.FunctionCall):
             func = self.searchFunction(node.name.name, scope)
             if func is None:
                 raise verror.DefinitionError('No such function: %s' % node.name.name)
@@ -1121,7 +1151,7 @@ class BindVisitor(NodeVisitor):
 
             return DFTerminal(varname)
 
-        if isinstance(node, TaskCall):
+        if isinstance(node, vast.TaskCall):
             task = self.searchTask(node.name.name, scope)
             label = self.labels.get(self.frames.getLabelKey('taskcall'))
 
@@ -1154,7 +1184,7 @@ class BindVisitor(NodeVisitor):
             self.frames.setCurrent(current)
             return DFTerminal(varname)
 
-        if isinstance(node, SystemCall):
+        if isinstance(node, vast.SystemCall):
             if node.syscall == 'unsigned':
                 return self.makeDFTree(node.args[0], scope)
             if node.syscall == 'signed':
@@ -1247,7 +1277,9 @@ class BindVisitor(NodeVisitor):
         if isinstance(tree, DFPointer):
             resolved_ptr = self.resolveBlockingAssign(tree.ptr, scope)
             if (isinstance(tree.var, DFTerminal) and
-                    self.getTermDims(tree.var.name) is not None):
+                (self.getTermPackedDims(tree.var.name) is not None or
+                 self.getTermUnpackedDims(tree.var.name) is not None)):
+
                 current_bindlist = self.frames.getBlockingAssign(tree.var.name, scope)
                 if len(current_bindlist) == 0:
                     return DFPointer(tree.var, resolved_ptr)
@@ -1323,9 +1355,9 @@ class BindVisitor(NodeVisitor):
         return tuple(ret)
 
     def getDsts(self, left, scope):
-        if isinstance(left, Lvalue):
+        if isinstance(left, vast.Lvalue):
             return self.getDsts(left.var, scope)
-        if isinstance(left, LConcat):
+        if isinstance(left, vast.LConcat):
             dst = []
             for n in left.list:
                 dst.extend(list(self.getDsts(n, scope)))
@@ -1338,7 +1370,7 @@ class BindVisitor(NodeVisitor):
             name = self.searchTerminal(left, scope)
             return (name, None, None, None)
 
-        if isinstance(left, Identifier):
+        if isinstance(left, vast.Identifier):
             name = self.searchTerminal(left.name, scope)
             if name is None:
                 m = re.search('none', self.default_nettype)
@@ -1355,8 +1387,8 @@ class BindVisitor(NodeVisitor):
                 name = left.scope + ScopeLabel(left.name, 'signal')
             return (name, None, None, None)
 
-        if isinstance(left, Partselect):
-            if isinstance(left.var, Pointer):
+        if isinstance(left, vast.Partselect):
+            if isinstance(left.var, vast.Pointer):
                 name, msb, lsb, ptr = self.getDst(left.var, scope)
                 if msb is None and lsb is None:
                     msb = self.optimize(self.makeDFTree(left.msb, scope))
@@ -1371,8 +1403,8 @@ class BindVisitor(NodeVisitor):
             lsb = self.optimize(self.makeDFTree(left.lsb, scope))
             return (name, msb, lsb, None)
 
-        if isinstance(left, Pointer):
-            if isinstance(left.var, Pointer):
+        if isinstance(left, vast.Pointer):
+            if isinstance(left.var, vast.Pointer):
                 name, msb, lsb, ptr = self.getDst(left.var, scope)
                 if msb is None and lsb is None:
                     msb = self.optimize(self.makeDFTree(left.ptr, scope))
@@ -1380,12 +1412,16 @@ class BindVisitor(NodeVisitor):
                 else:
                     raise verror.FormatError("%s is not array" % str(name))
                 return (name, msb, lsb, ptr)
+
             name = self.searchTerminal(left.var.name, scope)
             if left.var.scope is not None:
                 name = left.var.scope + ScopeLabel(left.var.name, 'signal')
             ptr = self.optimize(self.makeDFTree(left.ptr, scope))
-            if self.getTermDims(name) is not None:
+
+            if (self.getTermPackedDims(name) is not None or
+                self.getTermUnpackedDims(name) is not None):
                 return (name, None, None, ptr)
+
             return (name, ptr, copy.deepcopy(ptr), None)
 
         raise verror.FormatError("unsupported AST node type: %s %s" %

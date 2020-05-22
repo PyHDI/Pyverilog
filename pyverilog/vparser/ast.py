@@ -440,12 +440,13 @@ class Ioport(Node):
 class Parameter(Node):
     attr_names = ('name', 'signed')
 
-    def __init__(self, name, value, width=None, udims=None, signed=False, lineno=0):
+    def __init__(self, name, value, width=None, pdims=None, udims=None, signed=False, lineno=0):
         self.lineno = lineno
         self.name = name
         self.value = value
         self.width = width
         self.signed = signed
+        self.pdims = pdims
         self.udims = udims
 
     def children(self):
@@ -454,6 +455,8 @@ class Parameter(Node):
             nodelist.append(self.value)
         if self.width:
             nodelist.append(self.width)
+        if self.pdims:
+            nodelist.append(self.pdims)
         if self.udims:
             nodelist.append(self.udims)
         return tuple(nodelist)

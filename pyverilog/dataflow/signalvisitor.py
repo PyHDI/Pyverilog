@@ -6,13 +6,13 @@
 # Copyright (C) 2013, Shinya Takamaeda-Yamazaki
 # License: Apache 2.0
 # -------------------------------------------------------------------------------
+
 from __future__ import absolute_import
 from __future__ import print_function
 import sys
 import os
 
-from pyverilog.vparser.ast import *
-import pyverilog.utils.util as util
+import pyverilog.vparser.ast as vast
 import pyverilog.utils.verror as verror
 from pyverilog.utils.scope import ScopeLabel, ScopeChain
 from pyverilog.dataflow.dataflow import *
@@ -47,19 +47,22 @@ class SignalVisitor(NodeVisitor):
     def visit_Inout(self, node):
         self.frames.addSignal(node)
 
+    def visit_Tri(self, node):
+        self.frames.addSignal(node)
+
     def visit_Reg(self, node):
         self.frames.addSignal(node)
 
     def visit_Wire(self, node):
         self.frames.addSignal(node)
 
-    def visit_Supply(self, node):
-        self.frames.addSignal(node)
-
-    def visit_Tri(self, node):
+    def visit_Logic(self, node):
         self.frames.addSignal(node)
 
     def visit_Integer(self, node):
+        self.frames.addSignal(node)
+
+    def visit_Time(self, node):
         self.frames.addSignal(node)
 
     def visit_Parameter(self, node):
@@ -75,6 +78,9 @@ class SignalVisitor(NodeVisitor):
         if not self.hasConstant(name):
             value = self.optimize(self.getTree(node.value, self.frames.getCurrent()))
             self.setConstant(name, value)
+
+    def visit_Supply(self, node):
+        self.frames.addSignal(node)
 
     def visit_Genvar(self, node):
         self.frames.addConst(node)
@@ -165,6 +171,15 @@ class SignalVisitor(NodeVisitor):
                                        always=True)
         self.generic_visit(node)
         self.frames.setCurrent(current)
+
+    def visit_AlwaysFF(self, node):
+        return self.visit_Always(node)
+
+    def visit_AlwaysComb(self, node):
+        return self.visit_Always(node)
+
+    def visit_AlwaysLatch(self, node):
+        return self.visit_Always(node)
 
     def visit_IfStatement(self, node):
 
@@ -400,7 +415,7 @@ class SignalVisitor(NodeVisitor):
                     continue
 
                 for definition in definitions:
-                    if isinstance(definition, Genvar):
+                    if isinstance(definition, vast.Genvar):
                         continue
                     value = self.optimize(self.getTree(definition.value, current))
                     if not isinstance(value, DFEvalValue):
@@ -473,29 +488,29 @@ class SignalVisitor(NodeVisitor):
         return Term(name, termtypes, msb, lsb)
 
     def getTree(self, node, scope):
-        expr = node.var if isinstance(node, Rvalue) else node
+        expr = node.var if isinstance(node, vast.Rvalue) else node
         return self.makeDFTree(expr, scope)
 
     def makeDFTree(self, node, scope):
         if isinstance(node, str):
             return self.searchConstantValue(scope, node)
 
-        if isinstance(node, Identifier):
+        if isinstance(node, vast.Identifier):
             if node.scope is not None:
                 const = self.searchScopeConstantValue(node.scope, node.name)
                 return const
             return self.searchConstantValue(scope, node.name)
 
-        if isinstance(node, IntConst):
+        if isinstance(node, vast.IntConst):
             return DFIntConst(node.value)
 
-        if isinstance(node, FloatConst):
+        if isinstance(node, vast.FloatConst):
             return DFFloatConst(node.value)
 
-        if isinstance(node, StringConst):
+        if isinstance(node, vast.StringConst):
             return DFStringConst(node.value)
 
-        if isinstance(node, Cond):
+        if isinstance(node, vast.Cond):
             true_df = self.makeDFTree(node.true_value, scope)
             false_df = self.makeDFTree(node.false_value, scope)
             cond_df = self.makeDFTree(node.cond, scope)
@@ -503,20 +518,20 @@ class SignalVisitor(NodeVisitor):
                 return reorder.insertCond(cond_df, true_df, false_df)
             return DFBranch(cond_df, true_df, false_df)
 
-        if isinstance(node, UnaryOperator):
+        if isinstance(node, vast._UnaryOperator):
             right_df = self.makeDFTree(node.right, scope)
             if isinstance(right_df, DFBranch):
                 return reorder.insertUnaryOp(right_df, node.__class__.__name__)
             return DFOperator((right_df,), node.__class__.__name__)
 
-        if isinstance(node, Operator):
+        if isinstance(node, vast._Operator):
             left_df = self.makeDFTree(node.left, scope)
             right_df = self.makeDFTree(node.right, scope)
             if isinstance(left_df, DFBranch) or isinstance(right_df, DFBranch):
                 return reorder.insertOp(left_df, right_df, node.__class__.__name__)
             return DFOperator((left_df, right_df,), node.__class__.__name__)
 
-        if isinstance(node, Partselect):
+        if isinstance(node, vast.Partselect):
             var_df = self.makeDFTree(node.var, scope)
             msb_df = self.makeDFTree(node.msb, scope)
             lsb_df = self.makeDFTree(node.lsb, scope)
@@ -525,13 +540,13 @@ class SignalVisitor(NodeVisitor):
                 return reorder.insertPartselect(var_df, msb_df, lsb_df)
             return DFPartselect(var_df, msb_df, lsb_df)
 
-        if isinstance(node, Pointer):
+        if isinstance(node, vast.Pointer):
             var_df = self.makeDFTree(node.var, scope)
             ptr_df = self.makeDFTree(node.ptr, scope)
 
             return DFPointer(var_df, ptr_df)
 
-        if isinstance(node, Concat):
+        if isinstance(node, vast.Concat):
             nextnodes = []
             for n in node.list:
                 nextnodes.append(self.makeDFTree(n, scope))
@@ -540,7 +555,7 @@ class SignalVisitor(NodeVisitor):
                     return reorder.insertConcat(tuple(nextnodes))
             return DFConcat(tuple(nextnodes))
 
-        if isinstance(node, Repeat):
+        if isinstance(node, vast.Repeat):
             nextnodes = []
             times = self.optimize(self.getTree(node.times, scope)).value
             value = self.makeDFTree(node.value, scope)
@@ -548,7 +563,7 @@ class SignalVisitor(NodeVisitor):
                 nextnodes.append(copy.deepcopy(value))
             return DFConcat(tuple(nextnodes))
 
-        if isinstance(node, SystemCall):
+        if isinstance(node, vast.SystemCall):
             if node.syscall == 'unsigned':
                 return self.makeDFTree(node.args[0])
             if node.syscall == 'signed':
