@@ -20,8 +20,8 @@ import sys
 import os
 import pathlib
 
-from pyverilog.vparser.ply.yacc import yacc
-from pyverilog.vparser.plyparser import PLYParser, Coord, ParseError
+from ply.yacc import yacc
+from pyverilog.vparser.plyparser import PLYParser, ParseError
 from pyverilog.vparser.preprocessor import VerilogPreprocessor
 from pyverilog.vparser.lexer import VerilogLexer
 from pyverilog.vparser.ast import *
