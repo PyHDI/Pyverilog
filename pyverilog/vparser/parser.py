@@ -19,15 +19,14 @@ from __future__ import print_function
 import sys
 import os
 import pathlib
-
 from ply.yacc import yacc
-from pyverilog.vparser.plyparser import PLYParser, ParseError
+
 from pyverilog.vparser.preprocessor import VerilogPreprocessor
 from pyverilog.vparser.lexer import VerilogLexer
 from pyverilog.vparser.ast import *
 
 
-class VerilogParser(PLYParser):
+class VerilogParser(object):
     'Verilog HDL Parser'
 
     # Expression Precedence
@@ -64,7 +63,8 @@ class VerilogParser(PLYParser):
         )
 
     def _lexer_error_func(self, msg, line, column):
-        self._parse_error(msg, self._coord(line, column))
+        coord = self._coord(line, column)
+        raise ParseError('%s: %s' % (coord, msg))
 
     def get_directives(self):
         return self.lexer.get_directives()
@@ -2265,13 +2265,29 @@ class VerilogParser(PLYParser):
 
     # --------------------------------------------------------------------------
     def p_error(self, p):
-        print("Syntax error")
+        self._raise_error(p)
+
+    # --------------------------------------------------------------------------
+    def _raise_error(self, p):
         if p:
-            self._parse_error(
-                'before: %s' % p.value,
-                self._coord(p.lineno))
+            msg = 'before: "%s"' % p.value
+            coord = self._coord(p.lineno)
         else:
-            self._parse_error('At end of input', '')
+            msg = 'at end of input'
+            coord = None
+
+        raise ParseError("%s: %s" % (coord, msg))
+
+    def _coord(self, lineno, column=None):
+        ret = [self.lexer.filename]
+        ret.append('line:%s' % lineno)
+        if column is not None:
+            ret.append('column:%s' % column)
+        return ' '.join(ret)
+
+
+class ParseError(Exception):
+    pass
 
 
 class VerilogCodeParser(object):
