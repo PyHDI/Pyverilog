@@ -3470,7 +3470,7 @@ def parse(filelist,
         debug=debug
     )
 
-    ast = codeparser.parse()
+    ast = codeparser.parse(debug=debug)
     directives = codeparser.get_directives()
 
     return ast, directives
