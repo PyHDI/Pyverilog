@@ -62,7 +62,7 @@ class VerilogLexer(object):
         'ASSIGN', 'ALWAYS', 'SENS_OR', 'POSEDGE', 'NEGEDGE', 'INITIAL',
         'IF', 'ELSE', 'FOR', 'WHILE', 'CASE', 'ENDCASE', 'DEFAULT',
         'WAIT', 'FOREVER', 'DISABLE', 'FORK', 'JOIN',
-        'AUTOMATIC', 'STATIC', 'VOID',
+        # 'AUTOMATIC', 'STATIC', 'VOID',
     )
 
     sv_keywords = (
@@ -74,8 +74,9 @@ class VerilogLexer(object):
         'SHORTREAL',
         'UNSIGNED',
         'ALWAYS_FF', 'ALWAYS_COMB', 'ALWAYS_LATCH',
-        'FOREACH', 'CASEX', 'CASEZ', 'UNIQUE', 'PRIORITY',
-        'REF', 'CONST',
+        # 'FOREACH', 'PRIORITY',
+        'CASEX', 'CASEZ', 'UNIQUE',
+        # 'REF', 'CONST',
     )
 
     keywords = tuple(list(vh_keywords) + list(sv_keywords))
@@ -102,7 +103,7 @@ class VerilogLexer(object):
         'OREQUALS', 'ANDEQUALS', 'XOREQUALS',
         'LSHIFTAEQUALS', 'RSHIFTAEQUALS', 'LSHIFTEQUALS', 'RSHIFTEQUALS',
         'INCREMENT', 'DECREMENT',
-        'CAST',  # casting_type'(expression), width'([01ZzXx])
+        # 'CAST',  # casting_type'(expression), width'([01ZzXx])
     )
 
     operators = tuple(list(vh_operators) + list(sv_operators))
@@ -205,7 +206,7 @@ class VerilogLexer(object):
     t_INCREMENT = r'\+\+'
     t_DECREMENT = r'--'
 
-    t_CAST = r"'"
+    # t_CAST = r"'"
 
     t_PLUSCOLON = r'\+:'
     t_MINUSCOLON = r'-:'

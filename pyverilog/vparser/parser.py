@@ -45,7 +45,7 @@ class VerilogParser(PLYParser):
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIVIDE', 'MOD'),
         ('left', 'POWER'),
-        ('left', 'CAST'),
+        # ('left', 'CAST'),
         ('right', 'UMINUS', 'UPLUS', 'ULNOT', 'UNOT',
          'UAND', 'UNAND', 'UOR', 'UNOR', 'UXOR', 'UXNOR'),
         # -> Strong
