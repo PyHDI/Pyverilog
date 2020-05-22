@@ -416,12 +416,12 @@ class VerilogParser(object):
         p[0] = (p[1],)
         p.set_lineno(0, p.lineno(1))
 
-    def create_ioport(self, sigtypes, name, width=None, pdims=None, udims=None, lineno=0):
+    def create_ioport(self, p, sigtypes, name, width=None, pdims=None, udims=None, lineno=0):
         signed = False
         first = None
         second = None
 
-        self.typecheck_ioport(sigtypes)
+        self.typecheck_ioport(p, sigtypes)
 
         sigtypes = list(sigtypes)
 
@@ -434,7 +434,7 @@ class VerilogParser(object):
             sigtypes.remove('unsigned')
 
         if len(sigtypes) > 2:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'input' in sigtypes:
             first = Input(name=name, width=width, signed=signed,
@@ -452,7 +452,7 @@ class VerilogParser(object):
             sigtypes.remove('inout')
 
         if len(sigtypes) > 1:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'wire' in sigtypes:
             second = Wire(name=name, width=width, signed=signed,
@@ -487,86 +487,86 @@ class VerilogParser(object):
             sigtypes.remove(sigtypes[0])
 
         if len(sigtypes) > 0:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         return Ioport(first, second, lineno=lineno)
 
-    def typecheck_ioport(self, sigtypes):
+    def typecheck_ioport(self, p, sigtypes):
         if len(sigtypes) > 3:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if len(sigtypes) != len(set(sigtypes)):
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'signed' not in sigtypes and 'unsigned' not in sigtypes and len(sigtypes) > 2:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'signed' in sigtypes and len(sigtypes) == 1:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'unsigned' in sigtypes and len(sigtypes) == 1:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'signed' in sigtypes and 'unsigned' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         # if 'input' not in sigtypes and 'output' not in sigtypes and 'inout' not in sigtypes:
-        #     raise ParseError("Syntax Error")
+        #     self._raise_error(p)
 
         if 'input' in sigtypes and 'output' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'inout' in sigtypes and 'output' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'inout' in sigtypes and 'input' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'input' in sigtypes and 'reg' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'inout' in sigtypes and 'reg' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'input' in sigtypes and 'tri' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'output' in sigtypes and 'tri' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
     def p_ioport(self, p):
         'ioport : sigtypes portname'
-        p[0] = self.create_ioport(p[1], p[2], lineno=p.lineno(2))
+        p[0] = self.create_ioport(p, p[1], p[2], lineno=p.lineno(2))
         p.set_lineno(0, p.lineno(1))
 
     def p_ioport_pdims_width(self, p):
         'ioport : sigtypes pdims_width portname'
         pdims, width = p[2]
-        p[0] = self.create_ioport(p[1], p[3], width=width, pdims=pdims, lineno=p.lineno(1))
+        p[0] = self.create_ioport(p, p[1], p[3], width=width, pdims=pdims, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_ioport_pdims_width_udims(self, p):
         'ioport : sigtypes pdims_width portname udims'
         pdims, width = p[2]
-        p[0] = self.create_ioport(p[1], p[3], width=width,
+        p[0] = self.create_ioport(p, p[1], p[3], width=width,
                                   pdims=pdims, udims=p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_ioport_head(self, p):
         'ioport_head : sigtypes portname'
-        p[0] = self.create_ioport(p[1], p[2], lineno=p.lineno(2))
+        p[0] = self.create_ioport(p, p[1], p[2], lineno=p.lineno(2))
         p.set_lineno(0, p.lineno(1))
 
     def p_ioport_head_pdims_width(self, p):
         'ioport_head : sigtypes pdims_width portname'
         pdims, width = p[2]
-        p[0] = self.create_ioport(p[1], p[3], width=width, pdims=pdims, lineno=p.lineno(1))
+        p[0] = self.create_ioport(p, p[1], p[3], width=width, pdims=pdims, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_ioport_head_pdims_width_udims(self, p):
         'ioport_head : sigtypes pdims_width portname udims'
         pdims, width = p[2]
-        p[0] = self.create_ioport(p[1], p[3], width=width,
+        p[0] = self.create_ioport(p, p[1], p[3], width=width,
                                   pdims=pdims, udims=p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -590,11 +590,11 @@ class VerilogParser(object):
         p[0] = Length(p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    def _separate_pdims_width(self, dims):
+    def _separate_pdims_width(self, p, dims):
         if dims[-1].msb is None:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
         if dims[-1].lsb is None:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         width = Width(dims[-1].msb, dims[-1].lsb, lineno=dims[-1].lineno)
 
@@ -607,7 +607,7 @@ class VerilogParser(object):
 
     def p_pdims_width(self, p):
         'pdims_width : dims'
-        pdims, width = self._separate_pdims_width(p[1])
+        pdims, width = self._separate_pdims_width(p, p[1])
         p[0] = (pdims, width)
         p.set_lineno(0, p.lineno(1))
 
@@ -679,11 +679,11 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # Signal Decl
-    def create_decl(self, sigtypes, name, width=None, pdims=None, udims=None, lineno=0):
+    def create_decl(self, p, sigtypes, name, width=None, pdims=None, udims=None, lineno=0):
         signed = False
         decls = []
 
-        self.typecheck_decl(sigtypes, pdims, udims)
+        self.typecheck_decl(p, sigtypes, pdims, udims)
 
         sigtypes = list(sigtypes)
 
@@ -696,7 +696,7 @@ class VerilogParser(object):
             sigtypes.remove('unsigned')
 
         if len(sigtypes) > 2:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'input' in sigtypes:
             decls.append(Input(name=name, width=width,
@@ -714,7 +714,7 @@ class VerilogParser(object):
             sigtypes.remove('inout')
 
         if len(sigtypes) > 1:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'wire' in sigtypes:
             decls.append(Wire(name=name, width=width,
@@ -759,61 +759,61 @@ class VerilogParser(object):
             sigtypes.remove(sigtypes[0])
 
         if len(sigtypes) > 0:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         return decls
 
-    def typecheck_decl(self, sigtypes, pdims=None, udims=None):
+    def typecheck_decl(self, p, sigtypes, pdims=None, udims=None):
         if len(sigtypes) > 3:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if len(sigtypes) != len(set(sigtypes)):
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'signed' not in sigtypes and 'unsigned' not in sigtypes and len(sigtypes) > 2:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'signed' in sigtypes and len(sigtypes) == 1:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'unsigned' in sigtypes and len(sigtypes) == 1:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'signed' in sigtypes and 'unsigned' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if ('supply0' in sigtypes or 'supply1' in sigtypes) and pdims is not None:
-            raise ParseError("SyntaxError")
+            self._raise_error(p)
 
         if ('supply0' in sigtypes or 'supply1' in sigtypes) and udims is not None:
-            raise ParseError("SyntaxError")
+            self._raise_error(p)
 
         if 'input' in sigtypes and 'output' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'inout' in sigtypes and 'output' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'inout' in sigtypes and 'input' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'input' in sigtypes and 'reg' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'inout' in sigtypes and 'reg' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'input' in sigtypes and 'tri' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'output' in sigtypes and 'tri' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
     def p_decl(self, p):
         'decl : sigtypes declnamelist SEMICOLON'
         decllist = []
         for rname, rudims in p[2]:
-            decllist.extend(self.create_decl(p[1], rname, pdims=None, udims=rudims,
+            decllist.extend(self.create_decl(p, p[1], rname, pdims=None, udims=rudims,
                                              lineno=p.lineno(2)))
         p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
@@ -823,7 +823,7 @@ class VerilogParser(object):
         decllist = []
         pdims, width = p[2]
         for rname, rudims in p[3]:
-            decllist.extend(self.create_decl(p[1], rname, width=width, pdims=pdims, udims=rudims,
+            decllist.extend(self.create_decl(p, p[1], rname, width=width, pdims=pdims, udims=rudims,
                                              lineno=p.lineno(1)))
         p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
@@ -849,11 +849,11 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # Decl and Assign
-    def create_declassign(self, sigtypes, name, assign, width=None, pdims=None, udims=None, lineno=0):
+    def create_declassign(self, p, sigtypes, name, assign, width=None, pdims=None, udims=None, lineno=0):
         signed = False
         decls = []
 
-        self.typecheck_declassign(sigtypes)
+        self.typecheck_declassign(p, sigtypes)
 
         sigtypes = list(sigtypes)
 
@@ -866,7 +866,7 @@ class VerilogParser(object):
             sigtypes.remove('unsigned')
 
         if len(sigtypes) > 2:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'input' in sigtypes:
             decls.append(Input(name=name, width=width,
@@ -884,7 +884,7 @@ class VerilogParser(object):
             sigtypes.remove('inout')
 
         if len(sigtypes) > 1:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'wire' in sigtypes:
             decls.append(Wire(name=name, width=width,
@@ -914,58 +914,57 @@ class VerilogParser(object):
             sigtypes.remove(sigtypes[0])
 
         if len(sigtypes) > 0:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         decls.append(assign)
         return decls
 
-    def typecheck_declassign(self, sigtypes):
+    def typecheck_declassign(self, p, sigtypes):
         if len(sigtypes) > 3:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if len(sigtypes) != len(set(sigtypes)):
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'signed' not in sigtypes and 'unsigned' not in sigtypes and len(sigtypes) > 2:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'signed' in sigtypes and len(sigtypes) == 1:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'unsigned' in sigtypes and len(sigtypes) == 1:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'signed' in sigtypes and 'unsigned' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'input' in sigtypes and 'output' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'inout' in sigtypes and 'output' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'inout' in sigtypes and 'input' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'input' in sigtypes and 'reg' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'inout' in sigtypes and 'reg' in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'reg' not in sigtypes and 'wire' not in sigtypes:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'supply0' in sigtypes and len(sigtypes) != 1:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
         if 'supply1' in sigtypes and len(sigtypes) != 1:
-            raise ParseError("Syntax Error")
+            self._raise_error(p)
 
     def p_declassign(self, p):
         'declassign : sigtypes declassign_element SEMICOLON'
-        decllist = self.create_declassign(
-            p[1], p[2][0], p[2][1], lineno=p.lineno(2))
+        decllist = self.create_declassign(p, p[1], p[2][0], p[2][1], lineno=p.lineno(2))
         p[0] = Decl(decllist, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -973,7 +972,7 @@ class VerilogParser(object):
         'declassign : sigtypes pdims_width declassign_element SEMICOLON'
         pdims, width = p[2]
         decllist = self.create_declassign(
-            p[1], p[3][0], p[3][1], width=width, pdims=pdims, lineno=p.lineno(3))
+            p, p[1], p[3][0], p[3][1], width=width, pdims=pdims, lineno=p.lineno(3))
         p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -2381,7 +2380,8 @@ class VerilogParser(object):
                 if (not isinstance(r, Reg) and not isinstance(r, Wire) and
                     not isinstance(r, Integer) and not isinstance(r, Real) and
                         not isinstance(r, Parameter) and not isinstance(r, Localparam)):
-                    raise ParseError("Syntax Error")
+                    self._raise_error(p)
+
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
@@ -2955,7 +2955,8 @@ class VerilogParser(object):
             for r in p[1].list:
                 if (not isinstance(r, Input) and not isinstance(r, Reg) and
                         not isinstance(r, Integer)):
-                    raise ParseError("Syntax Error")
+                    self._raise_error(p)
+
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
@@ -3025,7 +3026,8 @@ class VerilogParser(object):
             for r in p[1].list:
                 if (not isinstance(r, Input) and not isinstance(r, Reg) and
                         not isinstance(r, Integer)):
-                    raise ParseError("Syntax Error")
+                    self._raise_error(p)
+
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
@@ -3391,15 +3393,22 @@ class VerilogParser(object):
 
     # --------------------------------------------------------------------------
     def p_error(self, p):
-        self._raise_error(p)
-
-    # --------------------------------------------------------------------------
-    def _raise_error(self, p):
         if p:
             msg = 'before: "%s"' % p.value
             coord = self._coord(p.lineno)
         else:
             msg = 'at end of input'
+            coord = None
+
+        raise ParseError("%s: %s" % (coord, msg))
+
+    # --------------------------------------------------------------------------
+    def _raise_error(self, p):
+        msg = 'syntax error'
+
+        try:
+            coord = self._coord(p.lineno(1))
+        except:
             coord = None
 
         raise ParseError("%s: %s" % (coord, msg))
