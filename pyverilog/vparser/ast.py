@@ -1610,7 +1610,7 @@ class Enumlist(Node):
 
 
 class TypeDef(Node):
-    attr_names = ('name',)
+    attr_names = ('name', 'types')
 
     def __init__(self, name, types, width=None, pdims=None, udims=None, lineno=0):
         self.lineno = lineno
@@ -1622,8 +1622,6 @@ class TypeDef(Node):
 
     def children(self):
         nodelist = []
-        if self.types:
-            nodelist.extend(self.types)
         if self.width:
             nodelist.append(self.width)
         if self.pdims:

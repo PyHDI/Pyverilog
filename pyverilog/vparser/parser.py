@@ -106,6 +106,7 @@ class VerilogParser(object):
         | struct
         | union
         | enum
+        | typedef
         | pragma
         """
         p[0] = p[1]
@@ -360,16 +361,18 @@ class VerilogParser(object):
         'custom_sigtype : identifier'
 
         if p[1].scope is not None:
-            self._raise_error(p)  # not implemented
-
-            if len(p[1].scope.labellist) > 2:
+            if len(p[1].scope.labellist) > 1:
                 self._raise_error(p)
 
-            for label in p[1].scope.labellist:
-                if label.loop is not None:
-                    self._raise_error(p)
+            label = p[1].scope.labellist[0]
+            if label.loop is not None:
+                self._raise_error(p)
 
-        p[0] = p[1].name
+            p[0] = (label.name, p[1].name)
+
+        else:
+            p[0] = p[1].name
+
         p.set_lineno(0, p.lineno(1))
 
     def p_ioports(self, p):
@@ -766,7 +769,7 @@ class VerilogParser(object):
             else:
                 typename = sigtypes[0][0]
                 modportname = None
-            delcs.append(CustomVariable(typename=typename, name=name, modportname=modportname,
+            decls.append(CustomVariable(typename=typename, name=name, modportname=modportname,
                                         width=width, signed=signed,
                                         pdims=pdims, udims=udims, lineno=lineno))
             sigtypes.remove(sigtypes[0])
@@ -821,6 +824,16 @@ class VerilogParser(object):
 
         if 'output' in sigtypes and 'tri' in sigtypes:
             self._raise_error(p)
+
+    def p_decl_one_ID(self, p):
+        'decl : ID ID SEMICOLON'
+        sigtypes = (p[1],)
+        ID = p[2]
+        decllist = []
+        decllist.extend(self.create_decl(p, sigtypes, ID, pdims=None, udims=None,
+                                         lineno=p.lineno(1)))
+        p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
 
     def p_decl_one(self, p):
         'decl : sigtypes_ID SEMICOLON'
@@ -954,7 +967,7 @@ class VerilogParser(object):
             else:
                 typename = sigtypes[0][0]
                 modportname = None
-            delcs.append(CustomVariable(typename=typename, name=name, modportname=modportname,
+            decls.append(CustomVariable(typename=typename, name=name, modportname=modportname,
                                         width=width, signed=signed,
                                         pdims=pdims, udims=udims, lineno=lineno))
             sigtypes.remove(sigtypes[0])
@@ -2671,24 +2684,6 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    def p_instance(self, p):
-        'instance : ID parameterlist instance_bodylist SEMICOLON'
-        instancelist = []
-        for instance_name, instance_ports, instance_array in p[3]:
-            instancelist.append(Instance(p[1], instance_name, instance_ports,
-                                         p[2], instance_array, lineno=p.lineno(1)))
-        p[0] = InstanceList(p[1], p[2], tuple(instancelist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_or(self, p):
-        'instance : SENS_OR parameterlist instance_bodylist SEMICOLON'
-        instancelist = []
-        for instance_name, instance_ports, instance_array in p[3]:
-            instancelist.append(Instance(p[1], instance_name, instance_ports,
-                                         p[2], instance_array, lineno=p.lineno(1)))
-        p[0] = InstanceList(p[1], p[2], tuple(instancelist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
     def p_instance_noparameterlist(self, p):
         'instance : ID instance_bodylist SEMICOLON'
         instancelist = []
@@ -2705,6 +2700,24 @@ class VerilogParser(object):
             instancelist.append(Instance(p[1], instance_name, instance_ports,
                                          (), instance_array, lineno=p.lineno(1)))
         p[0] = InstanceList(p[1], (), tuple(instancelist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance(self, p):
+        'instance : ID parameterlist instance_bodylist SEMICOLON'
+        instancelist = []
+        for instance_name, instance_ports, instance_array in p[3]:
+            instancelist.append(Instance(p[1], instance_name, instance_ports,
+                                         p[2], instance_array, lineno=p.lineno(1)))
+        p[0] = InstanceList(p[1], p[2], tuple(instancelist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_or(self, p):
+        'instance : SENS_OR parameterlist instance_bodylist SEMICOLON'
+        instancelist = []
+        for instance_name, instance_ports, instance_array in p[3]:
+            instancelist.append(Instance(p[1], instance_name, instance_ports,
+                                         p[2], instance_array, lineno=p.lineno(1)))
+        p[0] = InstanceList(p[1], p[2], tuple(instancelist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_instance_noname(self, p):

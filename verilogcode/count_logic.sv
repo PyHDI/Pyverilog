@@ -1,10 +1,12 @@
+
 module TOP
   (
    input logic CLK,
    input logic RST_X
    );
 
-  logic [3:0] cnt;
+  typedef logic [7:0] counter;
+  counter cnt;
 
   always_ff @(posedge CLK) begin
     if(!RST_X) begin
