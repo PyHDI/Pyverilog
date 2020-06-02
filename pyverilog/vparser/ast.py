@@ -1190,14 +1190,14 @@ class DelayStatement(Node):
 
 
 class Instance(Node):
-    attr_names = ('name', 'module')
+    attr_names = ('module', 'name')
 
-    def __init__(self, module, name, portlist, paramlist, array=None, lineno=0):
+    def __init__(self, module, name, paramlist, portlist, array=None, lineno=0):
         self.lineno = lineno
         self.module = module
         self.name = name
-        self.portlist = portlist
         self.paramlist = paramlist
+        self.portlist = portlist
         self.array = array
 
     def children(self):

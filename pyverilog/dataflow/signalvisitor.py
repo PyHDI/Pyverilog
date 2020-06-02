@@ -110,10 +110,6 @@ class SignalVisitor(NodeVisitor):
         # self.generic_visit(node)
         # self.frames.setCurrent(current)
 
-    def visit_InstanceList(self, node):
-        for i in node.instances:
-            self.visit(i)
-
     def visit_Instance(self, node):
         if node.array:
             return self._visit_Instance_array(node)
@@ -146,7 +142,7 @@ class SignalVisitor(NodeVisitor):
         scope = self.frames.getCurrent()
 
         paramnames = self.moduleinfotable.getParamNames(node.module)
-        for paramnames_i, param in enumerate(node.parameterlist):
+        for paramnames_i, param in enumerate(node.paramlist):
             paramname = paramnames[paramnames_i] if param.paramname is None else param.paramname
             if paramname not in paramnames:
                 raise verror.FormatError("No such parameter: %s in %s" %
@@ -441,7 +437,7 @@ class SignalVisitor(NodeVisitor):
 
     def toScopeChain(self, blocklabel):
         scopelist = []
-        for b in blocklabel.labellist:
+        for b in blocklabel:
             if b.loop is not None:
                 loop = self.optimize(b.loop)
                 if not isinstance(loop, DFEvalValue):

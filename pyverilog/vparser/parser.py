@@ -801,8 +801,9 @@ class VerilogParser(object):
         instance_body_list = (instance_body,) + p[4]
         instancelist = []
         for instance_name, instance_port_list, instance_array in instance_body_list:
-            instancelist.append(Instance(modulename, instance_name, instance_port_list,
-                                         instance_param_list, instance_array, lineno=p.lineno(1)))
+            instancelist.append(Instance(modulename, instance_name,
+                                         instance_param_list, instance_port_list,
+                                         instance_array, lineno=p.lineno(1)))
         p[0] = Decl(tuple(instancelist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -811,8 +812,9 @@ class VerilogParser(object):
         instance_param_list = () if p[2] == () else p[2]
         instancelist = []
         for instance_name, instance_port_list, instance_array in p[3]:
-            instancelist.append(Instance(p[1], instance_name, instance_port_list,
-                                         instance_param_list, instance_array, lineno=p.lineno(1)))
+            instancelist.append(Instance(p[1], instance_name,
+                                         instance_param_list, instance_port_list,
+                                         instance_array, lineno=p.lineno(1)))
         p[0] = Decl(tuple(instancelist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -820,8 +822,9 @@ class VerilogParser(object):
         'decl : _id instance_body_list_noname SEMICOLON'
         instancelist = []
         for instance_name, instance_port_list, instance_array in p[2]:
-            instancelist.append(Instance(p[1], instance_name, instance_port_list,
-                                         (), instance_array, lineno=p.lineno(1)))
+            instancelist.append(Instance(p[1], instance_name,
+                                         (), instance_port_list,
+                                         instance_array, lineno=p.lineno(1)))
         p[0] = Decl(tuple(instancelist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -2271,13 +2274,20 @@ class VerilogParser(object):
 
     # --------------------------------------------------------------------------
     def p_systemcall_noargs(self, p):
-        'systemcall : DOLLER _id'
+        'systemcall : DOLLER systemcall_name'
         p[0] = SystemCall(p[2], (), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_systemcall(self, p):
-        'systemcall : DOLLER _id LPAREN sysargs RPAREN'
+        'systemcall : DOLLER systemcall_name LPAREN sysargs RPAREN'
         p[0] = SystemCall(p[2], p[4], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_systemcall_name(self, p):
+        """systemcall_name : _id
+        | sign_sigtype
+        """
+        p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
     def p_sysargs(self, p):

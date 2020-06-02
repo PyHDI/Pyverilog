@@ -20,12 +20,10 @@ class ModuleVisitor(NodeVisitor):
     def __init__(self):
         self.moduleinfotable = ModuleInfoTable()
 
-    def visit_ModuleDef(self, node):
+    def visit_Module(self, node):
         self.moduleinfotable.addDefinition(node.name, node)
+        self.moduleinfotable.addPorts(node.portlist)
         self.generic_visit(node)
-
-    def visit_Portlist(self, node):
-        self.moduleinfotable.addPorts(node.ports)
 
     def visit_Input(self, node):
         self.moduleinfotable.addSignal(node.name, node)
@@ -54,9 +52,6 @@ class ModuleVisitor(NodeVisitor):
         pass
 
     def visit_Initial(self, node):
-        pass
-
-    def visit_InstanceList(self, node):
         pass
 
     def visit_Instance(self, node):

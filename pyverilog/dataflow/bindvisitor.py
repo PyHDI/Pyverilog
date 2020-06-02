@@ -57,7 +57,7 @@ class BindVisitor(NodeVisitor):
     def start_visit(self):
         return self.visit(self.moduleinfotable.getDefinition(self.top))
 
-    def visit_ModuleDef(self, node):
+    def visit_Module(self, node):
         self.default_nettype = node.default_nettype
         self.generic_visit(node)
 
@@ -132,10 +132,6 @@ class BindVisitor(NodeVisitor):
         self.generic_visit(node)
         self.frames.unsetTaskDef()
 
-    def visit_InstanceList(self, node):
-        for i in node.instances:
-            self.visit(i)
-
     def visit_Instance(self, node):
         if node.array:
             return self._visit_Instance_array(node)
@@ -167,7 +163,7 @@ class BindVisitor(NodeVisitor):
         scope = self.frames.getCurrent()
 
         paramnames = self.moduleinfotable.getParamNames(node.module)
-        for paramnames_i, param in enumerate(node.parameterlist):
+        for paramnames_i, param in enumerate(node.paramlist):
             self.addInstanceParameterBind(param, paramnames[paramnames_i])
             value = self.optimize(self.getTree(param.argname, current))
             paramname = paramnames[paramnames_i] if param.paramname is None else param.paramname
@@ -732,7 +728,7 @@ class BindVisitor(NodeVisitor):
 
     def toScopeChain(self, blocklabel, current):
         scopelist = []
-        for b in blocklabel.labellist:
+        for b in blocklabel:
             if b.loop is not None:
                 loop = self.optimize(self.getTree(b.loop, current))
                 if not isinstance(loop, DFEvalValue):
@@ -1151,8 +1147,9 @@ class BindVisitor(NodeVisitor):
 
             return DFTerminal(varname)
 
-        if isinstance(node, vast.TaskCall):
-            task = self.searchTask(node.name.name, scope)
+        if (isinstance(node, vast.SingleStatement) and
+            isinstance(node.statement, vast.FunctionCall)):
+            task = self.searchTask(node.statement.name.name, scope)
             label = self.labels.get(self.frames.getLabelKey('taskcall'))
 
             current = self.frames.addFrame(
@@ -1162,8 +1159,8 @@ class BindVisitor(NodeVisitor):
 
             varname = self.frames.getCurrent() + ScopeLabel(task.name, 'signal')
 
-            taskports = self.searchTaskPorts(node.name.name, scope)
-            taskargs = node.args
+            taskports = self.searchTaskPorts(node.statement.name.name, scope)
+            taskargs = node.statement.args
 
             if len(taskports) != len(taskargs):
                 raise verror.FormatError("%s takes exactly %d arguments. (%d given)" %
@@ -1357,7 +1354,7 @@ class BindVisitor(NodeVisitor):
     def getDsts(self, left, scope):
         if isinstance(left, vast.Lvalue):
             return self.getDsts(left.var, scope)
-        if isinstance(left, vast.LConcat):
+        if isinstance(left, vast.Concat):
             dst = []
             for n in left.list:
                 dst.extend(list(self.getDsts(n, scope)))
