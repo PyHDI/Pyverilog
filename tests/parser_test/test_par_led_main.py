@@ -9,31 +9,30 @@ try:
 except:
     from io import StringIO
 
-codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/verilogcode/'
+codedir = os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__)))) + '/verilogcode/'
 
 expected = """\
 Source:  (at 2)
   Description:  (at 2)
-    ModuleDef: led (at 2)
-      Paramlist:  (at 2)
-        Decl:  (at 4)
-          Parameter: STEP, False (at 4)
-            Rvalue:  (at 4)
-              IntConst: 10 (at 4)
-      Portlist:  (at 6)
-        Ioport:  (at 7)
-          Input: CLK, False (at 7)
-        Ioport:  (at 8)
-          Input: RST, False (at 8)
-        Ioport:  (at 9)
-          Output: LED, False (at 9)
-            Width:  (at 9)
-              IntConst: 7 (at 9)
-              IntConst: 0 (at 9)
-          Reg: LED, False (at 9)
-            Width:  (at 9)
-              IntConst: 7 (at 9)
-              IntConst: 0 (at 9)
+    Module: led, none (at 2)
+      Decl:  (at 4)
+        Parameter: STEP, False (at 4)
+          Rvalue:  (at 4)
+            IntConst: 10 (at 4)
+      Ioport:  (at 7)
+        Input: CLK, False (at 7)
+      Ioport:  (at 8)
+        Input: RST, False (at 8)
+      Ioport:  (at 9)
+        Output: LED, False (at 9)
+          Width:  (at 9)
+            IntConst: 7 (at 9)
+            IntConst: 0 (at 9)
+        Reg: LED, False (at 9)
+          Width:  (at 9)
+            IntConst: 7 (at 9)
+            IntConst: 0 (at 9)
       Decl:  (at 12)
         Reg: count, False (at 12)
           Width:  (at 12)
@@ -85,21 +84,17 @@ Source:  (at 2)
                       Plus:  (at 23)
                         Identifier: count (at 23)
                         IntConst: 1 (at 23)
-    ModuleDef: main (at 29)
-      Paramlist:  (at 0)
-      Portlist:  (at 30)
-        Ioport:  (at 31)
-          Input: CLK, False (at 31)
-        Ioport:  (at 32)
-          Input: RST, False (at 32)
-        Ioport:  (at 33)
-          Output: LED, False (at 33)
-            Width:  (at 33)
-              IntConst: 7 (at 33)
-              IntConst: 0 (at 33)
-      InstanceList: led (at 36)
-        ParamArg: STEP (at 38)
-          IntConst: 100 (at 38)
+    Module: main, none (at 29)
+      Ioport:  (at 31)
+        Input: CLK, False (at 31)
+      Ioport:  (at 32)
+        Input: RST, False (at 32)
+      Ioport:  (at 33)
+        Output: LED, False (at 33)
+          Width:  (at 33)
+            IntConst: 7 (at 33)
+            IntConst: 0 (at 33)
+      Decl:  (at 36)
         Instance: inst_led, led (at 36)
           ParamArg: STEP (at 38)
             IntConst: 100 (at 38)
@@ -112,12 +107,13 @@ Source:  (at 2)
 Line 1 : `default_nettype none
 """
 
+
 def test():
     filelist = [codedir + 'led_main.v']
     output = 'preprocess.out'
     include = [codedir]
     define = ['STEP=100']
-    
+
     parser = VerilogCodeParser(filelist,
                                preprocess_include=include,
                                preprocess_define=define)
@@ -129,11 +125,12 @@ def test():
 
     for lineno, directive in directives:
         output.write('Line %d : %s' % (lineno, directive))
-    
+
     rslt = output.getvalue()
 
     print(rslt)
     assert(expected == rslt)
+
 
 if __name__ == '__main__':
     test()

@@ -1,10 +1,10 @@
-module \1234 
+module \1234
   (
    \CLK~ , // "\CLK~"
    LE$D, // LE$D
    \1234RST*%&  // "\1234RST*%&"
    );
-  
+
   input \CLK~ , \1234RST*%& ;
   output LE$D;
 
@@ -18,5 +18,5 @@ module \1234
 
   wire [7:0] rslt;
   assign rslt = \1stLoop [0].\2ndLoop [1].tmp;
-  
+
 endmodule

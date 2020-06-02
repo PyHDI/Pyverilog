@@ -106,10 +106,10 @@ class Description(Node):
         return tuple(nodelist)
 
 
-class ModuleDef(Node):
-    attr_names = ('name',)
+class Module(Node):
+    attr_names = ('name', 'default_nettype')
 
-    def __init__(self, name, paramlist, portlist, items, default_nettype='wire', lineno=0):
+    def __init__(self, name, paramlist, portlist, items, default_nettype=None, lineno=0):
         self.lineno = lineno
         self.name = name
         self.paramlist = paramlist
@@ -120,39 +120,25 @@ class ModuleDef(Node):
     def children(self):
         nodelist = []
         if self.paramlist:
-            nodelist.append(self.paramlist)
+            nodelist.extend(self.paramlist)
         if self.portlist:
-            nodelist.append(self.portlist)
+            nodelist.extend(self.portlist)
         if self.items:
             nodelist.extend(self.items)
         return tuple(nodelist)
 
 
-class Paramlist(Node):
+class Decl(Node):
     attr_names = ()
 
-    def __init__(self, params, lineno=0):
+    def __init__(self, list, lineno=0):
         self.lineno = lineno
-        self.params = params
+        self.list = list
 
     def children(self):
         nodelist = []
-        if self.params:
-            nodelist.extend(self.params)
-        return tuple(nodelist)
-
-
-class Portlist(Node):
-    attr_names = ()
-
-    def __init__(self, ports, lineno=0):
-        self.lineno = lineno
-        self.ports = ports
-
-    def children(self):
-        nodelist = []
-        if self.ports:
-            nodelist.extend(self.ports)
+        if self.list:
+            nodelist.extend(self.list)
         return tuple(nodelist)
 
 
@@ -199,21 +185,17 @@ class Width(Node):
         return tuple(nodelist)
 
 
-class Length(Width):
-    pass
-
-
 class Dims(Node):
     attr_names = ()
 
-    def __init__(self, lengths, lineno=0):
+    def __init__(self, dims, lineno=0):
         self.lineno = lineno
-        self.lengths = lengths
+        self.dims = dims
 
     def children(self):
         nodelist = []
-        if self.lengths:
-            nodelist.extend(self.lengths)
+        if self.dims:
+            nodelist.extend(self.dims)
         return tuple(nodelist)
 
 
@@ -228,13 +210,26 @@ class Identifier(Node):
     def children(self):
         nodelist = []
         if self.scope:
-            nodelist.append(self.scope)
+            nodelist.extend(self.scope)
         return tuple(nodelist)
 
     def __repr__(self):
         if self.scope is None:
             return self.name
         return self.scope.__repr__() + '.' + self.name
+
+
+class IdentifierScope(Node):
+    attr_names = ('name', 'loop')
+
+    def __init__(self, name, loop=None, lineno=0):
+        self.lineno = lineno
+        self.name = name
+        self.loop = loop
+
+    def children(self):
+        nodelist = []
+        return tuple(nodelist)
 
 
 class _Value(Node):
@@ -440,12 +435,13 @@ class Ioport(Node):
 class Parameter(Node):
     attr_names = ('name', 'signed')
 
-    def __init__(self, name, value, width=None, pdims=None, udims=None, signed=False, lineno=0):
+    def __init__(self, name, value, width=None, pdims=None, udims=None, signed=False, ptype=None, lineno=0):
         self.lineno = lineno
         self.name = name
         self.value = value
         self.width = width
         self.signed = signed
+        self.ptype = ptype
         self.pdims = pdims
         self.udims = udims
 
@@ -470,20 +466,6 @@ class Supply(Parameter):
     pass
 
 
-class Decl(Node):
-    attr_names = ()
-
-    def __init__(self, list, lineno=0):
-        self.lineno = lineno
-        self.list = list
-
-    def children(self):
-        nodelist = []
-        if self.list:
-            nodelist.extend(self.list)
-        return tuple(nodelist)
-
-
 class Concat(Node):
     attr_names = ()
 
@@ -496,10 +478,6 @@ class Concat(Node):
         if self.list:
             nodelist.extend(self.list)
         return tuple(nodelist)
-
-
-class LConcat(Concat):
-    pass
 
 
 class Repeat(Node):
@@ -1211,41 +1189,23 @@ class DelayStatement(Node):
         return tuple(nodelist)
 
 
-class InstanceList(Node):
-    attr_names = ('module',)
-
-    def __init__(self, module, parameterlist, instances, lineno=0):
-        self.lineno = lineno
-        self.module = module
-        self.parameterlist = parameterlist
-        self.instances = instances
-
-    def children(self):
-        nodelist = []
-        if self.parameterlist:
-            nodelist.extend(self.parameterlist)
-        if self.instances:
-            nodelist.extend(self.instances)
-        return tuple(nodelist)
-
-
 class Instance(Node):
     attr_names = ('name', 'module')
 
-    def __init__(self, module, name, portlist, parameterlist, array=None, lineno=0):
+    def __init__(self, module, name, portlist, paramlist, array=None, lineno=0):
         self.lineno = lineno
         self.module = module
         self.name = name
         self.portlist = portlist
-        self.parameterlist = parameterlist
+        self.paramlist = paramlist
         self.array = array
 
     def children(self):
         nodelist = []
         if self.array:
             nodelist.append(self.array)
-        if self.parameterlist:
-            nodelist.extend(self.parameterlist)
+        if self.paramlist:
+            nodelist.extend(self.paramlist)
         if self.portlist:
             nodelist.extend(self.portlist)
         return tuple(nodelist)
@@ -1284,11 +1244,12 @@ class PortArg(Node):
 class Function(Node):
     attr_names = ('name', 'automatic')
 
-    def __init__(self, name, retwidth, statement, automatic=False, lineno=0):
+    def __init__(self, name, statement, retwidth=None, rettype=None, automatic=False, lineno=0):
         self.lineno = lineno
         self.name = name
-        self.retwidth = retwidth
         self.statement = statement
+        self.retwidth = retwidth
+        self.rettype = rettype
         self.automatic = automatic
 
     def children(self):
@@ -1297,26 +1258,6 @@ class Function(Node):
             nodelist.append(self.retwidth)
         if self.statement:
             nodelist.extend(self.statement)
-        return tuple(nodelist)
-
-    def __repr__(self):
-        return self.name.__repr__()
-
-
-class FunctionCall(Node):
-    attr_names = ()
-
-    def __init__(self, name, args, lineno=0):
-        self.lineno = lineno
-        self.name = name
-        self.args = args
-
-    def children(self):
-        nodelist = []
-        if self.name:
-            nodelist.append(self.name)
-        if self.args:
-            nodelist.extend(self.args)
         return tuple(nodelist)
 
     def __repr__(self):
@@ -1339,7 +1280,7 @@ class Task(Node):
         return tuple(nodelist)
 
 
-class TaskCall(Node):
+class FunctionCall(Node):
     attr_names = ()
 
     def __init__(self, name, args, lineno=0):
@@ -1354,6 +1295,9 @@ class TaskCall(Node):
         if self.args:
             nodelist.extend(self.args)
         return tuple(nodelist)
+
+    def __repr__(self):
+        return self.name.__repr__()
 
 
 class GenerateStatement(Node):
@@ -1398,33 +1342,6 @@ class SystemCall(Node):
             ret.append(str(a))
         ret.append(')')
         return ''.join(ret)
-
-
-class IdentifierScopeLabel(Node):
-    attr_names = ('name', 'loop')
-
-    def __init__(self, name, loop=None, lineno=0):
-        self.lineno = lineno
-        self.name = name
-        self.loop = loop
-
-    def children(self):
-        nodelist = []
-        return tuple(nodelist)
-
-
-class IdentifierScope(Node):
-    attr_names = ()
-
-    def __init__(self, labellist, lineno=0):
-        self.lineno = lineno
-        self.labellist = labellist
-
-    def children(self):
-        nodelist = []
-        if self.labellist:
-            nodelist.extend(self.labellist)
-        return tuple(nodelist)
 
 
 class Pragma(Node):
@@ -1497,25 +1414,8 @@ class SingleStatement(Node):
         return tuple(nodelist)
 
 
-class Interface(Node):
-    attr_names = ('name',)
-
-    def __init__(self, name, paramlist, portlist, items, lineno=0):
-        self.lineno = lineno
-        self.name = name
-        self.paramlist = paramlist
-        self.portlist = portlist
-        self.items = items
-
-    def children(self):
-        nodelist = []
-        if self.paramlist:
-            nodelist.append(self.paramlist)
-        if self.portlist:
-            nodelist.append(self.portlist)
-        if self.items:
-            nodelist.extend(self.items)
-        return tuple(nodelist)
+class Interface(Module):
+    pass
 
 
 class Modport(Node):

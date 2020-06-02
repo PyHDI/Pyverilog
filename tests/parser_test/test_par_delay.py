@@ -9,31 +9,30 @@ try:
 except:
     from io import StringIO
 
-codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/verilogcode/'
+codedir = os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__)))) + '/verilogcode/'
 
 expected = """\
 Source:  (at 3)
   Description:  (at 3)
-    ModuleDef: main (at 3)
-      Paramlist:  (at 3)
-        Decl:  (at 5)
-          Parameter: STEP, False (at 5)
-            Rvalue:  (at 5)
-              IntConst: 10 (at 5)
-      Portlist:  (at 7)
-        Ioport:  (at 8)
-          Input: CLK, False (at 8)
-        Ioport:  (at 9)
-          Input: RST, False (at 9)
-        Ioport:  (at 10)
-          Output: LED, False (at 10)
-            Width:  (at 10)
-              IntConst: 7 (at 10)
-              IntConst: 0 (at 10)
-          Reg: LED, False (at 10)
-            Width:  (at 10)
-              IntConst: 7 (at 10)
-              IntConst: 0 (at 10)
+    Module: main, None (at 3)
+      Decl:  (at 5)
+        Parameter: STEP, False (at 5)
+          Rvalue:  (at 5)
+            IntConst: 10 (at 5)
+      Ioport:  (at 8)
+        Input: CLK, False (at 8)
+      Ioport:  (at 9)
+        Input: RST, False (at 9)
+      Ioport:  (at 10)
+        Output: LED, False (at 10)
+          Width:  (at 10)
+            IntConst: 7 (at 10)
+            IntConst: 0 (at 10)
+        Reg: LED, False (at 10)
+          Width:  (at 10)
+            IntConst: 7 (at 10)
+            IntConst: 0 (at 10)
       Decl:  (at 13)
         Localparam: DELAY, False (at 13)
           Rvalue:  (at 13)
@@ -64,12 +63,13 @@ Source:  (at 3)
 Line 1 : `timescale 1ns / 1ps
 """
 
+
 def test():
     filelist = [codedir + 'delay.v']
     output = 'preprocess.out'
     include = None
     define = None
-    
+
     parser = VerilogCodeParser(filelist,
                                preprocess_include=include,
                                preprocess_define=define)
@@ -81,11 +81,12 @@ def test():
 
     for lineno, directive in directives:
         output.write('Line %d : %s' % (lineno, directive))
-    
+
     rslt = output.getvalue()
 
     print(rslt)
     assert(expected == rslt)
+
 
 if __name__ == '__main__':
     test()

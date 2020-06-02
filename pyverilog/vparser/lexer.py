@@ -30,7 +30,7 @@ class VerilogLexer(object):
         self.filename = ''
         self.error_func = error_func
         self.directives = []
-        self.default_nettype = 'wire'
+        self.default_nettype = None
 
     def build(self, **kwargs):
         self.lexer = lex(object=self, **kwargs)
@@ -94,7 +94,7 @@ class VerilogLexer(object):
         'LOR', 'LAND', 'LNOT',
         'LSHIFTA', 'RSHIFTA', 'LSHIFT', 'RSHIFT',
         'LT', 'GT', 'LE', 'GE', 'EQ', 'NE', 'EQL', 'NEL',
-        'COND',  # ?
+        'QUESTION',  # ?
         'EQUALS',
     )
 
@@ -103,7 +103,7 @@ class VerilogLexer(object):
         'OREQUALS', 'ANDEQUALS', 'XOREQUALS',
         'LSHIFTAEQUALS', 'RSHIFTAEQUALS', 'LSHIFTEQUALS', 'RSHIFTEQUALS',
         'INCREMENT', 'DECREMENT',
-        # 'CAST',  # casting_type'(expression), width'([01ZzXx])
+        # 'SQUOTE',  # casting_type'(expression), width'([01ZzXx])
     )
 
     operators = tuple(list(vh_operators) + list(sv_operators))
@@ -118,7 +118,7 @@ class VerilogLexer(object):
         'INTNUMBER_OCT', 'SIGNED_INTNUMBER_OCT',
         'INTNUMBER_BIN', 'SIGNED_INTNUMBER_BIN',
         'LPAREN', 'RPAREN', 'LBRACKET', 'RBRACKET', 'LBRACE', 'RBRACE',
-        'DELAY', 'DOLLER',
+        'SHARP', 'DOLLER',
     )
 
     skipped = (
@@ -186,7 +186,7 @@ class VerilogLexer(object):
     t_DIVIDE = r'/'
     t_MOD = r'%'
 
-    t_COND = r'\?'
+    t_QUESTION = r'\?'
     t_EQUALS = r'='
 
     t_PLUSEQUALS = r'\+='
@@ -206,7 +206,7 @@ class VerilogLexer(object):
     t_INCREMENT = r'\+\+'
     t_DECREMENT = r'--'
 
-    # t_CAST = r"'"
+    # t_SQUOTE = r"'"
 
     t_PLUSCOLON = r'\+:'
     t_MINUSCOLON = r'-:'
@@ -224,7 +224,7 @@ class VerilogLexer(object):
     t_LBRACE = r'\{'
     t_RBRACE = r'\}'
 
-    t_DELAY = r'\#'
+    t_SHARP = r'\#'
     t_DOLLER = r'\$'
 
     bin_number = '[0-9]*\'[bB][0-1xXzZ?][0-1xXzZ?_]*'

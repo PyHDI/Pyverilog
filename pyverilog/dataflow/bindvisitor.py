@@ -887,18 +887,18 @@ class BindVisitor(NodeVisitor):
         pdims = None
         if node.pdims is not None:
             pdims = []
-            for length in node.pdims.lengths:
-                l = self.makeDFTree(length.msb, scope)
-                r = self.makeDFTree(length.lsb, scope)
+            for dim in node.pdims.dims:
+                l = self.makeDFTree(dim.msb, scope)
+                r = self.makeDFTree(dim.lsb, scope)
                 pdims.append((l, r))
             pdims = tuple(pdims)
 
         udims = None
         if node.udims is not None:
             udims = []
-            for length in node.udims.lengths:
-                l = self.makeDFTree(length.msb, scope)
-                r = self.makeDFTree(length.lsb, scope)
+            for dim in node.udims.dims:
+                l = self.makeDFTree(dim.msb, scope)
+                r = self.makeDFTree(dim.lsb, scope)
                 udims.append((l, r))
             udims = tuple(udims)
 

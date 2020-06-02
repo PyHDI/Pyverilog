@@ -12,9 +12,6 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
-   ----
-   Code Generator from AST to Verilog HDL source code
 """
 
 from __future__ import absolute_import
@@ -168,6 +165,7 @@ class ASTCodeGenerator(ConvertVisitor):
         return rslt
 
     def visit_Port(self, node):
+        # for the old-style I/O port declaration
         filename = getfilename(node)
         template = self.get_template(filename)
         template_dict = {
@@ -189,9 +187,21 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_Length(self, node):
         filename = getfilename(node)
         template = self.get_template(filename)
+        msb = del_space(del_paren(self.visit(node.msb)))
+        lsb = del_space(del_paren(self.visit(node.lsb))) if node.lsb is not None else ''  # ???
         template_dict = {
-            'msb': del_space(del_paren(self.visit(node.msb))),
-            'lsb': del_space(del_paren(self.visit(node.lsb))),
+            'msb': msb,
+            'lsb': lsb,
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_Dims(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        dims = ''.join([self.visit(dim) for dim in node.dims])
+        template_dict = {
+            'dims': dims
         }
         rslt = template.render(template_dict)
         return rslt
@@ -202,24 +212,6 @@ class ASTCodeGenerator(ConvertVisitor):
         template_dict = {
             'name': escape(node.name),
             'scope': '' if node.scope is None else self.visit(node.scope),
-        }
-        rslt = template.render(template_dict)
-        return rslt
-
-    def visit_Value(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'value': node.value,
-        }
-        rslt = template.render(template_dict)
-        return rslt
-
-    def visit_Constant(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'value': node.value,
         }
         rslt = template.render(template_dict)
         return rslt
@@ -251,114 +243,135 @@ class ASTCodeGenerator(ConvertVisitor):
         rslt = template.render(template_dict)
         return rslt
 
-    def visit_Variable(self, node):
-        filename = getfilename(node)
+    def visit__Variable4State(self, node):
+        filename = '_variable4state.txt'
         template = self.get_template(filename)
         template_dict = {
+            'varname': node.node.__class__.__name__.lower(),
             'name': escape(node.name),
             'width': '' if node.width is None else self.visit(node.width),
             'signed': node.signed,
-            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
+            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+            'udims': '' if node.udims is None else self.visit(node.udims),
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit__Variable4State_no_width(self, node):
+        filename = '_variable4state_no_width.txt'
+        template = self.get_template(filename)
+        template_dict = {
+            'varname': node.node.__class__.__name__.lower(),
+            'name': escape(node.name),
+            'signed': node.signed,
+            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+            'udims': '' if node.udims is None else self.visit(node.udims),
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit__Variable2State(self, node):
+        filename = '_variable2state.txt'
+        template = self.get_template(filename)
+        template_dict = {
+            'varname': node.node.__class__.__name__.lower(),
+            'name': escape(node.name),
+            'width': '' if node.width is None else self.visit(node.width),
+            'signed': node.signed,
+            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+            'udims': '' if node.udims is None else self.visit(node.udims),
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit__Variable2State_no_width(self, node):
+        filename = '_variable4state_no_width.txt'
+        template = self.get_template(filename)
+        template_dict = {
+            'varname': node.node.__class__.__name__.lower(),
+            'name': escape(node.name),
+            'signed': node.signed,
+            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+            'udims': '' if node.udims is None else self.visit(node.udims),
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit__VariableReal(self, node):
+        filename = '_variablereal.txt'
+        template = self.get_template(filename)
+        template_dict = {
+            'varname': node.node.__class__.__name__.lower(),
+            'name': escape(node.name),
+            'signed': node.signed,
+            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+            'udims': '' if node.udims is None else self.visit(node.udims),
         }
         rslt = template.render(template_dict)
         return rslt
 
     def visit_Input(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'name': escape(node.name),
-            'width': '' if node.width is None else self.visit(node.width),
-            'signed': node.signed,
-            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
-        }
-        rslt = template.render(template_dict)
-        return rslt
+        return self.visit__Variable4State(node)
 
     def visit_Output(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'name': escape(node.name),
-            'width': '' if node.width is None else self.visit(node.width),
-            'signed': node.signed,
-            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
-        }
-        rslt = template.render(template_dict)
-        return rslt
+        return self.visit__Variable4State(node)
 
     def visit_Inout(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'name': escape(node.name),
-            'width': '' if node.width is None else self.visit(node.width),
-            'signed': node.signed,
-            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
-        }
-        rslt = template.render(template_dict)
-        return rslt
+        return self.visit__Variable4State(node)
 
     def visit_Tri(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'name': escape(node.name),
-            'width': '' if node.width is None else self.visit(node.width),
-            'signed': node.signed,
-            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
-        }
-        rslt = template.render(template_dict)
-        return rslt
+        return self.visit__Variable4State(node)
 
     def visit_Wire(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'name': escape(node.name),
-            'width': '' if node.width is None else self.visit(node.width),
-            'signed': node.signed,
-            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
-        }
-        rslt = template.render(template_dict)
-        return rslt
+        return self.visit__Variable4State(node)
 
     def visit_Reg(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'name': escape(node.name),
-            'width': '' if node.width is None else self.visit(node.width),
-            'signed': node.signed,
-            'dimensions': '' if node.dimensions is None else self.visit(node.dimensions),
-        }
-        rslt = template.render(template_dict)
-        return rslt
+        return self.visit__Variable4State(node)
 
     def visit_Integer(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'name': escape(node.name),
-            'signed': node.signed,
-        }
-        rslt = template.render(template_dict)
-        return rslt
+        return self.visit__Variable4State_no_width(node)
+
+    def visit_Time(self, node):
+        return self.visit__Variable4State_no_width(node)
 
     def visit_Real(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'name': escape(node.name),
-        }
-        rslt = template.render(template_dict)
-        return rslt
+        return self.visit__VariableReal(node)
 
-    def visit_Genvar(self, node):
+    def visit_RealTime(self, node):
+        return self.visit__VariableReal(node)
+
+    def visit_Logic(self, node):
+        return self.visit__Variable4State(node)
+
+    def visit_ShortInt(self, node):
+        return self.visit__Variable2State_no_width(node)
+
+    def visit_Int(self, node):
+        return self.visit__Variable2State_no_width(node)
+
+    def visit_LongInt(self, node):
+        return self.visit__Variable2State_no_width(node)
+
+    def visit_Byte(self, node):
+        return self.visit__Variable2State_no_width(node)
+
+    def visit_Bit(self, node):
+        return self.visit__Variable2State(node)
+
+    def visit_ShortReal(self, node):
+        return self.visit__VariableReal(node)
+
+    def visit_CustomVariable(self, node):
         filename = getfilename(node)
         template = self.get_template(filename)
         template_dict = {
+            'typename': escape(node.typename),
             'name': escape(node.name),
+            'modportname': escape(node.modportname),
+            'width': '' if node.width is None else self.visit(node.width),
+            'signed': node.signed,
+            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+            'udims': '' if node.udims is None else self.visit(node.udims),
         }
         rslt = template.render(template_dict)
         return rslt
@@ -372,7 +385,8 @@ class ASTCodeGenerator(ConvertVisitor):
             'name': escape(node.first.name),
             'width': '' if node.first.width is None else self.visit(node.first.width),
             'signed': node.first.signed or (node.second is not None and node.second.signed),
-            'dimensions': '' if node.first.dimensions is None else self.visit(node.first.dimensions)
+            'pdims': '' if node.first.pdims is None else self.visit(node.first.pdims),
+            'udims': '' if node.first.udims is None else self.visit(node.first.udims),
         }
         rslt = template.render(template_dict)
         return rslt
@@ -383,9 +397,12 @@ class ASTCodeGenerator(ConvertVisitor):
         value = self.visit(node.value)
         template_dict = {
             'name': escape(node.name),
-            'width': '' if node.width is None or (value.startswith('"') and value.endswith('"')) else self.visit(node.width),
+            'width': ('' if node.width is None or (value.startswith('"') and value.endswith('"')) else
+                      self.visit(node.width)),
             'value': value,
             'signed': node.signed,
+            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+            'udims': '' if node.udims is None else self.visit(node.udims),
         }
         rslt = template.render(template_dict)
         return rslt
@@ -396,12 +413,18 @@ class ASTCodeGenerator(ConvertVisitor):
         value = self.visit(node.value)
         template_dict = {
             'name': escape(node.name),
-            'width': '' if node.width is None or (value.startswith('"') and value.endswith('"')) else self.visit(node.width),
+            'width': ('' if node.width is None or (value.startswith('"') and value.endswith('"'))
+                      else self.visit(node.width)),
             'value': value,
             'signed': node.signed,
+            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+            'udims': '' if node.udims is None else self.visit(node.udims),
         }
         rslt = template.render(template_dict)
         return rslt
+
+    def visit_Supply(self, node):
+        return self.visit_Parameter(node)
 
     def visit_Decl(self, node):
         filename = getfilename(node)
@@ -424,15 +447,7 @@ class ASTCodeGenerator(ConvertVisitor):
         return rslt
 
     def visit_LConcat(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        items = [del_paren(self.visit(item)) for item in node.list]
-        template_dict = {
-            'items': items,
-            'len_items': len(items),
-        }
-        rslt = template.render(template_dict)
-        return rslt
+        return self.visit_LConcat(node)
 
     def visit_Repeat(self, node):
         filename = getfilename(node)
@@ -483,8 +498,8 @@ class ASTCodeGenerator(ConvertVisitor):
         rslt = template.render(template_dict)
         return rslt
 
-    def visit_Operator(self, node):
-        filename = getfilename(node)
+    def visit__BinaryOperator(self, node):
+        filename = '_binaryoperator.txt'
         template = self.get_template(filename)
         order = op2order(node.__class__.__name__)
         lorder = op2order(node.left.__class__.__name__)
@@ -493,8 +508,8 @@ class ASTCodeGenerator(ConvertVisitor):
         right = self.visit(node.right)
         if ((not isinstance(node.left, (Sll, Srl, Sra,
                                         LessThan, GreaterThan, LessEq, GreaterEq,
-                                        Eq, NotEq, Eql, NotEql))) and
-                (lorder is not None and lorder <= order)):
+                                        Eq, NotEq, Eql, NotEql)))
+                and (lorder is not None and lorder <= order)):
             left = del_paren(left)
         if ((not isinstance(node.right, (Sll, Srl, Sra,
                                          LessThan, GreaterThan, LessEq, GreaterEq,
@@ -509,8 +524,8 @@ class ASTCodeGenerator(ConvertVisitor):
         rslt = template.render(template_dict)
         return rslt
 
-    def visit_UnaryOperator(self, node):
-        filename = getfilename(node)
+    def visit__UnaryOperator(self, node):
+        filename = '_unaryoperator.txt'
         template = self.get_template(filename)
         right = self.visit(node.right)
         template_dict = {
@@ -521,103 +536,103 @@ class ASTCodeGenerator(ConvertVisitor):
         return rslt
 
     def visit_Uplus(self, node):
-        return self.visit_UnaryOperator(node)
+        return self.visit__UnaryOperator(node)
 
     def visit_Uminus(self, node):
-        return self.visit_UnaryOperator(node)
+        return self.visit__UnaryOperator(node)
 
     def visit_Ulnot(self, node):
-        return self.visit_UnaryOperator(node)
+        return self.visit__UnaryOperator(node)
 
     def visit_Unot(self, node):
-        return self.visit_UnaryOperator(node)
+        return self.visit__UnaryOperator(node)
 
     def visit_Uand(self, node):
-        return self.visit_UnaryOperator(node)
+        return self.visit__UnaryOperator(node)
 
     def visit_Unand(self, node):
-        return self.visit_UnaryOperator(node)
+        return self.visit__UnaryOperator(node)
 
     def visit_Uor(self, node):
-        return self.visit_UnaryOperator(node)
+        return self.visit__UnaryOperator(node)
 
     def visit_Unor(self, node):
-        return self.visit_UnaryOperator(node)
+        return self.visit__UnaryOperator(node)
 
     def visit_Uxor(self, node):
-        return self.visit_UnaryOperator(node)
+        return self.visit__UnaryOperator(node)
 
     def visit_Uxnor(self, node):
-        return self.visit_UnaryOperator(node)
+        return self.visit__UnaryOperator(node)
 
     def visit_Power(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Times(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Divide(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Mod(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Plus(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Minus(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Sll(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Srl(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Sra(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_LessThan(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_GreaterThan(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_LessEq(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_GreaterEq(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Eq(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_NotEq(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Eql(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_NotEql(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_And(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Xor(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Xnor(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Or(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Land(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Lor(self, node):
-        return self.visit_Operator(node)
+        return self.visit__BinaryOperator(node)
 
     def visit_Cond(self, node):
         filename = getfilename(node)
@@ -630,6 +645,29 @@ class ASTCodeGenerator(ConvertVisitor):
             'cond': del_paren(self.visit(node.cond)),
             'true_value': true_value,
             'false_value': false_value,
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_TypeCast(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        right = self.visit(node.right)
+        template_dict = {
+            'casting_type': node.casting_type,
+            'right': right,
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_WidthCast(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        width = self.visit(node.width)
+        right = self.visit(node.right)
+        template_dict = {
+            'width': width,
+            'right': right,
         }
         rslt = template.render(template_dict)
         return rslt
@@ -654,6 +692,15 @@ class ASTCodeGenerator(ConvertVisitor):
         }
         rslt = template.render(template_dict)
         return rslt
+
+    def visit_AlwaysFF(self, node):
+        return self.visit_Always(node)
+
+    def visit_AlwaysComb(self, node):
+        return self.visit_Always(node)
+
+    def visit_AlwaysLatch(self, node):
+        return self.visit_Always(node)
 
     def visit_SensList(self, node):
         filename = getfilename(node)
@@ -715,6 +762,79 @@ class ASTCodeGenerator(ConvertVisitor):
         rslt = indent_multiline_assign(rslt)
         return rslt
 
+    def visit__SubstitutionOperator(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        template_dict = {
+            'left': left,
+            'right': right,
+            'ldelay': '' if node.ldelay is None else self.visit(node.ldelay),
+            'rdelay': '' if node.rdelay is None else self.visit(node.rdelay),
+            'op': op2mark(node.__class__.__name__),
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_PlusEquals(self, node):
+        return self.visit__SubstitutionOperator(node)
+
+    def visit_MinusEquals(self, node):
+        return self.visit__SubstitutionOperator(node)
+
+    def visit_TimesEquals(self, node):
+        return self.visit__SubstitutionOperator(node)
+
+    def visit_DivideEquals(self, node):
+        return self.visit__SubstitutionOperator(node)
+
+    def visit_ModEquals(self, node):
+        return self.visit__SubstitutionOperator(node)
+
+    def visit_OrEquals(self, node):
+        return self.visit__SubstitutionOperator(node)
+
+    def visit_AndEquals(self, node):
+        return self.visit__SubstitutionOperator(node)
+
+    def visit_XorEquals(self, node):
+        return self.visit__SubstitutionOperator(node)
+
+    def visit_SlaEquals(self, node):
+        return self.visit__SubstitutionOperator(node)
+
+    def visit_SraEquals(self, node):
+        return self.visit__SubstitutionOperator(node)
+
+    def visit_SllEquals(self, node):
+        return self.visit__SubstitutionOperator(node)
+
+    def visit_SrlEquals(self, node):
+        return self.visit__SubstitutionOperator(node)
+
+    def visit_Increment(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        left = self.visit(node.left)
+        template_dict = {
+            'left': left,
+            'op': op2mark(node.__class__.__name__),
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_Decrement(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        left = self.visit(node.left)
+        template_dict = {
+            'left': left,
+            'op': op2mark(node.__class__.__name__),
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
     def visit_IfStatement(self, node):
         filename = getfilename(node)
         template = self.get_template(filename)
@@ -727,6 +847,9 @@ class ASTCodeGenerator(ConvertVisitor):
         }
         rslt = template.render(template_dict)
         return rslt
+
+    def visit_PriorityIf(self, node):
+        return self.visit_IfStatement(node)
 
     def visit_ForStatement(self, node):
         filename = getfilename(node)
@@ -761,14 +884,13 @@ class ASTCodeGenerator(ConvertVisitor):
         return rslt
 
     def visit_CasexStatement(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'comp': del_paren(self.visit(node.comp)),
-            'caselist': [self.indent(self.visit(case)) for case in node.caselist],
-        }
-        rslt = template.render(template_dict)
-        return rslt
+        return self.visit_CaseStatement(node)
+
+    def visit_CasezStatement(self, node):
+        return self.visit_CaseStatement(node)
+
+    def visit_UniqueCaseStatement(self, node):
+        return self.visit_CaseStatement(node)
 
     def visit_Case(self, node):
         filename = getfilename(node)
@@ -899,6 +1021,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'name': escape(node.name),
             'retwidth': self.visit(node.retwidth),
             'statement': statement,
+            'automatic': node.automatic,
         }
         rslt = template.render(template_dict)
         return rslt
@@ -922,6 +1045,7 @@ class ASTCodeGenerator(ConvertVisitor):
         template_dict = {
             'name': escape(node.name),
             'statement': statement,
+            'automatic': node.automatic,
         }
         rslt = template.render(template_dict)
         return rslt
@@ -943,6 +1067,15 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.get_template(filename)
         template_dict = {
             'items': [self.visit(item) for item in node.items]
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_Genvar(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        template_dict = {
+            'name': escape(node.name),
         }
         rslt = template.render(template_dict)
         return rslt
@@ -1022,6 +1155,90 @@ class ASTCodeGenerator(ConvertVisitor):
         template = self.get_template(filename)
         template_dict = {
             'statement': self.visit(node.statement),
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_Interface(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        paramlist = self.indent(self.visit(node.paramlist)) if node.paramlist is not None else ''
+        portlist = self.indent(self.visit(node.portlist)) if node.portlist is not None else ''
+        template_dict = {
+            'name': escape(node.name),
+            'paramlist': paramlist,
+            'portlist': portlist,
+            'items': [self.indent(self.visit(item)) for item in node.items] if node.items else (),
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_Modport(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        ports = [self.visit(port) for port in node.ports]
+        template_dict = {
+            'name': escape(node.name),
+            'ports': ports,
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_Struct(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        template_dict = {
+            'name': escape(node.name),
+            'items': [self.indent(self.visit(item)) for item in node.items] if node.items else (),
+            'packed': node.packed,
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_Union(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        template_dict = {
+            'name': escape(node.name),
+            'items': [self.indent(self.visit(item)) for item in node.items] if node.items else (),
+            'packed': node.packed,
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_Enum(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        enumlist = self.indent(self.visit(node.enumlist)) if node.enumlist is not None else ''
+        template_dict = {
+            'name': escape(node.name),
+            'enumlist': enumlist,
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_Enumlist(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        template_dict = {
+            'items': [self.indent(self.visit(item)) for item in node.items] if node.items else (),
+            'name': '' if node.name is None else escape(node.name),
+            'start': '' if node.start is None else escape(node.start),
+            'end': '' if node.end is None else escape(node.end),
+            'value': '' if node.value is None else escape(node.value),
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_TypeDef(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        template_dict = {
+            'name': escape(node.name),
+            'types': node.types,
+            'width': '' if node.width is None else self.visit(node.width),
+            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+            'udims': '' if node.udims is None else self.visit(node.udims),
         }
         rslt = template.render(template_dict)
         return rslt

@@ -44,7 +44,7 @@ class VerilogParser(object):
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIVIDE', 'MOD'),
         ('left', 'POWER'),
-        # ('left', 'CAST'),
+        # ('left', 'SQUOTE'),
         ('right', 'UMINUS', 'UPLUS', 'ULNOT', 'UNOT',
          'UAND', 'UNAND', 'UOR', 'UNOR', 'UXOR', 'UXNOR'),
         # -> Strong
@@ -101,7 +101,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_definition(self, p):
-        """definition : moduledef
+        """definition : module
         | interface
         | struct
         | union
@@ -114,267 +114,70 @@ class VerilogParser(object):
 
     # --------------------------------------------------------------------------
     def p_pragma_assign(self, p):
-        'pragma : LPAREN TIMES ID EQUALS expression TIMES RPAREN'
+        'pragma : LPAREN TIMES _id EQUALS expression TIMES RPAREN'
         p[0] = Pragma(PragmaEntry(p[3], p[5], lineno=p.lineno(1)),
                       lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_pragma(self, p):
-        'pragma : LPAREN TIMES ID TIMES RPAREN'
+        'pragma : LPAREN TIMES _id TIMES RPAREN'
         p[0] = Pragma(PragmaEntry(p[3], lineno=p.lineno(1)),
                       lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    def p_moduledef(self, p):
-        'moduledef : MODULE modulename paramlist portlist items ENDMODULE'
-        p[0] = ModuleDef(name=p[2], paramlist=p[3], portlist=p[4], items=p[5],
-                         default_nettype=self.get_default_nettype(), lineno=p.lineno(1))
+    def p_module(self, p):
+        'module : MODULE _id paramlist portlist items ENDMODULE'
+        p[0] = Module(name=p[2], paramlist=p[3], portlist=p[4], items=p[5],
+                      default_nettype=self.get_default_nettype(), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
         p[0].end_lineno = p.lineno(6)
 
-    def p_modulename(self, p):
-        'modulename : ID'
-        p[0] = p[1]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_modulename_or(self, p):
-        'modulename : SENS_OR'  # or primitive
-        p[0] = p[1]
-        p.set_lineno(0, p.lineno(1))
-
     def p_paramlist(self, p):
-        'paramlist : DELAY LPAREN params RPAREN'
-        p[0] = Paramlist(params=p[3], lineno=p.lineno(1))
+        'paramlist : SHARP LPAREN params RPAREN'
+        p[0] = p[3]
         p.set_lineno(0, p.lineno(1))
 
     def p_paramlist_empty(self, p):
         'paramlist : empty'
-        p[0] = Paramlist(params=())
+        p[0] = ()
 
     def p_params(self, p):
-        'params : params_begin param_end'
-        p[0] = p[1] + (p[2],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_params_begin(self, p):
-        'params_begin : params_begin param'
-        p[0] = p[1] + (p[2],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_params_begin_one(self, p):
-        'params_begin : param'
-        p[0] = (p[1],)
+        'params : params COMMA param'
+        p[0] = p[1] + (p[3],)
         p.set_lineno(0, p.lineno(1))
 
     def p_params_one(self, p):
-        'params : param_end'
+        'params : param'
         p[0] = (p[1],)
         p.set_lineno(0, p.lineno(1))
 
     def p_param(self, p):
-        'param : PARAMETER param_substitution_list COMMA'
-        paramlist = [Parameter(rname, rvalue, lineno=p.lineno(2))
-                     for rname, rvalue in p[2]]
+        'param : PARAMETER var_sigtype_or_empty sign_sigtype_or_empty width_or_empty param_substitution_list'
+        ptype = None if p[2] == () else p[2]
+        signed = False if p[3] == () else p[3]
+        width = None if p[4] == () else p[4]
+        paramlist = [Parameter(rname, rvalue, width, signed=signed, ptype=ptype, lineno=p.lineno(1))
+                     for rname, rvalue in p[5]]
         p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    def p_param_signed(self, p):
-        'param : PARAMETER SIGNED param_substitution_list COMMA'
-        paramlist = [Parameter(rname, rvalue, signed=True, lineno=p.lineno(2))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_unsigned(self, p):
-        'param : PARAMETER UNSIGNED param_substitution_list COMMA'
-        paramlist = [Parameter(rname, rvalue, signed=False, lineno=p.lineno(2))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_width(self, p):
-        'param : PARAMETER width param_substitution_list COMMA'
-        paramlist = [Parameter(rname, rvalue, p[2], lineno=p.lineno(3))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_signed_width(self, p):
-        'param : PARAMETER SIGNED width param_substitution_list COMMA'
-        paramlist = [Parameter(rname, rvalue, p[3], signed=True, lineno=p.lineno(3))
-                     for rname, rvalue in p[4]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_unsigned_width(self, p):
-        'param : PARAMETER UNSIGNED width param_substitution_list COMMA'
-        paramlist = [Parameter(rname, rvalue, p[3], signed=False, lineno=p.lineno(3))
-                     for rname, rvalue in p[4]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_integer(self, p):
-        'param : PARAMETER INTEGER param_substitution_list COMMA'
-        paramlist = [Parameter(rname, rvalue, lineno=p.lineno(3))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_end(self, p):
-        'param_end : PARAMETER param_substitution_list'
-        paramlist = [Parameter(rname, rvalue, lineno=p.lineno(2))
-                     for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_end_signed(self, p):
-        'param_end : PARAMETER SIGNED param_substitution_list'
-        paramlist = [Parameter(rname, rvalue, signed=True, lineno=p.lineno(2))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_end_unsigned(self, p):
-        'param_end : PARAMETER UNSIGNED param_substitution_list'
-        paramlist = [Parameter(rname, rvalue, signed=False, lineno=p.lineno(2))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_end_width(self, p):
-        'param_end : PARAMETER width param_substitution_list'
-        paramlist = [Parameter(rname, rvalue, p[2], lineno=p.lineno(3))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_end_signed_width(self, p):
-        'param_end : PARAMETER SIGNED width param_substitution_list'
-        paramlist = [Parameter(rname, rvalue, p[3], signed=True, lineno=p.lineno(3))
-                     for rname, rvalue in p[4]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_end_unsigned_width(self, p):
-        'param_end : PARAMETER UNSIGNED width param_substitution_list'
-        paramlist = [Parameter(rname, rvalue, p[3], signed=False, lineno=p.lineno(3))
-                     for rname, rvalue in p[4]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_end_integer(self, p):
-        'param_end : PARAMETER INTEGER param_substitution_list'
-        paramlist = [Parameter(rname, rvalue, lineno=p.lineno(3))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_portlist_io(self, p):
+    def p_portlist(self, p):
         'portlist : LPAREN ioports RPAREN SEMICOLON'
-        p[0] = Portlist(ports=p[2], lineno=p.lineno(1))
+        p[0] = p[2]
         p.set_lineno(0, p.lineno(1))
 
     def p_portlist_paren_empty(self, p):
         'portlist : LPAREN RPAREN SEMICOLON'
-        p[0] = Portlist(ports=(), lineno=p.lineno(1))
+        p[0] = ()
         p.set_lineno(0, p.lineno(1))
 
     def p_portlist_empty(self, p):
         'portlist : SEMICOLON'
-        p[0] = Portlist(ports=(), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_sigtypes(self, p):
-        'sigtypes : sigtypes_ID'
-        p[0] = p[1]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_sigtypes_io_var(self, p):
-        'sigtypes : io_sigtype var_sigtype sign_sigtypes'
-        p[0] = (p[1], p[2]) + p[3]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_sigtypes_io(self, p):
-        'sigtypes : io_sigtype sign_sigtypes'
-        p[0] = (p[1],) + p[2]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_sigtypes_var(self, p):
-        'sigtypes : var_sigtype sign_sigtypes'
-        p[0] = (p[1],) + p[2]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_sigtypes_custom(self, p):
-        'sigtypes : custom_sigtype'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_sigtypes_ID(self, p):
-        'sigtypes_ID : sigtypes custom_sigtype'
-        p[0] = p[1] + (p[2],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_sign_sigtypes(self, p):
-        'sign_sigtypes : sign_sigtype'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_sign_sigtypes_empty(self, p):
-        'sign_sigtypes : empty'
         p[0] = ()
-
-    def p_sigtype(self, p):
-        """sigtype : var_sigtype
-        | custom_sigtype
-        """
-        p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    def p_io_sigtype(self, p):
-        """io_sigtype : INPUT
-        | OUTPUT
-        | INOUT
-        """
-        p[0] = p[1]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_var_sigtype(self, p):
-        """var_sigtype : TRI
-        | REG
-        | WIRE
-        | LOGIC
-        | SUPPLY0
-        | SUPPLY1
-        """
-        p[0] = p[1]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_sign_sigtype(self, p):
-        """sign_sigtype : SIGNED
-        | UNSIGNED
-        """
-        p[0] = p[1]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_custom_sigtype(self, p):
-        'custom_sigtype : identifier'
-
-        if p[1].scope is not None:
-            if len(p[1].scope.labellist) > 1:
-                self._raise_error(p)
-
-            label = p[1].scope.labellist[0]
-            if label.loop is not None:
-                self._raise_error(p)
-
-            p[0] = (label.name, p[1].name)
-
-        else:
-            p[0] = p[1].name
-
-        p.set_lineno(0, p.lineno(1))
-
+    # --------------------------------------------------------------------------
     def p_ioports(self, p):
         'ioports : ioports COMMA ioport'
         if isinstance(p[1][0], Port) and not isinstance(p[3], Port):
@@ -403,7 +206,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_ioports_one(self, p):
-        'ioports : ioport_head'
+        'ioports : ioport'
         p[0] = (p[1],)
         p.set_lineno(0, p.lineno(1))
 
@@ -460,10 +263,60 @@ class VerilogParser(object):
                          pdims=pdims, udims=udims, lineno=lineno)
             sigtypes.remove('tri')
 
+        elif 'integer' in sigtypes:
+            second = Integer(name=name, signed=signed,
+                             pdims=pdims, udims=udims, lineno=lineno)
+            sigtypes.remove('integer')
+
+        elif 'time' in sigtypes:
+            second = Time(name=name, signed=signed,
+                          pdims=pdims, udims=udims, lineno=lineno)
+            sigtypes.remove('time')
+
+        elif 'real' in sigtypes:
+            second = Real(name=name, signed=signed,
+                          pdims=pdims, udims=udims, lineno=lineno)
+            sigtypes.remove('real')
+
+        elif 'realtime' in sigtypes:
+            second = RealTime(name=name, signed=signed,
+                              pdims=pdims, udims=udims, lineno=lineno)
+            sigtypes.remove('realtime')
+
         elif 'logic' in sigtypes:
             second = Logic(name=name, width=width, signed=signed,
                            pdims=pdims, udims=udims, lineno=lineno)
             sigtypes.remove('logic')
+
+        elif 'shortint' in sigtypes:
+            second = ShortInt(name=name, signed=signed,
+                              pdims=pdims, udims=udims, lineno=lineno)
+            sigtypes.remove('shortint')
+
+        elif 'int' in sigtypes:
+            second = Int(name=name, signed=signed,
+                         pdims=pdims, udims=udims, lineno=lineno)
+            sigtypes.remove('int')
+
+        elif 'longint' in sigtypes:
+            second = LongInt(name=name, signed=signed,
+                             pdims=pdims, udims=udims, lineno=lineno)
+            sigtypes.remove('longint')
+
+        elif 'byte' in sigtypes:
+            second = Byte(name=name, signed=signed,
+                          pdims=pdims, udims=udims, lineno=lineno)
+            sigtypes.remove('byte')
+
+        elif 'bit' in sigtypes:
+            second = Bit(name=name, width=width, signed=signed,
+                         pdims=pdims, udims=udims, lineno=lineno)
+            sigtypes.remove('bit')
+
+        elif 'shortreal' in sigtypes:
+            second = ShortReal(name=name, width=width, signed=signed,
+                               pdims=pdims, udims=udims, lineno=lineno)
+            sigtypes.remove('shortreal')
 
         if len(sigtypes) > 0:
             if isinstance(sigtypes[0], tuple):
@@ -525,14 +378,14 @@ class VerilogParser(object):
         if 'output' in sigtypes and 'tri' in sigtypes:
             self._raise_error(p)
 
-    def _separate_sigtypes_ID_allow_no_sigtypes(self, p, sigtypes):
+    def _separate_sigtypes_id_allow_no_sigtypes(self, p, sigtypes):
         ID = sigtypes[-1]
         sigtypes = sigtypes[:-1]
         if ID in self.lexer.reserved:
             self._raise_error(p)
         return sigtypes, ID
 
-    def _separate_sigtypes_ID(self, p, sigtypes):
+    def _separate_sigtypes_id(self, p, sigtypes):
         ID = sigtypes[-1]
         sigtypes = sigtypes[:-1]
         if len(sigtypes) == 0:
@@ -542,53 +395,28 @@ class VerilogParser(object):
         return sigtypes, ID
 
     def p_ioport(self, p):
-        'ioport : sigtypes_ID'
-        sigtypes, ID = self._separate_sigtypes_ID(p, p[1])
+        'ioport : sigtypes_id'
+        sigtypes, ID = self._separate_sigtypes_id(p, p[1])
         p[0] = self.create_ioport(p, sigtypes, ID, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    def p_ioport_oldstyle(self, p):
-        'ioport : ID'
-        p[0] = Port(name=p[1], width=None,
-                    pdims=None, udims=None, type=None, lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
     def p_ioport_pdims_width(self, p):
-        'ioport : sigtypes pdims_width ID'
+        'ioport : sigtypes pdims_width _id'
         pdims, width = p[2]
         p[0] = self.create_ioport(p, p[1], p[3], width=width, pdims=pdims, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_ioport_pdims_width_udims(self, p):
-        'ioport : sigtypes pdims_width ID udims'
+        'ioport : sigtypes pdims_width _id udims'
         pdims, width = p[2]
         p[0] = self.create_ioport(p, p[1], p[3], width=width,
                                   pdims=pdims, udims=p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    def p_ioport_head(self, p):
-        'ioport_head : sigtypes_ID'
-        sigtypes, ID = self._separate_sigtypes_ID(p, p[1])
-        p[0] = self.create_ioport(p, sigtypes, ID, lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_ioport_head_oldstyle(self, p):
-        'ioport_head : ID'
+    def p_ioport_oldstyle(self, p):
+        'ioport : _id'
         p[0] = Port(name=p[1], width=None,
                     pdims=None, udims=None, type=None, lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_ioport_head_pdims_width(self, p):
-        'ioport_head : sigtypes pdims_width ID'
-        pdims, width = p[2]
-        p[0] = self.create_ioport(p, p[1], p[3], width=width, pdims=pdims, lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_ioport_head_pdims_width_udims(self, p):
-        'ioport_head : sigtypes pdims_width ID udims'
-        pdims, width = p[2]
-        p[0] = self.create_ioport(p, p[1], p[3], width=width,
-                                  pdims=pdims, udims=p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_width_vector(self, p):
@@ -596,15 +424,19 @@ class VerilogParser(object):
         p[0] = Width(p[2], p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    def p_length_vector(self, p):
-        'length : LBRACKET expression COLON expression RBRACKET'
-        p[0] = Length(p[2], p[4], lineno=p.lineno(1))
+    def p_width(self, p):
+        'width : LBRACKET expression RBRACKET'
+        p[0] = Width(p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    def p_length(self, p):
-        'length : LBRACKET expression RBRACKET'
-        p[0] = Length(p[2], lineno=p.lineno(1))
+    def p_width_or_empty(self, p):
+        'width_or_empty : width'
+        p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
+
+    def p_width_or_empty_empty(self, p):
+        'width_or_empty : empty'
+        p[0] = ()
 
     def _separate_pdims_width(self, p, dims):
         if dims[-1].msb is None:
@@ -627,18 +459,36 @@ class VerilogParser(object):
         p[0] = (pdims, width)
         p.set_lineno(0, p.lineno(1))
 
+    def p_pdims_width_or_empty(self, p):
+        'pdims_width_or_empty : pdims_width'
+        p[0] = p[1]
+        p.set_lineno(0, p.lineno(1))
+
+    def p_pdims_width_or_empty_empty(self, p):
+        'pdims_width_or_empty : empty'
+        p[0] = ()
+
     def p_udims(self, p):
         'udims : dims'
         p[0] = Dims(p[1], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
+    def p_udims_or_empty(self, p):
+        'udims_or_empty : udims'
+        p[0] = p[1]
+        p.set_lineno(0, p.lineno(1))
+
+    def p_udims_or_empty_empty(self, p):
+        'udims_or_empty : empty'
+        p[0] = ()
+
     def p_dims(self, p):
-        'dims : dims length'
+        'dims : dims width'
         p[0] = p[1] + (p[2],)
         p.set_lineno(0, p.lineno(1))
 
     def p_dims_one(self, p):
-        'dims : length'
+        'dims : width'
         p[0] = (p[1],)
         p.set_lineno(0, p.lineno(1))
 
@@ -665,20 +515,10 @@ class VerilogParser(object):
 
     def p_standard_item(self, p):
         """standard_item : decl
-        | integerdecl
-        | timedecl
-        | realdecl
-        | realtimedecl
-        | shortintdecl
-        | intdecl
-        | longintdecl
-        | bytedecl
-        | bitdecl
-        | shortrealdecl
+        | parameter_decl
+        | localparam_decl
         | declassign
         | typedef
-        | parameterdecl
-        | localparamdecl
         | genvardecl
         | assignment
         | always
@@ -686,7 +526,6 @@ class VerilogParser(object):
         | always_comb
         | always_latch
         | initial
-        | instance
         | function
         | task
         | pragma
@@ -694,7 +533,7 @@ class VerilogParser(object):
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
-    # Signal Decl
+    # --------------------------------------------------------------------------
     def create_decl(self, p, sigtypes, name, width=None, pdims=None, udims=None, lineno=0):
         signed = False
         decls = []
@@ -747,10 +586,25 @@ class VerilogParser(object):
                              signed=signed, lineno=lineno, pdims=pdims, udims=udims))
             sigtypes.remove('tri')
 
-        elif 'logic' in sigtypes:
-            decls.append(Logic(name=name, width=width,
-                               signed=signed, lineno=lineno, pdims=pdims, udims=udims))
-            sigtypes.remove('logic')
+        elif 'integer' in sigtypes:
+            decls.append(Integer(name=name,
+                                 signed=signed, lineno=lineno, pdims=pdims, udims=udims))
+            sigtypes.remove('integer')
+
+        elif 'time' in sigtypes:
+            decls.append(Time(name=name,
+                              signed=signed, lineno=lineno, pdims=pdims, udims=udims))
+            sigtypes.remove('time')
+
+        elif 'real' in sigtypes:
+            decls.append(Real(name=name,
+                              signed=signed, lineno=lineno, pdims=pdims, udims=udims))
+            sigtypes.remove('real')
+
+        elif 'realtime' in sigtypes:
+            decls.append(RealTime(name=name,
+                                  signed=signed, lineno=lineno, pdims=pdims, udims=udims))
+            sigtypes.remove('realtime')
 
         elif 'supply0' in sigtypes:
             decls.append(Supply(name=name, value=IntConst('0', lineno=lineno),
@@ -761,6 +615,41 @@ class VerilogParser(object):
             decls.append(Supply(name=name, value=IntConst('1', lineno=lineno),
                                 width=width, signed=signed, lineno=lineno))
             sigtypes.remove('supply1')
+
+        elif 'logic' in sigtypes:
+            decls.append(Logic(name=name, width=width,
+                               signed=signed, lineno=lineno, pdims=pdims, udims=udims))
+            sigtypes.remove('logic')
+
+        elif 'shortint' in sigtypes:
+            decls.append(ShortInt(name=name,
+                                  signed=signed, lineno=lineno, pdims=pdims, udims=udims))
+            sigtypes.remove('shortint')
+
+        elif 'int' in sigtypes:
+            decls.append(Int(name=name,
+                             signed=signed, lineno=lineno, pdims=pdims, udims=udims))
+            sigtypes.remove('int')
+
+        elif 'longloint' in sigtypes:
+            decls.append(LongInt(name=name,
+                                 signed=signed, lineno=lineno, pdims=pdims, udims=udims))
+            sigtypes.remove('longint')
+
+        elif 'byte' in sigtypes:
+            decls.append(Byte(name=name,
+                              signed=signed, lineno=lineno, pdims=pdims, udims=udims))
+            sigtypes.remove('byte')
+
+        elif 'bit' in sigtypes:
+            decls.append(Bit(name=name,
+                             signed=signed, lineno=lineno, pdims=pdims, udims=udims))
+            sigtypes.remove('bit')
+
+        elif 'shortreal' in sigtypes:
+            decls.append(ShortReal(name=name,
+                                   signed=signed, lineno=lineno, pdims=pdims, udims=udims))
+            sigtypes.remove('shortreal')
 
         if len(sigtypes) > 0:
             if isinstance(sigtypes[0], tuple):
@@ -825,19 +714,9 @@ class VerilogParser(object):
         if 'output' in sigtypes and 'tri' in sigtypes:
             self._raise_error(p)
 
-    def p_decl_one_ID(self, p):
-        'decl : ID ID SEMICOLON'
-        sigtypes = (p[1],)
-        ID = p[2]
-        decllist = []
-        decllist.extend(self.create_decl(p, sigtypes, ID, pdims=None, udims=None,
-                                         lineno=p.lineno(1)))
-        p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
     def p_decl_one(self, p):
-        'decl : sigtypes_ID SEMICOLON'
-        sigtypes, ID = self._separate_sigtypes_ID(p, p[1])
+        'decl : sigtypes_id SEMICOLON'
+        sigtypes, ID = self._separate_sigtypes_id(p, p[1])
         decllist = []
         decllist.extend(self.create_decl(p, sigtypes, ID, pdims=None, udims=None,
                                          lineno=p.lineno(1)))
@@ -845,8 +724,8 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_decl_one_udims(self, p):
-        'decl : sigtypes_ID udims SEMICOLON'
-        sigtypes, ID = self._separate_sigtypes_ID(p, p[1])
+        'decl : sigtypes_id udims SEMICOLON'
+        sigtypes, ID = self._separate_sigtypes_id(p, p[1])
         decllist = []
         decllist.extend(self.create_decl(p, sigtypes, ID, pdims=None, udims=p[2],
                                          lineno=p.lineno(1)))
@@ -854,8 +733,8 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_decl_list(self, p):
-        'decl : sigtypes_ID COMMA declnamelist SEMICOLON'
-        sigtypes, ID = self._separate_sigtypes_ID(p, p[1])
+        'decl : sigtypes_id COMMA declnamelist SEMICOLON'
+        sigtypes, ID = self._separate_sigtypes_id(p, p[1])
         decllist = []
         decllist.extend(self.create_decl(p, sigtypes, ID, pdims=None, udims=None,
                                          lineno=p.lineno(1)))
@@ -866,8 +745,8 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_decl_udims_list(self, p):
-        'decl : sigtypes_ID udims COMMA declnamelist SEMICOLON'
-        sigtypes, ID = self._separate_sigtypes_ID(p, p[1])
+        'decl : sigtypes_id udims COMMA declnamelist SEMICOLON'
+        sigtypes, ID = self._separate_sigtypes_id(p, p[1])
         decllist = []
         decllist.extend(self.create_decl(p, sigtypes, ID, pdims=None, udims=p[2],
                                          lineno=p.lineno(1)))
@@ -898,16 +777,193 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_declname(self, p):
-        'declname : ID'
+        'declname : _id'
         p[0] = (p[1], None)
         p.set_lineno(0, p.lineno(1))
 
     def p_declname_udims(self, p):
-        'declname : ID udims'
+        'declname : _id udims'
         p[0] = (p[1], p[2])
         p.set_lineno(0, p.lineno(1))
 
-    # Decl and Assign
+    # --------------------------------------------------------------------------
+    def p_decl_instance_no_param(self, p):
+        'decl : sigtypes_id udims_or_empty instance_port_list comma_instance_body_list_or_empty SEMICOLON'
+        sigtypes, ID = self._separate_sigtypes_id(p, p[1])
+        if len(sigtypes) > 1:
+            self._raise_error(p)
+        modulename = sigtypes[0]
+        instance_param_list = ()
+        udims, length = (None, None) if p[2] == () else (p[2].dims[:-1], p[2].dims[-1])
+        if isinstance(udims, tuple) and len(udims) > 0:
+            self._raise_error(p)
+        instance_body = (ID, p[3], length)
+        instance_body_list = (instance_body,) + p[4]
+        instancelist = []
+        for instance_name, instance_port_list, instance_array in instance_body_list:
+            instancelist.append(Instance(modulename, instance_name, instance_port_list,
+                                         instance_param_list, instance_array, lineno=p.lineno(1)))
+        p[0] = Decl(tuple(instancelist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_decl_instance(self, p):
+        'decl : _id instance_param_list instance_body_list SEMICOLON'
+        instance_param_list = () if p[2] == () else p[2]
+        instancelist = []
+        for instance_name, instance_port_list, instance_array in p[3]:
+            instancelist.append(Instance(p[1], instance_name, instance_port_list,
+                                         instance_param_list, instance_array, lineno=p.lineno(1)))
+        p[0] = Decl(tuple(instancelist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_decl_instance_noname(self, p):
+        'decl : _id instance_body_list_noname SEMICOLON'
+        instancelist = []
+        for instance_name, instance_port_list, instance_array in p[2]:
+            instancelist.append(Instance(p[1], instance_name, instance_port_list,
+                                         (), instance_array, lineno=p.lineno(1)))
+        p[0] = Decl(tuple(instancelist), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_comma_instance_body_list_or_empty(self, p):
+        'comma_instance_body_list_or_empty : COMMA instance_body_list'
+        p[0] = p[2]
+        p.set_lineno(0, p.lineno(1))
+
+    def p_comma_instance_body_list_or_empty_empty(self, p):
+        'comma_instance_body_list_or_empty : empty'
+        p[0] = ()
+
+    def p_instance_body_list(self, p):
+        'instance_body_list : instance_body_list COMMA instance_body'
+        p[0] = p[1] + (p[3],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_body_list_one(self, p):
+        'instance_body_list : instance_body'
+        p[0] = (p[1],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_body(self, p):
+        'instance_body : _id width_or_empty instance_port_list'
+        length = None if p[2] == () else p[2]
+        p[0] = (p[1], p[3], length)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_body_list_noname(self, p):
+        'instance_body_list_noname : instance_body_list_noname COMMA instance_body_noname'
+        p[0] = p[1] + (p[3],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_body_list_one_noname(self, p):
+        'instance_body_list_noname : instance_body_noname'
+        p[0] = (p[1],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_body_noname(self, p):
+        'instance_body_noname : instance_port_list'
+        p[0] = ('', p[1], None)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_param_list(self, p):
+        'instance_param_list : SHARP LPAREN instance_params RPAREN'
+        p[0] = p[3]
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_param_list_noname(self, p):
+        'instance_param_list : SHARP LPAREN instance_params_noname RPAREN'
+        p[0] = p[3]
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_params(self, p):
+        'instance_params : instance_params COMMA instance_param'
+        p[0] = p[1] + (p[3],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_params_one(self, p):
+        'instance_params : instance_param'
+        p[0] = (p[1],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_params_empty(self, p):
+        'instance_params : empty'
+        p[0] = ()
+
+    def p_instance_param_exp(self, p):
+        'instance_param : DOT _id LPAREN expression RPAREN'
+        p[0] = ParamArg(p[2], p[4], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_params_noname(self, p):
+        'instance_params_noname : instance_params_noname COMMA instance_param_noname'
+        p[0] = p[1] + (p[3],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_params_noname_one(self, p):
+        'instance_params_noname : instance_param_noname'
+        p[0] = (p[1],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_param_noname_exp(self, p):
+        'instance_param_noname : expression'
+        p[0] = ParamArg(None, p[1], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_port_list(self, p):
+        'instance_port_list : LPAREN instance_ports RPAREN'
+        p[0] = p[2]
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_port_list_noname(self, p):
+        'instance_port_list : LPAREN instance_ports_noname RPAREN'
+        p[0] = p[2]
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_port_list_empty(self, p):
+        'instance_port_list : empty'
+        p[0] = ()
+
+    def p_instance_ports(self, p):
+        'instance_ports : instance_ports COMMA instance_port'
+        p[0] = p[1] + (p[3],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_ports_one(self, p):
+        'instance_ports : instance_port'
+        p[0] = (p[1],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_port(self, p):
+        'instance_port : DOT _id LPAREN expression RPAREN'
+        p[0] = PortArg(p[2], p[4], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_port_empty(self, p):
+        'instance_port : DOT _id LPAREN RPAREN'
+        p[0] = PortArg(p[2], None, lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_ports_noname(self, p):
+        'instance_ports_noname : instance_ports_noname COMMA instance_port_noname'
+        p[0] = p[1] + (p[3],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_ports_noname_one(self, p):
+        'instance_ports_noname : instance_port_noname'
+        p[0] = (p[1],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_port_noname(self, p):
+        'instance_port_noname : expression'
+        p[0] = PortArg(None, p[1], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_instance_ports_noname_empty(self, p):
+        'instance_ports_noname : empty'
+        p[0] = ()
+        p.set_lineno(0, p.lineno(1))
+
+    # --------------------------------------------------------------------------
     def create_declassign(self, p, sigtypes, name, assign, width=None, pdims=None, udims=None, lineno=0):
         signed = False
         decls = []
@@ -1022,53 +1078,13 @@ class VerilogParser(object):
             self._raise_error(p)
 
     def p_declassign(self, p):
-        'declassign : sigtypes_ID declassign_right SEMICOLON'
-        sigtypes, ID = self._separate_sigtypes_ID(p, p[1])
-        left = Lvalue(Identifier(ID, lineno=p.lineno(1)), lineno=p.lineno(1))
-        right = p[2][0]
-        ldelay = None
-        rdelay = p[2][1]
-        assign = Assign(left, right, ldelay, rdelay, lineno=p.lineno(1))
-        decllist = self.create_declassign(p, sigtypes, ID, assign, lineno=p.lineno(1))
-        p[0] = Decl(decllist, lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_declassign_delay(self, p):
-        'declassign : sigtypes delay ID declassign_right SEMICOLON'
-        sigtypes = p[1]
-        ID = p[3]
-        left = Lvalue(Identifier(ID, lineno=p.lineno(1)), lineno=p.lineno(1))
-        right = p[4][0]
-        ldelay = p[2]
-        rdelay = p[4][1]
-        assign = Assign(left, right, ldelay, rdelay, lineno=p.lineno(1))
-        decllist = self.create_declassign(p, sigtypes, ID, assign, lineno=p.lineno(1))
-        p[0] = Decl(decllist, lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_declassign_pdims_width(self, p):
-        'declassign : sigtypes pdims_width ID declassign_right SEMICOLON'
-        pdims, width = p[2]
-        sigtypes = p[1]
-        ID = p[3]
-        left = Lvalue(Identifier(ID, lineno=p.lineno(1)), lineno=p.lineno(1))
-        right = p[4][0]
-        ldelay = None
-        rdelay = p[4][1]
-        assign = Assign(left, right, ldelay, rdelay, lineno=p.lineno(1))
-        decllist = self.create_declassign(p, sigtypes, ID, assign,
-                                          width=width, pdims=pdims, lineno=p.lineno(1))
-        p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_declassign_delay_pdims_width(self, p):
-        'declassign : sigtypes pdims_width delay ID declassign_right SEMICOLON'
-        pdims, width = p[2]
+        'declassign : sigtypes pdims_width_or_empty delay_or_empty _id declassign_right SEMICOLON'
+        pdims, width = (None, None) if p[2] == () else p[2]
         sigtypes = p[1]
         ID = p[4]
         left = Lvalue(Identifier(ID, lineno=p.lineno(1)), lineno=p.lineno(1))
         right = p[5][0]
-        ldelay = p[4]
+        ldelay = None if p[4] == () else p[4]
         rdelay = p[5][1]
         assign = Assign(left, right, ldelay, rdelay, lineno=p.lineno(1))
         decllist = self.create_declassign(p, sigtypes, ID, assign,
@@ -1086,558 +1102,19 @@ class VerilogParser(object):
         p[0] = (p[3], p[2])  # value, delay
         p.set_lineno(0, p.lineno(3))
 
-    # Integer
-    def p_integerdecl(self, p):
-        'integerdecl : INTEGER integernamelist SEMICOLON'
-        intlist = [Integer(rname,
-                           signed=True,
-                           value=rvalue,
-                           lineno=p.lineno(2)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_integerdecl_signed(self, p):
-        'integerdecl : INTEGER SIGNED integernamelist SEMICOLON'
-        intlist = [Integer(rname,
-                           signed=True,
-                           value=rvalue,
-                           lineno=p.lineno(3)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_integerdecl_unsigned(self, p):
-        'integerdecl : INTEGER UNSIGNED integernamelist SEMICOLON'
-        intlist = [Integer(rname,
-                           signed=False,
-                           value=rvalue,
-                           lineno=p.lineno(3)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_integernamelist(self, p):
-        'integernamelist : integernamelist COMMA integername'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_integernamelist_one(self, p):
-        'integernamelist : integername'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_integername_init(self, p):
-        'integername : ID EQUALS rvalue'
-        p[0] = (p[1], p[3])
-        p.set_lineno(0, p.lineno(1))
-
-    def p_integername(self, p):
-        'integername : ID'
-        p[0] = (p[1], None)
-        p.set_lineno(0, p.lineno(1))
-
-    # Time
-    def p_timedecl(self, p):
-        'timedecl : TIME timenamelist SEMICOLON'
-        intlist = [Time(rname,
-                        signed=True,
-                        value=rvalue,
-                        lineno=p.lineno(2)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_timedecl_signed(self, p):
-        'timedecl : TIME SIGNED timenamelist SEMICOLON'
-        intlist = [Time(rname,
-                        signed=True,
-                        value=rvalue,
-                        lineno=p.lineno(3)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_timedecl_unsigned(self, p):
-        'timedecl : TIME UNSIGNED timenamelist SEMICOLON'
-        intlist = [Time(rname,
-                        signed=False,
-                        value=rvalue,
-                        lineno=p.lineno(3)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_timenamelist(self, p):
-        'timenamelist : timenamelist COMMA timename'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_timenamelist_one(self, p):
-        'timenamelist : timename'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_timename_init(self, p):
-        'timename : ID EQUALS rvalue'
-        p[0] = (p[1], p[3])
-        p.set_lineno(0, p.lineno(1))
-
-    def p_timename(self, p):
-        'timename : ID'
-        p[0] = (p[1], None)
-        p.set_lineno(0, p.lineno(1))
-
-    # Real
-    def p_realdecl(self, p):
-        'realdecl : REAL realnamelist SEMICOLON'
-        intlist = [Real(rname,
-                        value=rvalue,
-                        lineno=p.lineno(2)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_realnamelist(self, p):
-        'realnamelist : realnamelist COMMA realname'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_realnamelist_one(self, p):
-        'realnamelist : realname'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_realname_init(self, p):
-        'realname : ID EQUALS rvalue'
-        p[0] = (p[1], p[3])
-        p.set_lineno(0, p.lineno(1))
-
-    def p_realname(self, p):
-        'realname : ID'
-        p[0] = (p[1], None)
-        p.set_lineno(0, p.lineno(1))
-
-    # Realtime
-    def p_realtimedecl(self, p):
-        'realtimedecl : REALTIME realtimenamelist SEMICOLON'
-        intlist = [RealTime(rname,
-                            value=rvalue,
-                            lineno=p.lineno(2)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_realtimenamelist(self, p):
-        'realtimenamelist : realtimenamelist COMMA realtimename'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_realtimenamelist_one(self, p):
-        'realtimenamelist : realtimename'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_realtimename_init(self, p):
-        'realtimename : ID EQUALS rvalue'
-        p[0] = (p[1], p[3])
-        p.set_lineno(0, p.lineno(1))
-
-    def p_realtimename(self, p):
-        'realtimename : ID'
-        p[0] = (p[1], None)
-        p.set_lineno(0, p.lineno(1))
-
-    # ShortInt
-    def p_shortintdecl(self, p):
-        'shortintdecl : SHORTINT shortintnamelist SEMICOLON'
-        intlist = [ShortInt(rname,
-                            signed=True,
-                            value=rvalue,
-                            lineno=p.lineno(2)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_shortintdecl_signed(self, p):
-        'shortintdecl : SHORTINT SIGNED shortintnamelist SEMICOLON'
-        intlist = [ShortInt(rname,
-                            signed=True,
-                            value=rvalue,
-                            lineno=p.lineno(3)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_shortintdecl_unsigned(self, p):
-        'shortintdecl : SHORTINT UNSIGNED shortintnamelist SEMICOLON'
-        intlist = [ShortInt(rname,
-                            signed=False,
-                            value=rvalue,
-                            lineno=p.lineno(3)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_shortintnamelist(self, p):
-        'shortintnamelist : shortintnamelist COMMA shortintname'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_shortintnamelist_one(self, p):
-        'shortintnamelist : shortintname'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_shortintname_init(self, p):
-        'shortintname : ID EQUALS rvalue'
-        p[0] = (p[1], p[3])
-        p.set_lineno(0, p.lineno(1))
-
-    def p_shortintname(self, p):
-        'shortintname : ID'
-        p[0] = (p[1], None)
-        p.set_lineno(0, p.lineno(1))
-
-    # Int
-    def p_intdecl(self, p):
-        'intdecl : INT intnamelist SEMICOLON'
-        intlist = [Int(rname,
-                       signed=True,
-                       value=rvalue,
-                       lineno=p.lineno(2)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_intdecl_signed(self, p):
-        'intdecl : INT SIGNED intnamelist SEMICOLON'
-        intlist = [Int(rname,
-                       signed=True,
-                       value=rvalue,
-                       lineno=p.lineno(3)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_intdecl_unsigned(self, p):
-        'intdecl : INT UNSIGNED intnamelist SEMICOLON'
-        intlist = [Int(rname,
-                       signed=False,
-                       value=rvalue,
-                       lineno=p.lineno(3)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_intnamelist(self, p):
-        'intnamelist : intnamelist COMMA intname'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_intnamelist_one(self, p):
-        'intnamelist : intname'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_intname_init(self, p):
-        'intname : ID EQUALS rvalue'
-        p[0] = (p[1], p[3])
-        p.set_lineno(0, p.lineno(1))
-
-    def p_intname(self, p):
-        'intname : ID'
-        p[0] = (p[1], None)
-        p.set_lineno(0, p.lineno(1))
-
-    # LongInt
-    def p_longintdecl(self, p):
-        'longintdecl : LONGINT longintnamelist SEMICOLON'
-        intlist = [LongInt(rname,
-                           signed=True,
-                           value=rvalue,
-                           lineno=p.lineno(2)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_longintdecl_signed(self, p):
-        'longintdecl : LONGINT SIGNED longintnamelist SEMICOLON'
-        intlist = [LongInt(rname,
-                           signed=True,
-                           value=rvalue,
-                           lineno=p.lineno(3)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_longintdecl_unsigned(self, p):
-        'longintdecl : LONGINT UNSIGNED longintnamelist SEMICOLON'
-        intlist = [LongInt(rname,
-                           signed=False,
-                           value=rvalue,
-                           lineno=p.lineno(3)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_longintnamelist(self, p):
-        'longintnamelist : longintnamelist COMMA longintname'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_longintnamelist_one(self, p):
-        'longintnamelist : longintname'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_longintname_init(self, p):
-        'longintname : ID EQUALS rvalue'
-        p[0] = (p[1], p[3])
-        p.set_lineno(0, p.lineno(1))
-
-    def p_longintname(self, p):
-        'longintname : ID'
-        p[0] = (p[1], None)
-        p.set_lineno(0, p.lineno(1))
-
-    # Byte
-    def p_bytedecl(self, p):
-        'bytedecl : BYTE bytenamelist SEMICOLON'
-        bytelist = [Byte(rname,
-                         signed=True,
-                         value=rvalue,
-                         lineno=p.lineno(2)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(bytelist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bytedecl_signed(self, p):
-        'bytedecl : BYTE SIGNED bytenamelist SEMICOLON'
-        bytelist = [Byte(rname,
-                         signed=True,
-                         value=rvalue,
-                         lineno=p.lineno(3)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(bytelist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bytedecl_unsigned(self, p):
-        'bytedecl : BYTE UNSIGNED bytenamelist SEMICOLON'
-        bytelist = [Byte(rname,
-                         signed=False,
-                         value=rvalue,
-                         lineno=p.lineno(3)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(bytelist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bytenamelist(self, p):
-        'bytenamelist : bytenamelist COMMA bytename'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bytenamelist_one(self, p):
-        'bytenamelist : bytename'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bytename_init(self, p):
-        'bytename : ID EQUALS rvalue'
-        p[0] = (p[1], p[3])
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bytename(self, p):
-        'bytename : ID'
-        p[0] = (p[1], None)
-        p.set_lineno(0, p.lineno(1))
-
-    # Bit
-    def p_bitdecl(self, p):
-        'bitdecl : BIT bitnamelist SEMICOLON'
-        bitlist = [Bit(rname,
-                       width=None,
-                       signed=True,
-                       value=rvalue,
-                       lineno=p.lineno(2)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(bitlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bitdecl_width(self, p):
-        'bitdecl : BIT width bitnamelist SEMICOLON'
-        bitlist = [Bit(rname,
-                       width=p[2],
-                       signed=True,
-                       value=rvalue,
-                       lineno=p.lineno(3)) for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(bitlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bitdecl_signed(self, p):
-        'bitdecl : BIT SIGNED bitnamelist SEMICOLON'
-        bitlist = [Bit(rname,
-                       width=None,
-                       signed=True,
-                       value=rvalue,
-                       lineno=p.lineno(3)) for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(bitlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bitdecl_signed_width(self, p):
-        'bitdecl : BIT SIGNED width bitnamelist SEMICOLON'
-        bitlist = [Bit(rname,
-                       width=p[3],
-                       signed=True,
-                       value=rvalue,
-                       lineno=p.lineno(4)) for rname, rvalue in p[4]]
-        p[0] = Decl(tuple(bitlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bitdecl_unsigned(self, p):
-        'bitdecl : BIT UNSIGNED bitnamelist SEMICOLON'
-        bitlist = [Bit(rname,
-                       width=None,
-                       signed=False,
-                       value=rvalue,
-                       lineno=p.lineno(3)) for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(bitlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bitdecl_unsigned_width(self, p):
-        'bitdecl : BIT UNSIGNED width bitnamelist SEMICOLON'
-        bitlist = [Bit(rname,
-                       width=p[3],
-                       signed=False,
-                       value=rvalue,
-                       lineno=p.lineno(4)) for rname, rvalue in p[4]]
-        p[0] = Decl(tuple(bitlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bitnamelist(self, p):
-        'bitnamelist : bitnamelist COMMA bitname'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bitnamelist_one(self, p):
-        'bitnamelist : bitname'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bitname_init(self, p):
-        'bitname : ID EQUALS rvalue'
-        p[0] = (p[1], p[3])
-        p.set_lineno(0, p.lineno(1))
-
-    def p_bitname(self, p):
-        'bitname : ID'
-        p[0] = (p[1], None)
-        p.set_lineno(0, p.lineno(1))
-
-    # Shortreal
-    def p_shortrealdecl(self, p):
-        'shortrealdecl : SHORTREAL shortrealnamelist SEMICOLON'
-        intlist = [ShortReal(rname,
-                             value=rvalue,
-                             lineno=p.lineno(2)) for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(intlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_shortrealnamelist(self, p):
-        'shortrealnamelist : shortrealnamelist COMMA shortrealname'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_shortrealnamelist_one(self, p):
-        'shortrealnamelist : shortrealname'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_shortrealname_init(self, p):
-        'shortrealname : ID EQUALS rvalue'
-        p[0] = (p[1], p[3])
-        p.set_lineno(0, p.lineno(1))
-
-    def p_shortrealname(self, p):
-        'shortrealname : ID'
-        p[0] = (p[1], None)
-        p.set_lineno(0, p.lineno(1))
-
-    # Parameter
-    def p_parameterdecl(self, p):
-        'parameterdecl : PARAMETER param_substitution_list SEMICOLON'
-        paramlist = [Parameter(rname, rvalue, lineno=p.lineno(2))
-                     for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_parameterdecl_signed(self, p):
-        'parameterdecl : PARAMETER SIGNED param_substitution_list SEMICOLON'
-        paramlist = [Parameter(rname, rvalue, signed=True, lineno=p.lineno(2))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_parameterdecl_unsigned(self, p):
-        'parameterdecl : PARAMETER UNSIGNED param_substitution_list SEMICOLON'
-        paramlist = [Parameter(rname, rvalue, signed=False, lineno=p.lineno(2))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_parameterdecl_width(self, p):
-        'parameterdecl : PARAMETER width param_substitution_list SEMICOLON'
-        paramlist = [Parameter(rname, rvalue, p[2], lineno=p.lineno(3))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_parameterdecl_signed_width(self, p):
-        'parameterdecl : PARAMETER SIGNED width param_substitution_list SEMICOLON'
-        paramlist = [Parameter(rname, rvalue, p[3], signed=True, lineno=p.lineno(3))
-                     for rname, rvalue in p[4]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_parameterdecl_unsigned_width(self, p):
-        'parameterdecl : PARAMETER UNSIGNED width param_substitution_list SEMICOLON'
-        paramlist = [Parameter(rname, rvalue, p[3], signed=False, lineno=p.lineno(3))
-                     for rname, rvalue in p[4]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_parameterdecl_integer(self, p):
-        'parameterdecl : PARAMETER INTEGER param_substitution_list SEMICOLON'
-        paramlist = [Parameter(rname, rvalue, lineno=p.lineno(3))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_localparamdecl(self, p):
-        'localparamdecl : LOCALPARAM param_substitution_list SEMICOLON'
-        paramlist = [Localparam(rname, rvalue, lineno=p.lineno(2))
-                     for rname, rvalue in p[2]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_localparamdecl_signed(self, p):
-        'localparamdecl : LOCALPARAM SIGNED param_substitution_list SEMICOLON'
-        paramlist = [Localparam(rname, rvalue, signed=True, lineno=p.lineno(2))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_localparamdecl_unsigned(self, p):
-        'localparamdecl : LOCALPARAM UNSIGNED param_substitution_list SEMICOLON'
-        paramlist = [Localparam(rname, rvalue, signed=False, lineno=p.lineno(2))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_localparamdecl_width(self, p):
-        'localparamdecl : LOCALPARAM width param_substitution_list SEMICOLON'
-        paramlist = [Localparam(rname, rvalue, p[2], lineno=p.lineno(3))
-                     for rname, rvalue in p[3]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_localparamdecl_signed_width(self, p):
-        'localparamdecl : LOCALPARAM SIGNED width param_substitution_list SEMICOLON'
-        paramlist = [Localparam(rname, rvalue, p[3], signed=True, lineno=p.lineno(3))
-                     for rname, rvalue in p[4]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_localparamdecl_unsigned_width(self, p):
-        'localparamdecl : LOCALPARAM UNSIGNED width param_substitution_list SEMICOLON'
-        paramlist = [Localparam(rname, rvalue, p[3], signed=False, lineno=p.lineno(3))
-                     for rname, rvalue in p[4]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_localparamdecl_integer(self, p):
-        'localparamdecl : LOCALPARAM INTEGER param_substitution_list SEMICOLON'
-        paramlist = [Localparam(rname, rvalue, lineno=p.lineno(3))
-                     for rname, rvalue in p[3]]
+    # --------------------------------------------------------------------------
+    def p_parameter_decl(self, p):
+        'parameter_decl : param SEMICOLON'
+        p[0] = p[1]
+        p.set_lineno(0, p.lineno(1))
+
+    def p_localparam_decl(self, p):
+        'localparam_decl : LOCALPARAM var_sigtype_or_empty sign_sigtype_or_empty width_or_empty param_substitution_list SEMICOLON'
+        ptype = None if p[2] == () else p[2]
+        signed = False if p[3] == () else p[3]
+        width = None if p[4] == () else p[4]
+        paramlist = [Localparam(rname, rvalue, width, signed=signed, ptype=ptype, lineno=p.lineno(1))
+                     for rname, rvalue in p[5]]
         p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -1652,108 +1129,133 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_param_substitution(self, p):
-        'param_substitution : ID EQUALS rvalue'
+        'param_substitution : _id EQUALS rvalue'
         p[0] = (p[1], p[3])
         p.set_lineno(0, p.lineno(1))
 
-    def p_assignment(self, p):
-        'assignment : ASSIGN lvalue EQUALS rvalue SEMICOLON'
-        p[0] = Assign(p[2], p[4], None, None, lineno=p.lineno(1))
+    # --------------------------------------------------------------------------
+    def p_sigtypes_io_var(self, p):
+        'sigtypes : io_sigtype var_sigtype sign_sigtype_or_empty'
+        p[0] = (p[1], p[2]) + p[3]
         p.set_lineno(0, p.lineno(1))
 
-    def p_assignment_nodelay_delay(self, p):
-        'assignment : ASSIGN lvalue EQUALS delay rvalue SEMICOLON'
-        p[0] = Assign(p[2], p[5], None, p[4], lineno=p.lineno(1))
+    def p_sigtypes_io(self, p):
+        'sigtypes : io_sigtype sign_sigtype_or_empty'
+        p[0] = (p[1],) + p[2]
         p.set_lineno(0, p.lineno(1))
 
-    def p_assignment_delay_nodelay(self, p):
-        'assignment : ASSIGN delay lvalue EQUALS rvalue SEMICOLON'
-        p[0] = Assign(p[3], p[5], p[2], None, lineno=p.lineno(1))
+    def p_sigtypes_var(self, p):
+        'sigtypes : var_sigtype sign_sigtype_or_empty'
+        p[0] = (p[1],) + p[2]
         p.set_lineno(0, p.lineno(1))
 
-    def p_assignment_delay_delay(self, p):
-        'assignment : ASSIGN delay lvalue EQUALS delay rvalue SEMICOLON'
-        p[0] = Assign(p[3], p[6], p[2], p[5], lineno=p.lineno(1))
+    def p_sigtypes_custom(self, p):
+        'sigtypes : custom_sigtype'
+        p[0] = (p[1],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_io_sigtype(self, p):
+        """io_sigtype : INPUT
+        | OUTPUT
+        | INOUT
+        """
+        p[0] = p[1]
+        p.set_lineno(0, p.lineno(1))
+
+    def p_var_sigtype(self, p):
+        """var_sigtype : TRI
+        | REG
+        | WIRE
+        | INTEGER
+        | TIME
+        | REAL
+        | REALTIME
+        | SUPPLY0
+        | SUPPLY1
+        | LOGIC
+        | SHORTINT
+        | INT
+        | LONGINT
+        | BYTE
+        | BIT
+        | SHORTREAL
+        """
+        p[0] = p[1]
+        p.set_lineno(0, p.lineno(1))
+
+    def p_var_sigtype_or_empty(self, p):
+        'var_sigtype_or_empty : var_sigtype'
+        p[0] = (p[1],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_var_sigtype_or_empty_empty(self, p):
+        'var_sigtype_or_empty : empty'
+        p[0] = ()
+
+    def p_sign_sigtype(self, p):
+        """sign_sigtype : SIGNED
+        | UNSIGNED
+        """
+        p[0] = p[1]
+        p.set_lineno(0, p.lineno(1))
+
+    def p_sign_sigtype_or_empty(self, p):
+        'sign_sigtype_or_empty : sign_sigtype'
+        p[0] = (p[1],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_sign_sigtype_or_empty_empty(self, p):
+        'sign_sigtype_or_empty : empty'
+        p[0] = ()
+
+    def p_custom_sigtype(self, p):
+        'custom_sigtype : identifier'
+        if p[1].scope is not None:
+            if len(p[1].scope) > 1:
+                self._raise_error(p)
+            if p[1].scope[0].loop is not None:
+                self._raise_error(p)
+            p[0] = (p[1].scope[0].name, p[1].name)
+        else:
+            p[0] = p[1].name
+        p.set_lineno(0, p.lineno(1))
+
+    def p_sigtypes_id(self, p):
+        'sigtypes_id : sigtypes _id'
+        p[0] = p[1] + (p[2],)
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    def p_lpartselect_lpointer(self, p):
-        'lpartselect : pointer LBRACKET expression COLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], p[5], lineno=p.lineno(1))
+    def p_assignment(self, p):
+        'assignment : ASSIGN delay_or_empty lvalue EQUALS delay_or_empty rvalue SEMICOLON'
+        ldelay = None if p[2] == () else p[2]
+        rdelay = None if p[5] == () else p[5]
+        p[0] = Assign(p[3], p[6], ldelay, rdelay, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    def p_lpartselect_lpointer_plus(self, p):
-        'lpartselect : pointer LBRACKET expression PLUSCOLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], Plus(p[3], p[5]), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_lpartselect_lpointer_minus(self, p):
-        'lpartselect : pointer LBRACKET expression MINUSCOLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], Minus(p[3], p[5]), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_lpartselect(self, p):
-        'lpartselect : identifier LBRACKET expression COLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], p[5], lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_lpartselect_plus(self, p):
-        'lpartselect : identifier LBRACKET expression PLUSCOLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], Plus(p[3], p[5]), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_lpartselect_minus(self, p):
-        'lpartselect : identifier LBRACKET expression MINUSCOLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], Minus(p[3], p[5]), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
+    # --------------------------------------------------------------------------
     def p_lpointer(self, p):
         'lpointer : pointer'
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
+    def p_lpartselect(self, p):
+        'lpartselect : partselect'
+        p[0] = p[1]
+        p.set_lineno(0, p.lineno(1))
+
     def p_lconcat(self, p):
-        'lconcat : LBRACE lconcatlist RBRACE'
-        p[0] = LConcat(p[2], lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_lconcatlist(self, p):
-        'lconcatlist : lconcatlist COMMA lconcat_one'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_lconcatlist_one(self, p):
-        'lconcatlist : lconcat_one'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_lconcat_one_identifier(self, p):
-        'lconcat_one : identifier'
+        'lconcat : concat'
         p[0] = p[1]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_lconcat_one_lpartselect(self, p):
-        'lconcat_one : lpartselect'
-        p[0] = p[1]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_lconcat_one_lpointer(self, p):
-        'lconcat_one : lpointer'
-        p[0] = p[1]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_lconcat_one_lconcat(self, p):
-        'lconcat_one : lconcat'
-        p[0] = p[1]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_lvalue_partselect(self, p):
-        'lvalue : lpartselect'
-        p[0] = Lvalue(p[1], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_lvalue_pointer(self, p):
         'lvalue : lpointer'
+        p[0] = Lvalue(p[1], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_lvalue_partselect(self, p):
+        'lvalue : lpartselect'
         p[0] = Lvalue(p[1], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -1967,7 +1469,7 @@ class VerilogParser(object):
     # --------------------------------------------------------------------------
     # Level 12
     def p_expression_cond(self, p):
-        'expression : expression COND expression COLON expression'
+        'expression : expression QUESTION expression COLON expression'
         p[0] = Cond(p[1], p[3], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -2045,14 +1547,12 @@ class VerilogParser(object):
 
     def p_partselect_plus(self, p):
         'partselect : identifier LBRACKET expression PLUSCOLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], Plus(
-            p[3], p[5], lineno=p.lineno(1)), lineno=p.lineno(1))
+        p[0] = Partselect(p[1], p[3], Plus(p[3], p[5], lineno=p.lineno(1)), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_partselect_minus(self, p):
         'partselect : identifier LBRACKET expression MINUSCOLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], Minus(
-            p[3], p[5], lineno=p.lineno(1)), lineno=p.lineno(1))
+        p[0] = Partselect(p[1], p[3], Minus(p[3], p[5], lineno=p.lineno(1)), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_partselect_pointer(self, p):
@@ -2062,14 +1562,12 @@ class VerilogParser(object):
 
     def p_partselect_pointer_plus(self, p):
         'partselect : pointer LBRACKET expression PLUSCOLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], Plus(
-            p[3], p[5], lineno=p.lineno(1)), lineno=p.lineno(1))
+        p[0] = Partselect(p[1], p[3], Plus(p[3], p[5], lineno=p.lineno(1)), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_partselect_pointer_minus(self, p):
         'partselect : pointer LBRACKET expression MINUSCOLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], Minus(
-            p[3], p[5], lineno=p.lineno(1)), lineno=p.lineno(1))
+        p[0] = Partselect(p[1], p[3], Minus(p[3], p[5], lineno=p.lineno(1)), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_pointer(self, p):
@@ -2263,6 +1761,7 @@ class VerilogParser(object):
         | parallelblock
         | blocking_substitution
         | nonblocking_substitution
+        | substitution_operator
         | single_statement
         """
         p[0] = p[1]
@@ -2280,138 +1779,135 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_blocking_substitution_base(self, p):
-        'blocking_substitution_base : lvalue EQUALS rvalue'
-        p[0] = BlockingSubstitution(p[1], p[3], None, None, lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(2))
+        'blocking_substitution_base : lvalue EQUALS delay_or_empty rvalue'
+        ldelay = None
+        rdelay = None if p[3] == () else p[3]
+        p[0] = BlockingSubstitution(p[1], p[4], ldelay, rdelay, lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
 
-    def p_blocking_substitution_base_nodelay_delay(self, p):
-        'blocking_substitution_base : lvalue EQUALS delay rvalue'
-        p[0] = BlockingSubstitution(p[1], p[4], None, p[3], lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(2))
-
-    def p_blocking_substitution_base_delay_nodelay(self, p):
-        'blocking_substitution_base : delay lvalue EQUALS rvalue'
-        p[0] = BlockingSubstitution(p[2], p[4], p[1], None, lineno=p.lineno(2))
-        p.set_lineno(0, p.lineno(2))
-
-    def p_blocking_substitution_base_delay_delay(self, p):
-        'blocking_substitution_base : delay lvalue EQUALS delay rvalue'
-        p[0] = BlockingSubstitution(p[2], p[5], p[1], p[4], lineno=p.lineno(2))
+    def p_blocking_substitution_base_ldelay(self, p):
+        'blocking_substitution_base : delay lvalue EQUALS delay_or_empty rvalue'
+        ldelay = p[1]
+        rdelay = None if p[4] == () else p[4]
+        p[0] = BlockingSubstitution(p[2], p[5], ldelay, rdelay, lineno=p.lineno(2))
         p.set_lineno(0, p.lineno(2))
 
     def p_nonblocking_substitution(self, p):
-        'nonblocking_substitution : lvalue LE rvalue SEMICOLON'
-        p[0] = NonblockingSubstitution(p[1], p[3], None, None, lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(2))
+        'nonblocking_substitution : lvalue LE delay_or_empty rvalue SEMICOLON'
+        ldelay = None
+        rdelay = None if p[3] == () else p[3]
+        p[0] = NonblockingSubstitution(p[1], p[4], ldelay, rdelay, lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
 
-    def p_nonblocking_substitution_nodelay_delay(self, p):
-        'nonblocking_substitution : lvalue LE delay rvalue SEMICOLON'
-        p[0] = NonblockingSubstitution(p[1], p[4], None, p[3], lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(2))
-
-    def p_nonblocking_substitution_delay_nodelay(self, p):
-        'nonblocking_substitution : delay lvalue LE rvalue SEMICOLON'
-        p[0] = NonblockingSubstitution(p[2], p[4], p[1], None, lineno=p.lineno(2))
-        p.set_lineno(0, p.lineno(2))
-
-    def p_nonblocking_substitution_delay_delay(self, p):
-        'nonblocking_substitution : delay lvalue LE delay rvalue SEMICOLON'
-        p[0] = NonblockingSubstitution(p[2], p[5], p[1], p[4], lineno=p.lineno(2))
+    def p_nonblocking_substitution_ldelay(self, p):
+        'nonblocking_substitution : delay lvalue LE delay_or_empty rvalue SEMICOLON'
+        ldelay = p[1]
+        rdelay = None if p[4] == () else p[4]
+        p[0] = NonblockingSubstitution(p[2], p[5], ldelay, rdelay, lineno=p.lineno(2))
         p.set_lineno(0, p.lineno(2))
 
     # --------------------------------------------------------------------------
     def p_substitution_operator_plusequals(self, p):
-        'substitution_operator : lvalue PLUSEQUALS rvalue'
+        'substitution_operator : lvalue PLUSEQUALS rvalue SEMICOLON'
         p[0] = PlusEquals(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_substitution_operator_minusequals(self, p):
-        'substitution_operator : lvalue MINUSEQUALS rvalue'
+        'substitution_operator : lvalue MINUSEQUALS rvalue SEMICOLON'
         p[0] = MinusEquals(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_substitution_operator_timesequals(self, p):
-        'substitution_operator : lvalue TIMESEQUALS rvalue'
+        'substitution_operator : lvalue TIMESEQUALS rvalue SEMICOLON'
         p[0] = TimesEquals(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_substitution_operator_divideequals(self, p):
-        'substitution_operator : lvalue DIVIDEEQUALS rvalue'
+        'substitution_operator : lvalue DIVIDEEQUALS rvalue SEMICOLON'
         p[0] = DivideEquals(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_substitution_operator_modequals(self, p):
-        'substitution_operator : lvalue MODEQUALS rvalue'
+        'substitution_operator : lvalue MODEQUALS rvalue SEMICOLON'
         p[0] = ModEquals(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_substitution_operator_orequals(self, p):
-        'substitution_operator : lvalue OREQUALS rvalue'
+        'substitution_operator : lvalue OREQUALS rvalue SEMICOLON'
         p[0] = OrEquals(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_substitution_operator_andequals(self, p):
-        'substitution_operator : lvalue ANDEQUALS rvalue'
+        'substitution_operator : lvalue ANDEQUALS rvalue SEMICOLON'
         p[0] = AndEquals(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_substitution_operator_xorequals(self, p):
-        'substitution_operator : lvalue XOREQUALS rvalue'
+        'substitution_operator : lvalue XOREQUALS rvalue SEMICOLON'
         p[0] = XorEquals(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_substitution_operator_slaequals(self, p):
-        'substitution_operator : lvalue LSHIFTAEQUALS rvalue'
+        'substitution_operator : lvalue LSHIFTAEQUALS rvalue SEMICOLON'
         p[0] = SlaEquals(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_substitution_operator_sraequals(self, p):
-        'substitution_operator : lvalue RSHIFTAEQUALS rvalue'
+        'substitution_operator : lvalue RSHIFTAEQUALS rvalue SEMICOLON'
         p[0] = SraEquals(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_substitution_operator_sllequals(self, p):
-        'substitution_operator : lvalue LSHIFTEQUALS rvalue'
+        'substitution_operator : lvalue LSHIFTEQUALS rvalue SEMICOLON'
         p[0] = SllEquals(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_substitution_operator_srlequals(self, p):
-        'substitution_operator : lvalue RSHIFTEQUALS rvalue'
+        'substitution_operator : lvalue RSHIFTEQUALS rvalue SEMICOLON'
         p[0] = SrlEquals(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_substitution_operator_increment(self, p):
-        'substitution_operator : lvalue INCREMENT'
+        'substitution_operator : lvalue INCREMENT SEMICOLON'
         p[0] = Increment(p[1], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_substitution_operator_decrement(self, p):
-        'substitution_operator : lvalue DECREMENT'
+        'substitution_operator : lvalue DECREMENT SEMICOLON'
         p[0] = Decrement(p[1], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
     def p_delay(self, p):
-        'delay : DELAY LPAREN expression RPAREN'
+        'delay : SHARP LPAREN expression RPAREN'
         p[0] = DelayStatement(p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_delay_identifier(self, p):
-        'delay : DELAY identifier'
+        'delay : SHARP identifier'
         p[0] = DelayStatement(p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_delay_intnumber(self, p):
-        'delay : DELAY intnumber'
+        'delay : SHARP intnumber'
         p[0] = DelayStatement(
             IntConst(p[2], lineno=p.lineno(1)), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_delay_floatnumber(self, p):
-        'delay : DELAY floatnumber'
+        'delay : SHARP floatnumber'
         p[0] = DelayStatement(FloatConst(
             p[2], lineno=p.lineno(1)), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+
+    def p_delay_or_empty(self, p):
+        'delay_or_empty : delay'
+        p[0] = p[1]
+        p.set_lineno(0, p.lineno(1))
+
+    def p_delay_or_empty_empty(self, p):
+        'delay_or_empty : empty'
+        p[0] = ()
 
     # --------------------------------------------------------------------------
     def p_block(self, p):
@@ -2441,12 +1937,12 @@ class VerilogParser(object):
 
     # --------------------------------------------------------------------------
     def p_namedblock(self, p):
-        'namedblock : BEGIN COLON ID namedblock_statements END'
+        'namedblock : BEGIN COLON _id namedblock_statements END'
         p[0] = Block(p[4], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_namedblock_empty(self, p):
-        'namedblock : BEGIN COLON ID END'
+        'namedblock : BEGIN COLON _id END'
         p[0] = Block((), p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -2463,17 +1959,8 @@ class VerilogParser(object):
     def p_namedblock_statement(self, p):
         """namedblock_statement : basic_statement
         | decl
-        | timedecl
-        | realdecl
-        | realtimedecl
-        | shortintdecl
-        | intdecl
-        | longintdecl
-        | bytedecl
-        | bitdecl
-        | shortrealdecl
-        | parameterdecl
-        | localparamdecl
+        | parameter_decl
+        | localparam_decl
         """
         if isinstance(p[1], Decl):
             for r in p[1].list:
@@ -2684,192 +2171,6 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    def p_instance_noparameterlist(self, p):
-        'instance : ID instance_bodylist SEMICOLON'
-        instancelist = []
-        for instance_name, instance_ports, instance_array in p[2]:
-            instancelist.append(Instance(p[1], instance_name, instance_ports,
-                                         (), instance_array, lineno=p.lineno(1)))
-        p[0] = InstanceList(p[1], (), tuple(instancelist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_or_noparameterlist(self, p):
-        'instance : SENS_OR instance_bodylist SEMICOLON'
-        instancelist = []
-        for instance_name, instance_ports, instance_array in p[2]:
-            instancelist.append(Instance(p[1], instance_name, instance_ports,
-                                         (), instance_array, lineno=p.lineno(1)))
-        p[0] = InstanceList(p[1], (), tuple(instancelist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance(self, p):
-        'instance : ID parameterlist instance_bodylist SEMICOLON'
-        instancelist = []
-        for instance_name, instance_ports, instance_array in p[3]:
-            instancelist.append(Instance(p[1], instance_name, instance_ports,
-                                         p[2], instance_array, lineno=p.lineno(1)))
-        p[0] = InstanceList(p[1], p[2], tuple(instancelist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_or(self, p):
-        'instance : SENS_OR parameterlist instance_bodylist SEMICOLON'
-        instancelist = []
-        for instance_name, instance_ports, instance_array in p[3]:
-            instancelist.append(Instance(p[1], instance_name, instance_ports,
-                                         p[2], instance_array, lineno=p.lineno(1)))
-        p[0] = InstanceList(p[1], p[2], tuple(instancelist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_noname(self, p):
-        'instance : ID instance_bodylist_noname SEMICOLON'
-        instancelist = []
-        for instance_name, instance_ports, instance_array in p[2]:
-            instancelist.append(Instance(p[1], instance_name, instance_ports,
-                                         (), instance_array, lineno=p.lineno(1)))
-        p[0] = InstanceList(p[1], (), tuple(instancelist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_or_noname(self, p):
-        'instance : SENS_OR instance_bodylist_noname SEMICOLON'
-        instancelist = []
-        for instance_name, instance_ports, instance_array in p[2]:
-            instancelist.append(Instance(p[1], instance_name, instance_ports,
-                                         (), instance_array, lineno=p.lineno(1)))
-        p[0] = InstanceList(p[1], (), tuple(instancelist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_bodylist(self, p):
-        'instance_bodylist : instance_bodylist COMMA instance_body'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_bodylist_one(self, p):
-        'instance_bodylist : instance_body'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_body(self, p):
-        'instance_body : ID LPAREN instance_ports RPAREN'
-        p[0] = (p[1], p[3], None)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_body_array(self, p):
-        'instance_body : ID width LPAREN instance_ports RPAREN'
-        p[0] = (p[1], p[4], p[2])
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_bodylist_noname(self, p):
-        'instance_bodylist_noname : instance_bodylist_noname COMMA instance_body_noname'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_bodylist_one_noname(self, p):
-        'instance_bodylist_noname : instance_body_noname'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_body_noname(self, p):
-        'instance_body_noname : LPAREN instance_ports RPAREN'
-        p[0] = ('', p[2], None)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_parameterlist(self, p):
-        'parameterlist : DELAY LPAREN param_args RPAREN'
-        p[0] = p[3]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_parameterlist_noname(self, p):
-        'parameterlist : DELAY LPAREN param_args_noname RPAREN'
-        p[0] = p[3]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_args_noname(self, p):
-        'param_args_noname : param_args_noname COMMA param_arg_noname'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_args_noname_one(self, p):
-        'param_args_noname : param_arg_noname'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_args(self, p):
-        'param_args : param_args COMMA param_arg'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_args_one(self, p):
-        'param_args : param_arg'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_args_empty(self, p):
-        'param_args : empty'
-        p[0] = ()
-
-    def p_param_arg_noname_exp(self, p):
-        'param_arg_noname : expression'
-        p[0] = ParamArg(None, p[1], lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_param_arg_exp(self, p):
-        'param_arg : DOT ID LPAREN expression RPAREN'
-        p[0] = ParamArg(p[2], p[4], lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_ports(self, p):
-        """instance_ports : instance_ports_list
-        | instance_ports_arg
-        """
-        p[0] = p[1]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_ports_list(self, p):
-        'instance_ports_list : instance_ports_list COMMA instance_port_list'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_ports_list_one(self, p):
-        'instance_ports_list : instance_port_list'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_ports_list_empty(self, p):
-        'instance_ports_list : empty'
-        p[0] = ()
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_port_list(self, p):
-        'instance_port_list : expression'
-        p[0] = PortArg(None, p[1], lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_ports_arg(self, p):
-        'instance_ports_arg : instance_ports_arg COMMA instance_port_arg'
-        p[0] = p[1] + (p[3],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_ports_arg_one(self, p):
-        'instance_ports_arg : instance_port_arg'
-        p[0] = (p[1],)
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_port_arg(self, p):
-        'instance_port_arg : DOT ID LPAREN identifier RPAREN'
-        p[0] = PortArg(p[2], p[4], lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_port_arg_exp(self, p):
-        'instance_port_arg : DOT ID LPAREN expression RPAREN'
-        p[0] = PortArg(p[2], p[4], lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_instance_port_arg_none(self, p):
-        'instance_port_arg : DOT ID LPAREN RPAREN'
-        p[0] = PortArg(p[2], None, lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    # --------------------------------------------------------------------------
     def p_genvardecl(self, p):
         'genvardecl : GENVAR genvarlist SEMICOLON'
         p[0] = Decl(p[2], lineno=p.lineno(1))
@@ -2886,7 +2187,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_genvar(self, p):
-        'genvar : ID'
+        'genvar : _id'
         p[0] = Genvar(name=p[1],
                       width=Width(msb=IntConst('31', lineno=p.lineno(1)),
                                   lsb=IntConst('0', lineno=p.lineno(1)),
@@ -2899,11 +2200,6 @@ class VerilogParser(object):
         p[0] = GenerateStatement(p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    def p_generate_items_empty(self, p):
-        'generate_items : empty'
-        p[0] = ()
-        p.set_lineno(0, p.lineno(1))
-
     def p_generate_items(self, p):
         'generate_items : generate_items generate_item'
         p[0] = p[1] + (p[2],)
@@ -2912,6 +2208,11 @@ class VerilogParser(object):
     def p_generate_items_one(self, p):
         'generate_items : generate_item'
         p[0] = (p[1],)
+        p.set_lineno(0, p.lineno(1))
+
+    def p_generate_items_empty(self, p):
+        'generate_items : empty'
+        p[0] = ()
         p.set_lineno(0, p.lineno(1))
 
     def p_generate_item(self, p):
@@ -2928,7 +2229,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_generate_named_block(self, p):
-        'generate_block : BEGIN COLON ID generate_items END'
+        'generate_block : BEGIN COLON _id generate_items END'
         p[0] = Block(p[4], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -2970,22 +2271,12 @@ class VerilogParser(object):
 
     # --------------------------------------------------------------------------
     def p_systemcall_noargs(self, p):
-        'systemcall : DOLLER ID'
+        'systemcall : DOLLER _id'
         p[0] = SystemCall(p[2], (), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_systemcall(self, p):
-        'systemcall : DOLLER ID LPAREN sysargs RPAREN'
-        p[0] = SystemCall(p[2], p[4], lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_systemcall_signed(self, p):  # for $signed system task
-        'systemcall : DOLLER SIGNED LPAREN sysargs RPAREN'
-        p[0] = SystemCall(p[2], p[4], lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_systemcall_unsigned(self, p):  # for $unsigned system task
-        'systemcall : DOLLER UNSIGNED LPAREN sysargs RPAREN'
+        'systemcall : DOLLER _id LPAREN sysargs RPAREN'
         p[0] = SystemCall(p[2], p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -3010,26 +2301,14 @@ class VerilogParser(object):
 
     # --------------------------------------------------------------------------
     def p_function(self, p):
-        'function : FUNCTION width ID SEMICOLON function_statement ENDFUNCTION'
-        p[0] = Function(p[3], p[2], p[5], lineno=p.lineno(1))
+        'function : FUNCTION width_or_empty _id SEMICOLON function_statement ENDFUNCTION'
+        retwidth = None if p[2] == () else p[2]
+        p[0] = Function(p[3], p[5], retwidth=retwidth, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    def p_function_nowidth(self, p):
-        'function : FUNCTION ID SEMICOLON function_statement ENDFUNCTION'
-        p[0] = Function(p[2],
-                        Width(IntConst('0', lineno=p.lineno(1)),
-                              IntConst('0', lineno=p.lineno(1)),
-                              lineno=p.lineno(1)),
-                        p[4], lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_function_integer(self, p):
-        'function : FUNCTION INTEGER ID SEMICOLON function_statement ENDFUNCTION'
-        p[0] = Function(p[3],
-                        Width(IntConst('31', lineno=p.lineno(1)),
-                              IntConst('0', lineno=p.lineno(1)),
-                              lineno=p.lineno(1)),
-                        p[5], lineno=p.lineno(1))
+    def p_function_rettype(self, p):
+        'function : FUNCTION var_sigtype _id SEMICOLON function_statement ENDFUNCTION'
+        p[0] = Function(p[3], p[5], rettype=p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_function_statement(self, p):
@@ -3048,9 +2327,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_funcvardecl(self, p):
-        """funcvardecl : decl
-        | integerdecl
-        """
+        'funcvardecl : decl'
         if isinstance(p[1], Decl):
             for r in p[1].list:
                 if (not isinstance(r, Input) and not isinstance(r, Reg) and
@@ -3095,7 +2372,7 @@ class VerilogParser(object):
 
     # --------------------------------------------------------------------------
     def p_task(self, p):
-        'task : TASK ID SEMICOLON task_statement ENDTASK'
+        'task : TASK _id SEMICOLON task_statement ENDTASK'
         p[0] = Task(p[2], p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -3119,9 +2396,8 @@ class VerilogParser(object):
         p[0] = ()
 
     def p_taskvardecl(self, p):
-        """taskvardecl : decl
-        | integerdecl
-        """
+        'taskvardecl : decl'
+
         if isinstance(p[1], Decl):
             for r in p[1].list:
                 if (not isinstance(r, Input) and not isinstance(r, Reg) and
@@ -3146,49 +2422,41 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    def p_identifier(self, p):
-        """identifier : single_identifier
-        | scope_identifier
-        | pointer_identifier
+    def p__id(self, p):
+        """_id : ID
+        | SENS_OR
         """
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
     def p_single_identifier(self, p):
-        'single_identifier : ID'
+        'identifier : _id'
         p[0] = Identifier(p[1], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    def p_scope_identifier(self, p):
-        'scope_identifier : identifier DOT ID'
-        labellist = () if p[1].scope is None else p[1].scope.labellist
-        labellist = labellist + (IdentifierScopeLabel(p[1].name, lineno=p.lineno(1)),)
-        scope = IdentifierScope(labellist, lineno=p.lineno(1))
-        p[0] = Identifier(p[3], scope, lineno=p.lineno(1))
+    def p_identifier_scope(self, p):
+        'identifier : identifier DOT _id'
+        scope = () if p[1].scope is None else p[1].scope
+        scope = scope + (IdentifierScope(p[1].name, lineno=p.lineno(1)),)
+        p[0] = Identifier(p[3], scope=scope, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    def p_pointer_identifier(self, p):
-        'pointer_identifier : pointer DOT ID'
-        labellist = () if p[1].var.scope is None else p[1].var.scope.labellist
-        labellist = labellist + (IdentifierScopeLabel(p[1].var.name, p[1].ptr, lineno=p.lineno(1)),)
-        scope = IdentifierScope(labellist, lineno=p.lineno(1))
-        p[0] = Identifier(p[3], scope, lineno=p.lineno(1))
+    def p_identifier_pointer(self, p):
+        'identifier : identifier LBRACKET expression RBRACKET DOT _id'
+        scope = () if p[1].scope is None else p[1].scope
+        scope = scope + (IdentifierScope(p[1].name, p[3], lineno=p.lineno(1)),)
+        p[0] = Identifier(p[6], scope=scope, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
     def p_disable(self, p):
-        'disable : DISABLE ID'
+        'disable : DISABLE _id'
         p[0] = Disable(p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    def p_single_statement_substitution_operator(self, p):
-        'single_statement : substitution_operator SEMICOLON'
-        p[0] = SingleStatement(p[1], lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
     def p_single_statement_delay(self, p):
-        'single_statement : DELAY expression SEMICOLON'
+        'single_statement : SHARP expression SEMICOLON'
         p[0] = SingleStatement(DelayStatement([2], lineno=p.lineno(1)), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -3227,7 +2495,7 @@ class VerilogParser(object):
         p[0].end_lineno = p.lineno(6)
 
     def p_interfacename(self, p):
-        'interfacename : ID'
+        'interfacename : _id'
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
@@ -3243,24 +2511,17 @@ class VerilogParser(object):
 
     def p_interface_item(self, p):
         """interface_item : decl
-        | integerdecl
-        | timedecl
-        | realdecl
-        | realtimedecl
-        | shortintdecl
-        | intdecl
-        | longintdecl
-        | bytedecl
-        | bitdecl
-        | shortrealdecl
-        | modport
+        | parameter_decl
+        | localparam_decl
+        | typedef
         | pragma
+        | modport
         """
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
     def p_modport(self, p):
-        'modport : MODPORT ID LPAREN ioports RPAREN SEMICOLON'
+        'modport : MODPORT _id LPAREN ioports RPAREN SEMICOLON'
         p[0] = Modport(p[2], p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -3281,7 +2542,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_structname(self, p):
-        'structname : ID'
+        'structname : _id'
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
@@ -3297,16 +2558,8 @@ class VerilogParser(object):
 
     def p_struct_item(self, p):
         """struct_item : decl
-        | integerdecl
-        | timedecl
-        | realdecl
-        | realtimedecl
-        | shortintdecl
-        | intdecl
-        | longintdecl
-        | bytedecl
-        | bitdecl
-        | shortrealdecl
+        | parameter_decl
+        | localparam_decl
         | pragma
         """
         p[0] = p[1]
@@ -3329,7 +2582,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_unionname(self, p):
-        'unionname : ID'
+        'unionname : _id'
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
@@ -3345,16 +2598,8 @@ class VerilogParser(object):
 
     def p_union_item(self, p):
         """union_item : decl
-        | integerdecl
-        | timedecl
-        | realdecl
-        | realtimedecl
-        | shortintdecl
-        | intdecl
-        | longintdecl
-        | bytedecl
-        | bitdecl
-        | shortrealdecl
+        | parameter_decl
+        | localparam_decl
         | pragma
         """
         p[0] = p[1]
@@ -3374,21 +2619,28 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_enum_base_sigtype(self, p):
-        'enum_base : ENUM sigtype LBRACE enumlist RBRACE enumname'
+        'enum_base : ENUM enum_sigtype LBRACE enumlist RBRACE enumname'
         type = p[1]
         width = None
         p[0] = Enum(p[5], p[3], packed=False, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_enum_base_sigtype_width(self, p):
-        'enum_base : ENUM sigtype width LBRACE enumlist RBRACE enumname'
+        'enum_base : ENUM enum_sigtype width LBRACE enumlist RBRACE enumname'
         type = p[1]
         width = p[2]
         p[0] = Enum(p[5], p[3], packed=False, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
+    def p_enum_sigtype(self, p):
+        """enum_sigtype : var_sigtype
+        | custom_sigtype
+        """
+        p[0] = p[1]
+        p.set_lineno(0, p.lineno(1))
+
     def p_enumname(self, p):
-        'enumname : ID'
+        'enumname : _id'
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 
@@ -3398,17 +2650,17 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_enumlist_length(self, p):
-        'enumlist : ID LBRACKET expression RBRACKET'
+        'enumlist : _id LBRACKET expression RBRACKET'
         p[0] = Enumlist(name=p[1], length=p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_enumlist_length_value(self, p):
-        'enumlist : ID LBRACKET expression RBRACKET EQUALS expression'
+        'enumlist : _id LBRACKET expression RBRACKET EQUALS expression'
         p[0] = Enumlist(name=p[1], length=p[3], value=p[6], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_enumlist_start_end(self, p):
-        'enumlist : ID LBRACKET expression COLON expression RBRACKET'
+        'enumlist : _id LBRACKET expression COLON expression RBRACKET'
         p[0] = Enumlist(name=p[1], start=p[3], end=p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -3423,37 +2675,37 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def p_enum_item(self, p):
-        'enum_item : ID'
+        'enum_item : _id'
         p[0] = (p[1], None)  # ID, value
         p.set_lineno(0, p.lineno(1))
 
     def p_enum_item_value(self, p):
-        'enum_item : ID EQUALS rvalue'
+        'enum_item : _id EQUALS rvalue'
         p[0] = (p[1], p[3])  # ID, value
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
     def p_typedef(self, p):
-        'typedef : TYPEDEF sigtypes_ID SEMICOLON'
-        sigtypes, ID = self._separate_sigtypes_ID(p, p[2])
+        'typedef : TYPEDEF sigtypes_id SEMICOLON'
+        sigtypes, ID = self._separate_sigtypes_id(p, p[2])
         p[0] = TypeDef(ID, sigtypes, width=None, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_typedef_pdims_width(self, p):
-        'typedef : TYPEDEF sigtypes pdims_width ID SEMICOLON'
+        'typedef : TYPEDEF sigtypes pdims_width _id SEMICOLON'
         pdims, width = p[3]
         p[0] = TypeDef(p[4], p[2], width=width, pdims=pdims, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_typedef_pdims_width_udims(self, p):
-        'typedef : TYPEDEF sigtypes pdims_width ID udims SEMICOLON'
+        'typedef : TYPEDEF sigtypes pdims_width _id udims SEMICOLON'
         pdims, width = p[3]
         p[0] = TypeDef(p[4], p[2], width=width, pdims=pdims, udims=p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_typedef_udims(self, p):
-        'typedef : TYPEDEF sigtypes_ID udims SEMICOLON'
-        sigtypes, ID = self._separate_sigtypes_ID(p, p[2])
+        'typedef : TYPEDEF sigtypes_id udims SEMICOLON'
+        sigtypes, ID = self._separate_sigtypes_id(p, p[2])
         p[0] = TypeDef(ID, sigtypes, width=None, udims=p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 

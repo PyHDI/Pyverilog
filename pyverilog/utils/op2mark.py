@@ -16,7 +16,11 @@ operator_mark = {
     'LessThan': '<', 'GreaterThan': '>', 'LessEq': '<=', 'GreaterEq': '>=',
     'Eq': '==', 'NotEq': '!=', 'Eql': '===', 'NotEql': '!==',
     'And': '&', 'Xor': '^', 'Xnor': '~^',
-    'Or': '|', 'Land': '&&', 'Lor': '||'
+    'Or': '|', 'Land': '&&', 'Lor': '||',
+    'PlusEquals': '+=', 'MinusEquals': '-=', 'TimesEquals': '*=', 'DivideEquals': '/=', 'ModEquals': '%=',
+    'OrEquals': '|=', 'AndEquals': '&=', 'XorEquals': '^=',
+    'SllEquals': '<<=', 'SrlEquals': '>>=', 'SlaEquals': '<<<=', 'SraEquals': '>>>=',
+    'Increment': '++', 'Decrement': '--',
 }
 
 

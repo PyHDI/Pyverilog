@@ -1,1 +1,1 @@
-[{{ msb }}:{{ lsb }}]
+[{{ msb }}{% if lsb != '' %}:{{ lsb }}{% endif %}]
