@@ -1,1 +1,0 @@
-[{{ msb }}{% if lsb != '' %}:{{ lsb }}{% endif %}]

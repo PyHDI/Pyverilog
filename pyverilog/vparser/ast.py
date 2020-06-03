@@ -131,14 +131,14 @@ class Module(Node):
 class Decl(Node):
     attr_names = ()
 
-    def __init__(self, list, lineno=0):
+    def __init__(self, items, lineno=0):
         self.lineno = lineno
-        self.list = list
+        self.items = items
 
     def children(self):
         nodelist = []
-        if self.list:
-            nodelist.extend(self.list)
+        if self.items:
+            nodelist.extend(self.items)
         return tuple(nodelist)
 
 
@@ -220,12 +220,12 @@ class Identifier(Node):
 
 
 class IdentifierScope(Node):
-    attr_names = ('name', 'loop')
+    attr_names = ('name', 'iter')
 
-    def __init__(self, name, loop=None, lineno=0):
+    def __init__(self, name, iter=None, lineno=0):
         self.lineno = lineno
         self.name = name
-        self.loop = loop
+        self.iter = iter
 
     def children(self):
         nodelist = []
@@ -276,7 +276,7 @@ class StringConst(_Constant):
 class _Variable(_Value):
     attr_names = ('name', 'signed')
 
-    def __init__(self, name, width=None, signed=False, pdims=None, udims=None, value=None, lineno=0):
+    def __init__(self, name, width=None, signed=None, pdims=None, udims=None, value=None, lineno=0):
         self.lineno = lineno
         self.name = name
         self.width = width
@@ -336,28 +336,28 @@ class Reg(_Variable4State):
 
 class Integer(_Variable4State):
 
-    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+    def __init__(self, name, signed=None, pdims=None, udims=None, value=None, lineno=0):
         width = Width(msb=IntConst('31', lineno=lineno), lsb=IntConst('0', lineno=lineno))
         _Variable4State.__init__(self, name, width, signed, pdims, udims, value, lineno)
 
 
 class Time(_Variable4State):
 
-    def __init__(self, name, signed=False, pdims=None, udims=None, value=None, lineno=0):
+    def __init__(self, name, signed=None, pdims=None, udims=None, value=None, lineno=0):
         width = Width(msb=IntConst('64', lineno=lineno), lsb=IntConst('0', lineno=lineno))
         _Variable4State.__init__(self, name, width, signed, pdims, udims, value, lineno)
 
 
 class Real(_VariableReal):
 
-    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+    def __init__(self, name, signed=None, pdims=None, udims=None, value=None, lineno=0):
         width = Width(msb=IntConst('63', lineno=lineno), lsb=IntConst('0', lineno=lineno))
         _Variable4State.__init__(self, name, width, signed, pdims, udims, value, lineno)
 
 
 class RealTime(_VariableReal):
 
-    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+    def __init__(self, name, signed=None, pdims=None, udims=None, value=None, lineno=0):
         width = Width(msb=IntConst('63', lineno=lineno), lsb=IntConst('0', lineno=lineno))
         _Variable4State.__init__(self, name, width, signed, pdims, udims, value, lineno)
 
@@ -368,28 +368,28 @@ class Logic(_Variable4State):
 
 class ShortInt(_Variable2State):
 
-    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+    def __init__(self, name, signed=None, pdims=None, udims=None, value=None, lineno=0):
         width = Width(msb=IntConst('16', lineno=lineno), lsb=IntConst('0', lineno=lineno))
         _Variable2State.__init__(self, name, width, signed, pdims, udims, value, lineno)
 
 
 class Int(_Variable2State):
 
-    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+    def __init__(self, name, signed=None, pdims=None, udims=None, value=None, lineno=0):
         width = Width(msb=IntConst('31', lineno=lineno), lsb=IntConst('0', lineno=lineno))
         _Variable2State.__init__(self, name, width, signed, pdims, udims, value, lineno)
 
 
 class LongInt(_Variable2State):
 
-    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+    def __init__(self, name, signed=None, pdims=None, udims=None, value=None, lineno=0):
         width = Width(msb=IntConst('63', lineno=lineno), lsb=IntConst('0', lineno=lineno))
         _Variable2State.__init__(self, name, width, signed, pdims, udims, value, lineno)
 
 
 class Byte(_Variable2State):
 
-    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+    def __init__(self, name, signed=None, pdims=None, udims=None, value=None, lineno=0):
         width = Width(msb=IntConst('7', lineno=lineno), lsb=IntConst('0', lineno=lineno))
         _Variable2State.__init__(self, name, width, signed, pdims, udims, value, lineno)
 
@@ -400,7 +400,7 @@ class Bit(_Variable2State):
 
 class ShortReal(_VariableReal):
 
-    def __init__(self, name, signed=True, pdims=None, udims=None, value=None, lineno=0):
+    def __init__(self, name, signed=None, pdims=None, udims=None, value=None, lineno=0):
         width = Width(msb=IntConst('31', lineno=lineno), lsb=IntConst('0', lineno=lineno))
         _Variable4State.__init__(self, name, width, signed, pdims, udims, value, lineno)
 
@@ -408,7 +408,7 @@ class ShortReal(_VariableReal):
 class CustomVariable(_Variable):
     attr_names = ('name', 'typename', 'modportname')
 
-    def __init__(self, typename, name, modportname=None, width=None, signed=False,
+    def __init__(self, typename, name, modportname=None, width=None, signed=None,
                  pdims=None, udims=None, value=None, lineno=0):
         _Variable.__init__(self, name, width, signed, pdims, udims, value, lineno)
         self.typename = typename
@@ -469,14 +469,14 @@ class Supply(Parameter):
 class Concat(Node):
     attr_names = ()
 
-    def __init__(self, list, lineno=0):
+    def __init__(self, items, lineno=0):
         self.lineno = lineno
-        self.list = list
+        self.items = items
 
     def children(self):
         nodelist = []
-        if self.list:
-            nodelist.extend(self.list)
+        if self.items:
+            nodelist.extend(self.items)
         return tuple(nodelist)
 
 
@@ -859,14 +859,14 @@ class AlwaysLatch(Always):
 class SensList(Node):
     attr_names = ()
 
-    def __init__(self, list, lineno=0):
+    def __init__(self, items, lineno=0):
         self.lineno = lineno
-        self.list = list
+        self.items = items
 
     def children(self):
         nodelist = []
-        if self.list:
-            nodelist.extend(self.list)
+        if self.items:
+            nodelist.extend(self.items)
         return tuple(nodelist)
 
 
@@ -885,7 +885,7 @@ class Sens(Node):
         return tuple(nodelist)
 
 
-class Substitution(Node):
+class _Substitution(Node):
     attr_names = ()
 
     def __init__(self, left, right, ldelay=None, rdelay=None, lineno=0):
@@ -908,11 +908,11 @@ class Substitution(Node):
         return tuple(nodelist)
 
 
-class BlockingSubstitution(Substitution):
+class BlockingSubstitution(_Substitution):
     pass
 
 
-class NonblockingSubstitution(Substitution):
+class NonblockingSubstitution(_Substitution):
     pass
 
 
@@ -1189,6 +1189,10 @@ class DelayStatement(Node):
         return tuple(nodelist)
 
 
+class DeclInstances(Decl):
+    pass
+
+
 class Instance(Node):
     attr_names = ('module', 'name')
 
@@ -1264,22 +1268,6 @@ class Function(Node):
         return self.name.__repr__()
 
 
-class Task(Node):
-    attr_names = ('name', 'automatic')
-
-    def __init__(self, name, statement, automatic=False, lineno=0):
-        self.lineno = lineno
-        self.name = name
-        self.statement = statement
-        self.automatic = automatic
-
-    def children(self):
-        nodelist = []
-        if self.statement:
-            nodelist.extend(self.statement)
-        return tuple(nodelist)
-
-
 class FunctionCall(Node):
     attr_names = ()
 
@@ -1300,6 +1288,26 @@ class FunctionCall(Node):
         return self.name.__repr__()
 
 
+class Task(Node):
+    attr_names = ('name', 'automatic')
+
+    def __init__(self, name, statement, automatic=False, lineno=0):
+        self.lineno = lineno
+        self.name = name
+        self.statement = statement
+        self.automatic = automatic
+
+    def children(self):
+        nodelist = []
+        if self.statement:
+            nodelist.extend(self.statement)
+        return tuple(nodelist)
+
+
+class Genvar(_Variable):
+    pass
+
+
 class GenerateStatement(Node):
     attr_names = ()
 
@@ -1312,10 +1320,6 @@ class GenerateStatement(Node):
         if self.items:
             nodelist.extend(self.items)
         return tuple(nodelist)
-
-
-class Genvar(_Variable):
-    pass
 
 
 class SystemCall(Node):
@@ -1358,7 +1362,7 @@ class Pragma(Node):
         return tuple(nodelist)
 
 
-class PragmaEntry(Node):
+class PragmaItem(Node):
     attr_names = ('name', )
 
     def __init__(self, name, value=None, lineno=0):

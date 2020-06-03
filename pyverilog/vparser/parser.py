@@ -115,13 +115,13 @@ class VerilogParser(object):
     # --------------------------------------------------------------------------
     def p_pragma_assign(self, p):
         'pragma : LPAREN TIMES _id EQUALS expression TIMES RPAREN'
-        p[0] = Pragma(PragmaEntry(p[3], p[5], lineno=p.lineno(1)),
+        p[0] = Pragma(PragmaItem(p[3], p[5], lineno=p.lineno(1)),
                       lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_pragma(self, p):
         'pragma : LPAREN TIMES _id TIMES RPAREN'
-        p[0] = Pragma(PragmaEntry(p[3], lineno=p.lineno(1)),
+        p[0] = Pragma(PragmaItem(p[3], lineno=p.lineno(1)),
                       lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -155,7 +155,7 @@ class VerilogParser(object):
     def p_param(self, p):
         'param : PARAMETER var_sigtype_or_empty sign_sigtype_or_empty width_or_empty param_substitution_list'
         ptype = None if p[2] == () else p[2]
-        signed = False if p[3] == () else p[3]
+        signed = None if p[3] == () else p[3]
         width = None if p[4] == () else p[4]
         paramlist = [Parameter(rname, rvalue, width, signed=signed, ptype=ptype, lineno=p.lineno(1))
                      for rname, rvalue in p[5]]
@@ -211,7 +211,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     def create_ioport(self, p, sigtypes, name, width=None, pdims=None, udims=None, lineno=0):
-        signed = False
+        signed = None
         first = None
         second = None
 
@@ -535,7 +535,7 @@ class VerilogParser(object):
 
     # --------------------------------------------------------------------------
     def create_decl(self, p, sigtypes, name, width=None, pdims=None, udims=None, lineno=0):
-        signed = False
+        signed = None
         decls = []
 
         self.typecheck_decl(p, sigtypes, pdims, udims)
@@ -804,7 +804,7 @@ class VerilogParser(object):
             instancelist.append(Instance(modulename, instance_name,
                                          instance_param_list, instance_port_list,
                                          instance_array, lineno=p.lineno(1)))
-        p[0] = Decl(tuple(instancelist), lineno=p.lineno(1))
+        p[0] = DeclInstances(tuple(instancelist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_decl_instance(self, p):
@@ -815,7 +815,7 @@ class VerilogParser(object):
             instancelist.append(Instance(p[1], instance_name,
                                          instance_param_list, instance_port_list,
                                          instance_array, lineno=p.lineno(1)))
-        p[0] = Decl(tuple(instancelist), lineno=p.lineno(1))
+        p[0] = DeclInstances(tuple(instancelist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_decl_instance_noname(self, p):
@@ -825,7 +825,7 @@ class VerilogParser(object):
             instancelist.append(Instance(p[1], instance_name,
                                          (), instance_port_list,
                                          instance_array, lineno=p.lineno(1)))
-        p[0] = Decl(tuple(instancelist), lineno=p.lineno(1))
+        p[0] = DeclInstances(tuple(instancelist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_comma_instance_body_list_or_empty(self, p):
@@ -968,7 +968,7 @@ class VerilogParser(object):
 
     # --------------------------------------------------------------------------
     def create_declassign(self, p, sigtypes, name, assign, width=None, pdims=None, udims=None, lineno=0):
-        signed = False
+        signed = None
         decls = []
 
         self.typecheck_declassign(p, sigtypes)
@@ -1114,7 +1114,7 @@ class VerilogParser(object):
     def p_localparam_decl(self, p):
         'localparam_decl : LOCALPARAM var_sigtype_or_empty sign_sigtype_or_empty width_or_empty param_substitution_list SEMICOLON'
         ptype = None if p[2] == () else p[2]
-        signed = False if p[3] == () else p[3]
+        signed = None if p[3] == () else p[3]
         width = None if p[4] == () else p[4]
         paramlist = [Localparam(rname, rvalue, width, signed=signed, ptype=ptype, lineno=p.lineno(1))
                      for rname, rvalue in p[5]]
@@ -1216,7 +1216,7 @@ class VerilogParser(object):
         if p[1].scope is not None:
             if len(p[1].scope) > 1:
                 self._raise_error(p)
-            if p[1].scope[0].loop is not None:
+            if p[1].scope[0].iter is not None:
                 self._raise_error(p)
             p[0] = (p[1].scope[0].name, p[1].name)
         else:
