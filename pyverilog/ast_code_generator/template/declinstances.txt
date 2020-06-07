@@ -1,12 +1,12 @@
 
 {{ module }}
-{%- if len_parameterlist > 0 %}
-#({% for param in parameterlist %}
-{{ param }}{%- if loop.index < len_parameterlist -%},
+{%- if len_paramlist > 0 %}
+#({% for param in paramlist %}
+{{ param }}{%- if loop.index < len_paramlist -%},
 {%- endif -%}{% endfor %}
 )
 {%- endif %}
-{%- for instance in instances %}
-{{ instance }}{%- if loop.index < len_instances -%},
+{%- for item in items %}
+{{ item }}{%- if loop.index < len_items -%},
 {%- endif -%}{%- endfor -%};
 

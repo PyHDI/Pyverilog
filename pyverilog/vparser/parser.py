@@ -44,9 +44,9 @@ class VerilogParser(object):
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIVIDE', 'MOD'),
         ('left', 'POWER'),
-        # ('left', 'SQUOTE'),
         ('right', 'UMINUS', 'UPLUS', 'ULNOT', 'UNOT',
          'UAND', 'UNAND', 'UOR', 'UNOR', 'UXOR', 'UXNOR'),
+        ('left', 'SQUOTE'),
         # -> Strong
     )
 
@@ -1228,6 +1228,16 @@ class VerilogParser(object):
         p[0] = p[1] + (p[2],)
         p.set_lineno(0, p.lineno(1))
 
+    def p_sigtypes_id_id(self, p):
+        'sigtypes_id : sigtypes _id _id'
+        p[0] = p[1] + (p[2], p[3])
+        p.set_lineno(0, p.lineno(1))
+
+    def p_sigtypes_id_signed_id(self, p):
+        'sigtypes_id : sigtypes _id sign_sigtype _id'
+        p[0] = p[1] + (p[2], p[3], p[4])
+        p.set_lineno(0, p.lineno(1))
+
     # --------------------------------------------------------------------------
     def p_assignment(self, p):
         'assignment : ASSIGN delay_or_empty lvalue EQUALS delay_or_empty rvalue SEMICOLON'
@@ -1279,6 +1289,13 @@ class VerilogParser(object):
 
     # --------------------------------------------------------------------------
     # Level 1 (Highest Priority)
+    def p_static_cast(self, p):
+        'static_cast : expression SQUOTE LPAREN expression RPAREN'
+        p[0] = StaticCast(p[1], p[4], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    # --------------------------------------------------------------------------
+    # Level 2
     def p_expression_uminus(self, p):
         'expression : MINUS expression %prec UMINUS'
         p[0] = Uminus(p[2], lineno=p.lineno(1))
@@ -1330,14 +1347,14 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    # Level 2
+    # Level 3
     def p_expression_power(self, p):
         'expression : expression POWER expression'
         p[0] = Power(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    # Level 3
+    # Level 4
     def p_expression_times(self, p):
         'expression : expression TIMES expression'
         p[0] = Times(p[1], p[3], lineno=p.lineno(1))
@@ -1354,7 +1371,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    # Level 4
+    # Level 5
     def p_expression_plus(self, p):
         'expression : expression PLUS expression'
         p[0] = Plus(p[1], p[3], lineno=p.lineno(1))
@@ -1366,7 +1383,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    # Level 5
+    # Level 6
     def p_expression_sll(self, p):
         'expression : expression LSHIFT expression'
         p[0] = Sll(p[1], p[3], lineno=p.lineno(1))
@@ -1388,7 +1405,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    # Level 6
+    # Level 7
     def p_expression_lessthan(self, p):
         'expression : expression LT expression'
         p[0] = LessThan(p[1], p[3], lineno=p.lineno(1))
@@ -1410,7 +1427,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    # Level 7
+    # Level 8
     def p_expression_eq(self, p):
         'expression : expression EQ expression'
         p[0] = Eq(p[1], p[3], lineno=p.lineno(1))
@@ -1432,7 +1449,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    # Level 8
+    # Level 9
     def p_expression_And(self, p):
         'expression : expression AND expression'
         p[0] = And(p[1], p[3], lineno=p.lineno(1))
@@ -1449,28 +1466,28 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    # Level 9
+    # Level 10
     def p_expression_Or(self, p):
         'expression : expression OR expression'
         p[0] = Or(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    # Level 10
+    # Level 11
     def p_expression_land(self, p):
         'expression : expression LAND expression'
         p[0] = Land(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    # Level 11
+    # Level 12
     def p_expression_lor(self, p):
         'expression : expression LOR expression'
         p[0] = Lor(p[1], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    # Level 12
+    # Level 13
     def p_expression_cond(self, p):
         'expression : expression QUESTION expression COLON expression'
         p[0] = Cond(p[1], p[3], p[5], lineno=p.lineno(1))
@@ -1520,6 +1537,11 @@ class VerilogParser(object):
 
     def p_expression_const(self, p):
         'expression : const_expression'
+        p[0] = p[1]
+        p.set_lineno(0, p.lineno(1))
+
+    def p_expression_static_cast(self, p):
+        'expression : static_cast'
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
 

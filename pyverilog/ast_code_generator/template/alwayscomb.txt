@@ -1,0 +1,3 @@
+
+always_comb @({{ sens_list }}) {{ statement }}
+

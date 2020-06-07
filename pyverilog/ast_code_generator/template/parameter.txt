@@ -1,1 +1,1 @@
-parameter {% if signed %}signed {% endif %}{% if width != '' %}{{ width }} {% endif %}{{ name }} = {{ value }};
+parameter {% if ptype != '' %}{{ ptype }} {% endif %}{% if signed != '' %}{{ signed }} {% endif %}{% if pdims != '' %}{{ pdims }} {% endif %}{% if width != '' %}{{ width }} {% endif %}{{ name }} {% if udims != '' %}{{ udims}} {% endif %} = {{ value }};

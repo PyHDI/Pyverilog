@@ -1,1 +1,1 @@
-{{ first }} {% if second != '' %}{{ second }} {% endif %}{% if signed %}signed {% endif %}{% if width != '' %}{{ width }} {% endif %}{{ name }}{% if dimensions != '' %} {{ dimensions }}{% endif %}
+{{ first }} {% if second != '' %}{{ second }} {% endif %}{% if signed != '' %}{{ signed }} {% endif %}{% if pdims != '' %}{{ pdims }} {% endif %}{% if width != '' %}{{ width }} {% endif %}{{ name }}{% if udims != '' %} {{ udims }}{% endif %}

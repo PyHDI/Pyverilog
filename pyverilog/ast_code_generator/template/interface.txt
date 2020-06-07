@@ -1,0 +1,14 @@
+
+interface {{ name }}{% if paramlist != '' %} #
+(
+{{ paramlist }}
+)
+{%- endif %}
+(
+{{ portlist }}
+);
+
+{% for item in items %}{{ item }}
+{% endfor %}
+endinterface
+

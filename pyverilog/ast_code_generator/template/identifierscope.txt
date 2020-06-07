@@ -1,1 +1,1 @@
-{{ name }}{%- if loop != '' %}[{{ loop }}]{%- endif %}.
+{{ name }}{%- if iter != '' %}[{{ iter }}]{%- endif %}.

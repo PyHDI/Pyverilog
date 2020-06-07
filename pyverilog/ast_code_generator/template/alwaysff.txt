@@ -1,0 +1,3 @@
+
+always_ff @({{ sens_list }}) {{ statement }}
+

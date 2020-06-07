@@ -1,0 +1,6 @@
+
+struct{% if packed %} packed{% endif %} {
+{% for item in items %}{{ item }}
+{% endfor %}
+} {{ name }};
+

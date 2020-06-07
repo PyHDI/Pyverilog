@@ -1,0 +1,3 @@
+enum {{ vartype }} {{ width }}{
+
+} {{ name }};

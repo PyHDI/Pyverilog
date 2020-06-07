@@ -1,0 +1,1 @@
+{{ casting_type }}'({{ right }})

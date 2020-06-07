@@ -31,19 +31,20 @@ def op2mark(op):
 
 
 operator_order = {
-    'Uminus': 0, 'Ulnot': 0, 'Unot': 0, 'Uand': 0, 'Unand': 0,
-    'Uor': 0, 'Unor': 0, 'Uxor': 0, 'Uxnor': 0,
-    'Power': 1,
-    'Times': 2, 'Divide': 2, 'Mod': 2,
-    'Plus': 3, 'Minus': 3,
-    'Sll': 4, 'Srl': 4, 'Sla': 4, 'Sra': 4,
-    'LessThan': 5, 'GreaterThan': 5, 'LessEq': 5, 'GreaterEq': 5,
-    'Eq': 6, 'NotEq': 6, 'Eql': 6, 'NotEql': 6,
-    'And': 7,
-    'Xor': 8, 'Xnor': 8,
-    'Or': 9,
-    'Land': 10,
-    'Lor': 11
+    'StaticCast': 0,
+    'Uminus': 1, 'Ulnot': 1, 'Unot': 1, 'Uand': 1, 'Unand': 1,
+    'Uor': 1, 'Unor': 1, 'Uxor': 1, 'Uxnor': 1,
+    'Power': 2,
+    'Times': 3, 'Divide': 3, 'Mod': 3,
+    'Plus': 4, 'Minus': 4,
+    'Sll': 5, 'Srl': 5, 'Sla': 5, 'Sra': 5,
+    'LessThan': 6, 'GreaterThan': 6, 'LessEq': 6, 'GreaterEq': 6,
+    'Eq': 7, 'NotEq': 7, 'Eql': 7, 'NotEql': 7,
+    'And': 8,
+    'Xor': 9, 'Xnor': 9,
+    'Or': 10,
+    'Land': 11,
+    'Lor': 12
 }
 
 

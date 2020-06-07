@@ -433,15 +433,15 @@ class Ioport(Node):
 
 
 class Parameter(Node):
-    attr_names = ('name', 'signed')
+    attr_names = ('name', 'ptype', 'signed')
 
-    def __init__(self, name, value, width=None, pdims=None, udims=None, signed=False, ptype=None, lineno=0):
+    def __init__(self, name, value, width=None, pdims=None, udims=None, ptype=None, signed=False, lineno=0):
         self.lineno = lineno
         self.name = name
         self.value = value
         self.width = width
-        self.signed = signed
         self.ptype = ptype
+        self.signed = signed
         self.pdims = pdims
         self.udims = udims
 
@@ -606,6 +606,24 @@ class _UnaryOperator(_Operator):
 
 
 # Level 1 (Highest Priority)
+class StaticCast(_Operator):
+    attr_names = ()
+
+    def __init__(self, casting_type, right, lineno=0):
+        self.lineno = lineno
+        self.casting_type = casting_type
+        self.right = right
+
+    def children(self):
+        nodelist = []
+        if self.casting_type:
+            nodelist.append(self.casting_type)
+        if self.right:
+            nodelist.append(self.right)
+        return tuple(nodelist)
+
+
+# Level 2
 class Uplus(_UnaryOperator):
     pass
 
@@ -646,7 +664,7 @@ class Uxnor(_UnaryOperator):
     pass
 
 
-# Level 2
+# Level 3
 class Power(_BinaryOperator):
     pass
 
@@ -663,7 +681,7 @@ class Mod(_BinaryOperator):
     pass
 
 
-# Level 3
+# Level 4
 class Plus(_BinaryOperator):
     pass
 
@@ -672,7 +690,7 @@ class Minus(_BinaryOperator):
     pass
 
 
-# Level 4
+# Level 5
 class Sll(_BinaryOperator):
     pass
 
@@ -689,7 +707,7 @@ class Sra(_BinaryOperator):
     pass
 
 
-# Level 5
+# Level 6
 class LessThan(_BinaryOperator):
     pass
 
@@ -706,7 +724,7 @@ class GreaterEq(_BinaryOperator):
     pass
 
 
-# Level 6
+# Level 7
 class Eq(_BinaryOperator):
     pass
 
@@ -723,7 +741,7 @@ class NotEql(_BinaryOperator):
     pass  # !==
 
 
-# Level 7
+# Level 8
 class And(_BinaryOperator):
     pass
 
@@ -736,22 +754,22 @@ class Xnor(_BinaryOperator):
     pass
 
 
-# Level 8
+# Level 9
 class Or(_BinaryOperator):
     pass
 
 
-# Level 9
+# Level 10
 class Land(_BinaryOperator):
     pass
 
 
-# Level 10
+# Level 11
 class Lor(_BinaryOperator):
     pass
 
 
-# Level 11
+# Level 12
 class Cond(_Operator):
     attr_names = ()
 
@@ -769,38 +787,6 @@ class Cond(_Operator):
             nodelist.append(self.true_value)
         if self.false_value:
             nodelist.append(self.false_value)
-        return tuple(nodelist)
-
-
-class TypeCast(_Operator):
-    attr_names = ('casting_type',)
-
-    def __init__(self, casting_type, right, lineno=0):
-        self.lineno = lineno
-        self.casting_type = casting_type
-        self.right = right
-
-    def children(self):
-        nodelist = []
-        if self.right:
-            nodelist.append(self.right)
-        return tuple(nodelist)
-
-
-class WidthCast(_Operator):
-    attr_names = ()
-
-    def __init__(self, width, right, lineno=0):
-        self.lineno = lineno
-        self.width = width
-        self.right = right
-
-    def children(self):
-        nodelist = []
-        if self.width:
-            nodelist.append(self.width)
-        if self.right:
-            nodelist.append(self.right)
         return tuple(nodelist)
 
 

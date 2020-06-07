@@ -1,0 +1,5 @@
+priority if({{ cond }}) {{ true_statement }}
+{%- if true_statement[-1] != ' ' and true_statement[-1] != '\n' %} {% endif -%}
+{%- if true_statement.count('\n') == 0 and false_statement != '' %}
+{% endif -%}
+{%- if false_statement != '' %}else {{ false_statement }}{% endif -%}

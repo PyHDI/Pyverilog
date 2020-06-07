@@ -103,7 +103,7 @@ class VerilogLexer(object):
         'OREQUALS', 'ANDEQUALS', 'XOREQUALS',
         'LSHIFTAEQUALS', 'RSHIFTAEQUALS', 'LSHIFTEQUALS', 'RSHIFTEQUALS',
         'INCREMENT', 'DECREMENT',
-        # 'SQUOTE',  # casting_type'(expression), width'([01ZzXx])
+        'SQUOTE',  # casting_type'(expression), width'([01ZzXx])
     )
 
     operators = tuple(list(vh_operators) + list(sv_operators))
@@ -206,7 +206,7 @@ class VerilogLexer(object):
     t_INCREMENT = r'\+\+'
     t_DECREMENT = r'--'
 
-    # t_SQUOTE = r"'"
+    t_SQUOTE = r"'"
 
     t_PLUSCOLON = r'\+:'
     t_MINUSCOLON = r'-:'

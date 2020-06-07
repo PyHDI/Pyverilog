@@ -1,0 +1,4 @@
+modport {{ name }}
+(
+{{ ports }}
+);
