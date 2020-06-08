@@ -31,6 +31,7 @@ module SUB #
    input VAL,
    output LED
    );
-  assign LED = ~VAL & MODE;
+  wire outval = ~VAL & MODE;
+  assign LED = outval;
 endmodule
 

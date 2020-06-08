@@ -128,7 +128,7 @@ class Module(Node):
         return tuple(nodelist)
 
 
-class Decl(Node):
+class _Decl(Node):
     attr_names = ()
 
     def __init__(self, items, lineno=0):
@@ -142,29 +142,74 @@ class Decl(Node):
         return tuple(nodelist)
 
 
-# pdims: Packed Dimensions
-# udims: Unpacked Dimensions
-# {pdims} {width} name {udims}
+class DeclParameters(_Decl):
+    """
+    Parameter declarations with a common width and dims.
+    Each item must be Parameter or Localparam.
 
-class Port(Node):
-    attr_names = ('name', 'type',)
+    example:
+        parameter A = 10, B = 20, C = 30;
+    """
+    pass
 
-    def __init__(self, name, width, pdims, udims, type, lineno=0):
+
+class DeclVars(_Decl):
+    """
+    Variable declarations with a common sigtypes, width, and dims.
+    Each item must be Var.
+
+    example:
+        input logic [SW_WIDTH-1:0] SW0, SW1;
+    """
+    pass
+
+
+class DeclVarAssign(_Decl):
+    """
+    Variable declaration with a assignment.
+    The first item must be Var, and the second item must be Assign.
+
+    example:
+        wire [LED_WIDTH-1:0] LED = 0;
+    """
+    attr_names = ()
+
+    def __init__(self, var, assign, lineno=0):
         self.lineno = lineno
-        self.name = name
-        self.width = width
-        self.pdims = pdims
-        self.udims = udims
-        self.type = type
+        self.var = var
+        self.assign = assign
 
     def children(self):
         nodelist = []
-        if self.width:
-            nodelist.append(self.width)
-        if self.pdims:
-            nodelist.append(self.pdims)
-        if self.udims:
-            nodelist.append(self.udims)
+        if self.var:
+            nodelist.append(self.var)
+        if self.assign:
+            nodelist.append(self.assign)
+        return tuple(nodelist)
+
+
+class DeclInstances(_Decl):
+    """
+    Instance declaration with a common parameter list.
+    Each item must be Instance.
+
+    example:
+        SUB # (.LED_WIDTH(8))
+        inst_sub0 (.CLK(CLK), .RST(RST), LED(LED0))
+        inst_sub1 (.CLK(CLK), .RST(RST), LED(LED1));
+    """
+    pass
+
+
+class Port(Node):
+    attr_names = ('name',)
+
+    def __init__(self, name, lineno=0):
+        self.lineno = lineno
+        self.name = name
+
+    def children(self):
+        nodelist = []
         return tuple(nodelist)
 
 
@@ -232,21 +277,7 @@ class IdentifierScope(Node):
         return tuple(nodelist)
 
 
-class _Value(Node):
-    attr_names = ()
-
-    def __init__(self, value, lineno=0):
-        self.lineno = lineno
-        self.value = value
-
-    def children(self):
-        nodelist = []
-        if self.value:
-            nodelist.append(self.value)
-        return tuple(nodelist)
-
-
-class _Constant(_Value):
+class _Constant(Node):
     attr_names = ('value',)
 
     def __init__(self, value, lineno=0):
@@ -273,7 +304,25 @@ class StringConst(_Constant):
     pass
 
 
-class _Variable(_Value):
+class Var(Node):
+    attr_names = ()
+
+    def __init__(self, items, lineno=0):
+        self.lineno = lineno
+        self.items = items
+
+    def children(self):
+        nodelist = []
+        if self.items:
+            nodelist.extend(self.items)
+        return tuple(nodelist)
+
+
+# pdims: Packed Dimensions
+# udims: Unpacked Dimensions
+# variable : [pdims] [width] name [udims]
+
+class _Variable(Node):
     attr_names = ('name', 'signed')
 
     def __init__(self, name, width=None, signed=None, pdims=None, udims=None, value=None, lineno=0):
@@ -405,7 +454,7 @@ class ShortReal(_VariableReal):
         _Variable4State.__init__(self, name, width, signed, pdims, udims, value, lineno)
 
 
-class CustomVariable(_Variable):
+class CustomType(_Variable):
     attr_names = ('name', 'typename', 'modportname')
 
     def __init__(self, typename, name, modportname=None, width=None, signed=None,
@@ -415,32 +464,15 @@ class CustomVariable(_Variable):
         self.modportname = modportname
 
 
-class Ioport(Node):
-    attr_names = ()
-
-    def __init__(self, first, second=None, lineno=0):
-        self.lineno = lineno
-        self.first = first
-        self.second = second
-
-    def children(self):
-        nodelist = []
-        if self.first:
-            nodelist.append(self.first)
-        if self.second:
-            nodelist.append(self.second)
-        return tuple(nodelist)
-
-
 class Parameter(Node):
-    attr_names = ('name', 'ptype', 'signed')
+    attr_names = ('name', 'sigtypes', 'signed')
 
-    def __init__(self, name, value, width=None, pdims=None, udims=None, ptype=None, signed=None, lineno=0):
+    def __init__(self, name, value, width=None, pdims=None, udims=None, sigtypes=None, signed=None, lineno=0):
         self.lineno = lineno
         self.name = name
         self.value = value
         self.width = width
-        self.ptype = ptype
+        self.sigtypes = sigtypes
         self.signed = signed
         self.pdims = pdims
         self.udims = udims
@@ -1173,10 +1205,6 @@ class DelayStatement(Node):
         if self.delay:
             nodelist.append(self.delay)
         return tuple(nodelist)
-
-
-class DeclInstances(Decl):
-    pass
 
 
 class Instance(Node):

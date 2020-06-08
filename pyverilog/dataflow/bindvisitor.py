@@ -260,7 +260,7 @@ class BindVisitor(NodeVisitor):
         reset_name = None
         reset_bit = None
 
-        for l in node.sens_list.list:
+        for l in node.sens_list.items:
             if l.sig is None:
                 continue
 
@@ -729,8 +729,8 @@ class BindVisitor(NodeVisitor):
     def toScopeChain(self, blocklabel, current):
         scopelist = []
         for b in blocklabel:
-            if b.loop is not None:
-                loop = self.optimize(self.getTree(b.loop, current))
+            if b.iter is not None:
+                loop = self.optimize(self.getTree(b.iter, current))
                 if not isinstance(loop, DFEvalValue):
                     raise verror.FormatError('Loop iterator should be constant')
                 scopelist.append(ScopeLabel('for', 'for', loop.value))
@@ -1089,7 +1089,7 @@ class BindVisitor(NodeVisitor):
 
         if isinstance(node, vast.Concat):
             nextnodes = []
-            for n in node.list:
+            for n in node.items:
                 nextnodes.append(self.makeDFTree(n, scope))
             for n in nextnodes:
                 if isinstance(n, DFBranch):
@@ -1356,7 +1356,7 @@ class BindVisitor(NodeVisitor):
             return self.getDsts(left.var, scope)
         if isinstance(left, vast.Concat):
             dst = []
-            for n in left.list:
+            for n in left.items:
                 dst.extend(list(self.getDsts(n, scope)))
             return tuple(dst)
         ret = (self.getDst(left, scope),)

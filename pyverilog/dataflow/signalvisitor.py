@@ -544,7 +544,7 @@ class SignalVisitor(NodeVisitor):
 
         if isinstance(node, vast.Concat):
             nextnodes = []
-            for n in node.list:
+            for n in node.items:
                 nextnodes.append(self.makeDFTree(n, scope))
             for n in nextnodes:
                 if isinstance(n, DFBranch):

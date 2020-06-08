@@ -154,12 +154,12 @@ class VerilogParser(object):
 
     def p_param(self, p):
         'param : PARAMETER var_sigtype_or_empty sign_sigtype_or_empty width_or_empty param_substitution_list'
-        ptype = None if p[2] == () else p[2]
+        sigtypes = None if p[2] == () else p[2]
         signed = None if p[3] == () else p[3]
         width = None if p[4] == () else p[4]
-        paramlist = [Parameter(rname, rvalue, width, signed=signed, ptype=ptype, lineno=p.lineno(1))
+        paramlist = [Parameter(rname, rvalue, width, signed=signed, sigtypes=sigtypes, lineno=p.lineno(1))
                      for rname, rvalue in p[5]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
+        p[0] = DeclParameters(tuple(paramlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_portlist(self, p):
@@ -180,203 +180,47 @@ class VerilogParser(object):
     # --------------------------------------------------------------------------
     def p_ioports(self, p):
         'ioports : ioports COMMA ioport'
-        if isinstance(p[1][0], Port) and not isinstance(p[3], Port):
-            self._raise_error(p)
 
-        if isinstance(p[1][0], Ioport) and isinstance(p[3], Port):
-            t = None
-            r = p[1][-1]
-            first_type = type(r.first)
-            second_type = type(r.second) if r.second is not None else None
+        if isinstance(p[1][-1], Port) and isinstance(p[3], Port):
+            # old-style port declarations
+            p[0] = p[1] + (p[3],)
 
-            if second_type is not None:
-                t = Ioport(first_type(name=p[3].name, width=r.first.width, lineno=p.lineno(3)),
-                           second_type(name=p[3].name, width=r.first.width, lineno=p.lineno(3)),
-                           lineno=p.lineno(3))
+        elif isinstance(p[1][-1], DeclVars) and isinstance(p[3], Port):
+            # append a port using the same type
+            last_declvars = p[1][-1]
+            r = last_declvars.items[0]  # Var
+            types = [type(item) for item in r.items]
+            name = p[3].name
+            width = r.items[0].width
+            signed = r.items[0].signed
+            pdims = r.items[0].pdims
+            udims = r.items[0].udims
+            lineno = p.lineno(3)
+            var_items = tuple([_type(name=name, width=width, pdims=pdims, udims=udims, lineno=lineno)
+                               for _type in types])
+            v = Var(var_items, lineno=lineno)
+            d = DeclVars(last_declvars.items + (v,), lineno=p.lineno(1))
+            p[0] = p[1][:-1] + (d,)
 
-            else:
-                t = Ioport(first_type(name=p[3].name, width=r.first.width, lineno=p.lineno(3)),
-                           lineno=p.lineno(3))
-
-            p[0] = p[1] + (t,)
+        elif isinstance(p[1][-1], DeclVars) and isinstance(p[3], Var):
+            variables = (p[3],)
+            p[0] = p[1] + (DeclVars(variables, lineno=p.lineno(3)),)
 
         else:
-            p[0] = p[1] + (p[3],)
+            self._raise_error(p)
 
         p.set_lineno(0, p.lineno(1))
 
     def p_ioports_one(self, p):
         'ioports : ioport'
-        p[0] = (p[1],)
+        if isinstance(p[1], Port):
+            p[0] = (p[1],)
+        elif isinstance(p[1], Var):
+            variables = (p[1],)
+            p[0] = (DeclVars(variables, lineno=p.lineno(1)),)
+        else:
+            self._raise_error(p)
         p.set_lineno(0, p.lineno(1))
-
-    def create_ioport(self, p, sigtypes, name, width=None, pdims=None, udims=None, lineno=0):
-        signed = None
-        first = None
-        second = None
-
-        self.typecheck_ioport(p, sigtypes)
-
-        sigtypes = list(sigtypes)
-
-        if 'signed' in sigtypes:
-            signed = True
-            sigtypes.remove('signed')
-
-        elif 'unsigned' in sigtypes:
-            signed = False
-            sigtypes.remove('unsigned')
-
-        if len(sigtypes) > 2:
-            self._raise_error(p)
-
-        if 'input' in sigtypes:
-            first = Input(name=name, width=width, signed=signed,
-                          pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('input')
-
-        elif 'output' in sigtypes:
-            first = Output(name=name, width=width, signed=signed,
-                           pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('output')
-
-        elif 'inout' in sigtypes:
-            first = Inout(name=name, width=width, signed=signed,
-                          pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('inout')
-
-        if len(sigtypes) > 1:
-            self._raise_error(p)
-
-        if 'wire' in sigtypes:
-            second = Wire(name=name, width=width, signed=signed,
-                          pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('wire')
-
-        elif 'reg' in sigtypes:
-            second = Reg(name=name, width=width, signed=signed,
-                         pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('reg')
-
-        elif 'tri' in sigtypes:
-            second = Tri(name=name, width=width, signed=signed,
-                         pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('tri')
-
-        elif 'integer' in sigtypes:
-            second = Integer(name=name, signed=signed,
-                             pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('integer')
-
-        elif 'time' in sigtypes:
-            second = Time(name=name, signed=signed,
-                          pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('time')
-
-        elif 'real' in sigtypes:
-            second = Real(name=name, signed=signed,
-                          pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('real')
-
-        elif 'realtime' in sigtypes:
-            second = RealTime(name=name, signed=signed,
-                              pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('realtime')
-
-        elif 'logic' in sigtypes:
-            second = Logic(name=name, width=width, signed=signed,
-                           pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('logic')
-
-        elif 'shortint' in sigtypes:
-            second = ShortInt(name=name, signed=signed,
-                              pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('shortint')
-
-        elif 'int' in sigtypes:
-            second = Int(name=name, signed=signed,
-                         pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('int')
-
-        elif 'longint' in sigtypes:
-            second = LongInt(name=name, signed=signed,
-                             pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('longint')
-
-        elif 'byte' in sigtypes:
-            second = Byte(name=name, signed=signed,
-                          pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('byte')
-
-        elif 'bit' in sigtypes:
-            second = Bit(name=name, width=width, signed=signed,
-                         pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('bit')
-
-        elif 'shortreal' in sigtypes:
-            second = ShortReal(name=name, width=width, signed=signed,
-                               pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove('shortreal')
-
-        if len(sigtypes) > 0:
-            if isinstance(sigtypes[0], tuple):
-                typename = sigtypes[0][0]
-                modportname = sigtypes[0][1]
-            else:
-                typename = sigtypes[0][0]
-                modportname = None
-            second = CustomVariable(typename=typename, name=name, modportname=modportname,
-                                    width=width, signed=signed,
-                                    pdims=pdims, udims=udims, lineno=lineno)
-            sigtypes.remove(sigtypes[0])
-
-        if len(sigtypes) > 0:
-            self._raise_error(p)
-
-        return Ioport(first, second, lineno=lineno)
-
-    def typecheck_ioport(self, p, sigtypes):
-        if len(sigtypes) > 3:
-            self._raise_error(p)
-
-        if len(sigtypes) != len(set(sigtypes)):
-            self._raise_error(p)
-
-        if 'signed' not in sigtypes and 'unsigned' not in sigtypes and len(sigtypes) > 2:
-            self._raise_error(p)
-
-        if 'signed' in sigtypes and len(sigtypes) == 1:
-            self._raise_error(p)
-
-        if 'unsigned' in sigtypes and len(sigtypes) == 1:
-            self._raise_error(p)
-
-        if 'signed' in sigtypes and 'unsigned' in sigtypes:
-            self._raise_error(p)
-
-        # if 'input' not in sigtypes and 'output' not in sigtypes and 'inout' not in sigtypes:
-        #     self._raise_error(p)
-
-        if 'input' in sigtypes and 'output' in sigtypes:
-            self._raise_error(p)
-
-        if 'inout' in sigtypes and 'output' in sigtypes:
-            self._raise_error(p)
-
-        if 'inout' in sigtypes and 'input' in sigtypes:
-            self._raise_error(p)
-
-        if 'input' in sigtypes and 'reg' in sigtypes:
-            self._raise_error(p)
-
-        if 'inout' in sigtypes and 'reg' in sigtypes:
-            self._raise_error(p)
-
-        if 'input' in sigtypes and 'tri' in sigtypes:
-            self._raise_error(p)
-
-        if 'output' in sigtypes and 'tri' in sigtypes:
-            self._raise_error(p)
 
     def _separate_sigtypes_id_allow_no_sigtypes(self, p, sigtypes):
         ID = sigtypes[-1]
@@ -397,26 +241,29 @@ class VerilogParser(object):
     def p_ioport(self, p):
         'ioport : sigtypes_id'
         sigtypes, ID = self._separate_sigtypes_id(p, p[1])
-        p[0] = self.create_ioport(p, sigtypes, ID, lineno=p.lineno(1))
+        var_items = self.create_var_items(p, sigtypes, ID, lineno=p.lineno(1))
+        p[0] = Var(var_items, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_ioport_pdims_width(self, p):
         'ioport : sigtypes pdims_width _id'
         pdims, width = p[2]
-        p[0] = self.create_ioport(p, p[1], p[3], width=width, pdims=pdims, lineno=p.lineno(1))
+        var_items = self.create_var_items(
+            p, p[1], p[3], width=width, pdims=pdims, lineno=p.lineno(1))
+        p[0] = Var(var_items, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_ioport_pdims_width_udims(self, p):
         'ioport : sigtypes pdims_width _id udims'
         pdims, width = p[2]
-        p[0] = self.create_ioport(p, p[1], p[3], width=width,
-                                  pdims=pdims, udims=p[4], lineno=p.lineno(1))
+        var_items = self.create_var_items(p, p[1], p[3], width=width,
+                                          pdims=pdims, udims=p[4], lineno=p.lineno(1))
+        p[0] = Var(var_items, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_ioport_oldstyle(self, p):
         'ioport : _id'
-        p[0] = Port(name=p[1], width=None,
-                    pdims=None, udims=None, type=None, lineno=p.lineno(1))
+        p[0] = Port(p[1], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_width_vector(self, p):
@@ -458,15 +305,6 @@ class VerilogParser(object):
         pdims, width = self._separate_pdims_width(p, p[1])
         p[0] = (pdims, width)
         p.set_lineno(0, p.lineno(1))
-
-    def p_pdims_width_or_empty(self, p):
-        'pdims_width_or_empty : pdims_width'
-        p[0] = p[1]
-        p.set_lineno(0, p.lineno(1))
-
-    def p_pdims_width_or_empty_empty(self, p):
-        'pdims_width_or_empty : empty'
-        p[0] = ()
 
     def p_udims(self, p):
         'udims : dims'
@@ -517,7 +355,6 @@ class VerilogParser(object):
         """standard_item : decl
         | parameter_decl
         | localparam_decl
-        | decl_assign
         | typedef
         | genvar_decl
         | assignment
@@ -534,7 +371,7 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    def create_decl(self, p, sigtypes, name, width=None, pdims=None, udims=None, lineno=0):
+    def create_var_items(self, p, sigtypes, name, width=None, pdims=None, udims=None, lineno=0):
         signed = None
         decls = []
 
@@ -658,15 +495,15 @@ class VerilogParser(object):
             else:
                 typename = sigtypes[0][0]
                 modportname = None
-            decls.append(CustomVariable(typename=typename, name=name, modportname=modportname,
-                                        width=width, signed=signed,
-                                        pdims=pdims, udims=udims, lineno=lineno))
+            decls.append(CustomType(typename=typename, name=name, modportname=modportname,
+                                    width=width, signed=signed,
+                                    pdims=pdims, udims=udims, lineno=lineno))
             sigtypes.remove(sigtypes[0])
 
         if len(sigtypes) > 0:
             self._raise_error(p)
 
-        return decls
+        return tuple(decls)
 
     def typecheck_decl(self, p, sigtypes, pdims=None, udims=None):
         if len(sigtypes) > 3:
@@ -714,56 +551,96 @@ class VerilogParser(object):
         if 'output' in sigtypes and 'tri' in sigtypes:
             self._raise_error(p)
 
+    def p_decl_assign(self, p):
+        'decl : sigtypes_id decl_assign_value SEMICOLON'
+        sigtypes, ID = self._separate_sigtypes_id(p, p[1])
+        var_items = self.create_var_items(
+            p, sigtypes, ID, pdims=None, udims=None, lineno=p.lineno(1))
+        var = Var(var_items, lineno=p.lineno(1))
+        right = p[2]
+        assign = Assign(var, right, lineno=p.lineno(1))
+        p[0] = DeclVarAssign(var, assign, lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
     def p_decl_one(self, p):
         'decl : sigtypes_id SEMICOLON'
         sigtypes, ID = self._separate_sigtypes_id(p, p[1])
-        decllist = []
-        decllist.extend(self.create_decl(p, sigtypes, ID, pdims=None, udims=None,
-                                         lineno=p.lineno(1)))
-        p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
+        var_items = self.create_var_items(
+            p, sigtypes, ID, pdims=None, udims=None, lineno=p.lineno(1))
+        variables = (Var(var_items, lineno=p.lineno(1)),)
+        p[0] = DeclVars(variables, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_decl_one_udims(self, p):
         'decl : sigtypes_id udims SEMICOLON'
         sigtypes, ID = self._separate_sigtypes_id(p, p[1])
-        decllist = []
-        decllist.extend(self.create_decl(p, sigtypes, ID, pdims=None, udims=p[2],
-                                         lineno=p.lineno(1)))
-        p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
+        var_items = self.create_var_items(
+            p, sigtypes, ID, pdims=None, udims=p[2], lineno=p.lineno(1))
+        variables = (Var(var_items, lineno=p.lineno(1)),)
+        p[0] = DeclVars(variables, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_decl_list(self, p):
         'decl : sigtypes_id COMMA declnamelist SEMICOLON'
         sigtypes, ID = self._separate_sigtypes_id(p, p[1])
-        decllist = []
-        decllist.extend(self.create_decl(p, sigtypes, ID, pdims=None, udims=None,
-                                         lineno=p.lineno(1)))
+        var_items = self.create_var_items(
+            p, sigtypes, ID, pdims=None, udims=None, lineno=p.lineno(1))
+        variables = []
+        variables.append(Var(var_items, lineno=p.lineno(1)))
+
         for rname, rudims in p[3]:
-            decllist.extend(self.create_decl(p, sigtypes, rname, pdims=None, udims=rudims,
-                                             lineno=p.lineno(1)))
-        p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
+            var_items = self.create_var_items(p, sigtypes, rname, pdims=None, udims=rudims,
+                                              lineno=p.lineno(1))
+            variables.append(Var(var_items, lineno=p.lineno(1)))
+
+        p[0] = DeclVars(tuple(variables), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_decl_udims_list(self, p):
         'decl : sigtypes_id udims COMMA declnamelist SEMICOLON'
         sigtypes, ID = self._separate_sigtypes_id(p, p[1])
-        decllist = []
-        decllist.extend(self.create_decl(p, sigtypes, ID, pdims=None, udims=p[2],
-                                         lineno=p.lineno(1)))
+        var_items = self.create_var_items(
+            p, sigtypes, ID, pdims=None, udims=p[2], lineno=p.lineno(1))
+        variables = []
+        variables.append(Var(var_items, lineno=p.lineno(1)))
+
         for rname, rudims in p[4]:
-            decllist.extend(self.create_decl(p, sigtypes, rname, pdims=None, udims=rudims,
-                                             lineno=p.lineno(1)))
-        p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
+            var_items = self.create_var_items(p, sigtypes, rname, pdims=None, udims=rudims,
+                                              lineno=p.lineno(1))
+            variables.append(Var(var_items, lineno=p.lineno(1)))
+
+        p[0] = DeclVars(tuple(variables), lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_decl_pdims_width_assign(self, p):
+        'decl : sigtypes pdims_width declnamelist decl_assign_value SEMICOLON'
+        pdims, width = p[2]
+
+        variables = []
+        for rname, rudims in p[3]:
+            var_items = self.create_var_items(p, p[1], rname, width=width, pdims=pdims, udims=rudims,
+                                              lineno=p.lineno(1))
+            variables.append(Var(var_items, lineno=p.lineno(1)))
+
+        if len(variables) > 1:
+            self._raise_error(p)
+
+        var = variables[-1]
+        right = p[4]
+        p[0] = DeclVarAssign(var, right, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_decl_pdims_width(self, p):
         'decl : sigtypes pdims_width declnamelist SEMICOLON'
-        decllist = []
         pdims, width = p[2]
+
+        variables = []
         for rname, rudims in p[3]:
-            decllist.extend(self.create_decl(p, p[1], rname, width=width, pdims=pdims, udims=rudims,
-                                             lineno=p.lineno(1)))
-        p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
+            var_items = self.create_var_items(p, p[1], rname, width=width, pdims=pdims, udims=rudims,
+                                              lineno=p.lineno(1))
+            variables.append(Var(var_items, lineno=p.lineno(1)))
+
+        p[0] = DeclVars(tuple(variables), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_declnamelist(self, p):
@@ -785,6 +662,11 @@ class VerilogParser(object):
         'declname : _id udims'
         p[0] = (p[1], p[2])
         p.set_lineno(0, p.lineno(1))
+
+    def p_decl_assign_value(self, p):
+        'decl_assign_value : EQUALS rvalue'
+        p[0] = p[2]
+        p.set_lineno(0, p.lineno(2))
 
     # --------------------------------------------------------------------------
     def p_decl_instance_no_param(self, p):
@@ -967,145 +849,6 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    def create_decl_assign(self, p, sigtypes, name, assign, width=None, pdims=None, udims=None, lineno=0):
-        signed = None
-        decls = []
-
-        self.typecheck_decl_assign(p, sigtypes)
-
-        sigtypes = list(sigtypes)
-
-        if 'signed' in sigtypes:
-            signed = True
-            sigtypes.remove('signed')
-
-        elif 'unsigned' in sigtypes:
-            signed = False
-            sigtypes.remove('unsigned')
-
-        if len(sigtypes) > 2:
-            self._raise_error(p)
-
-        if 'input' in sigtypes:
-            decls.append(Input(name=name, width=width,
-                               signed=signed, lineno=lineno))
-            sigtypes.remove('input')
-
-        elif 'output' in sigtypes:
-            decls.append(Output(name=name, width=width,
-                                signed=signed, lineno=lineno))
-            sigtypes.remove('output')
-
-        elif 'inout' in sigtypes:
-            decls.append(Inout(name=name, width=width,
-                               signed=signed, lineno=lineno))
-            sigtypes.remove('inout')
-
-        if len(sigtypes) > 1:
-            self._raise_error(p)
-
-        if 'wire' in sigtypes:
-            decls.append(Wire(name=name, width=width,
-                              signed=signed, lineno=lineno))
-            sigtypes.remove('wire')
-
-        elif 'reg' in sigtypes:
-            decls.append(Reg(name=name, width=width,
-                             signed=signed, lineno=lineno))
-            sigtypes.remove('reg')
-
-        elif 'logic' in sigtypes:
-            decls.append(Logic(name=name, width=width,
-                               signed=signed, lineno=lineno))
-            sigtypes.remove('logic')
-
-        if len(sigtypes) > 0:
-            if isinstance(sigtypes[0], tuple):
-                typename = sigtypes[0][0]
-                modportname = sigtypes[0][1]
-            else:
-                typename = sigtypes[0][0]
-                modportname = None
-            decls.append(CustomVariable(typename=typename, name=name, modportname=modportname,
-                                        width=width, signed=signed,
-                                        pdims=pdims, udims=udims, lineno=lineno))
-            sigtypes.remove(sigtypes[0])
-
-        if len(sigtypes) > 0:
-            self._raise_error(p)
-
-        decls.append(assign)
-        return decls
-
-    def typecheck_decl_assign(self, p, sigtypes):
-        if len(sigtypes) > 3:
-            self._raise_error(p)
-
-        if len(sigtypes) != len(set(sigtypes)):
-            self._raise_error(p)
-
-        if 'signed' not in sigtypes and 'unsigned' not in sigtypes and len(sigtypes) > 2:
-            self._raise_error(p)
-
-        if 'signed' in sigtypes and len(sigtypes) == 1:
-            self._raise_error(p)
-
-        if 'unsigned' in sigtypes and len(sigtypes) == 1:
-            self._raise_error(p)
-
-        if 'signed' in sigtypes and 'unsigned' in sigtypes:
-            self._raise_error(p)
-
-        if 'input' in sigtypes and 'output' in sigtypes:
-            self._raise_error(p)
-
-        if 'inout' in sigtypes and 'output' in sigtypes:
-            self._raise_error(p)
-
-        if 'inout' in sigtypes and 'input' in sigtypes:
-            self._raise_error(p)
-
-        if 'input' in sigtypes and 'reg' in sigtypes:
-            self._raise_error(p)
-
-        if 'inout' in sigtypes and 'reg' in sigtypes:
-            self._raise_error(p)
-
-        if 'reg' not in sigtypes and 'wire' not in sigtypes:
-            self._raise_error(p)
-
-        if 'supply0' in sigtypes and len(sigtypes) != 1:
-            self._raise_error(p)
-
-        if 'supply1' in sigtypes and len(sigtypes) != 1:
-            self._raise_error(p)
-
-    def p_decl_assign(self, p):
-        'decl_assign : sigtypes pdims_width_or_empty delay_or_empty _id decl_assign_right SEMICOLON'
-        pdims, width = (None, None) if p[2] == () else p[2]
-        sigtypes = p[1]
-        ID = p[4]
-        left = Lvalue(Identifier(ID, lineno=p.lineno(1)), lineno=p.lineno(1))
-        right = p[5][0]
-        ldelay = None if p[4] == () else p[4]
-        rdelay = p[5][1]
-        assign = Assign(left, right, ldelay, rdelay, lineno=p.lineno(1))
-        decllist = self.create_decl_assign(p, sigtypes, ID, assign,
-                                          width=width, pdims=pdims, lineno=p.lineno(1))
-        p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
-        p.set_lineno(0, p.lineno(1))
-
-    def p_decl_assign_right(self, p):
-        'decl_assign_right : EQUALS rvalue'
-        p[0] = (p[2], None)  # value, delay
-        p.set_lineno(0, p.lineno(2))
-
-    def p_decl_assign_right_delay(self, p):
-        'decl_assign_right : EQUALS delay rvalue'
-        p[0] = (p[3], p[2])  # value, delay
-        p.set_lineno(0, p.lineno(3))
-
-    # --------------------------------------------------------------------------
     def p_parameter_decl(self, p):
         'parameter_decl : param SEMICOLON'
         p[0] = p[1]
@@ -1113,12 +856,12 @@ class VerilogParser(object):
 
     def p_localparam_decl(self, p):
         'localparam_decl : LOCALPARAM var_sigtype_or_empty sign_sigtype_or_empty width_or_empty param_substitution_list SEMICOLON'
-        ptype = None if p[2] == () else p[2]
+        sigtypes = None if p[2] == () else p[2]
         signed = None if p[3] == () else p[3]
         width = None if p[4] == () else p[4]
-        paramlist = [Localparam(rname, rvalue, width, signed=signed, ptype=ptype, lineno=p.lineno(1))
+        paramlist = [Localparam(rname, rvalue, width, signed=signed, sigtypes=sigtypes, lineno=p.lineno(1))
                      for rname, rvalue in p[5]]
-        p[0] = Decl(tuple(paramlist), lineno=p.lineno(1))
+        p[0] = DeclParameters(tuple(paramlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_param_substitution_list(self, p):
@@ -1240,10 +983,10 @@ class VerilogParser(object):
 
     # --------------------------------------------------------------------------
     def p_assignment(self, p):
-        'assignment : ASSIGN delay_or_empty lvalue EQUALS delay_or_empty rvalue SEMICOLON'
+        'assignment : ASSIGN delay_or_empty lvalue EQUALS rvalue SEMICOLON'
         ldelay = None if p[2] == () else p[2]
-        rdelay = None if p[5] == () else p[5]
-        p[0] = Assign(p[3], p[6], ldelay, rdelay, lineno=p.lineno(1))
+        rdelay = None
+        p[0] = Assign(p[3], p[5], ldelay, rdelay, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
@@ -1987,12 +1730,13 @@ class VerilogParser(object):
         | parameter_decl
         | localparam_decl
         """
-        if isinstance(p[1], Decl):
-            for r in p[1].list:
-                if (not isinstance(r, Reg) and not isinstance(r, Wire) and
-                    not isinstance(r, Integer) and not isinstance(r, Real) and
-                        not isinstance(r, Parameter) and not isinstance(r, Localparam)):
-                    self._raise_error(p)
+        if isinstance(p[1], DeclVars):
+            for item in p[1].items:
+                for v in item.items:
+                    if (not isinstance(v, Reg) and not isinstance(v, Wire) and
+                        not isinstance(v, Integer) and not isinstance(v, Real) and
+                            not isinstance(v, Parameter) and not isinstance(v, Localparam)):
+                        self._raise_error(p)
 
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
@@ -2198,7 +1942,7 @@ class VerilogParser(object):
     # --------------------------------------------------------------------------
     def p_genvar_decl(self, p):
         'genvar_decl : GENVAR genvarlist SEMICOLON'
-        p[0] = Decl(p[2], lineno=p.lineno(1))
+        p[0] = Var(p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_genvarlist(self, p):
@@ -2360,11 +2104,12 @@ class VerilogParser(object):
 
     def p_funcvardecl(self, p):
         'funcvardecl : decl'
-        if isinstance(p[1], Decl):
-            for r in p[1].list:
-                if (not isinstance(r, Input) and not isinstance(r, Reg) and
-                        not isinstance(r, Integer)):
-                    self._raise_error(p)
+        if isinstance(p[1], DeclVars):
+            for item in p[1].items:
+                for v in item.items:
+                    if (not isinstance(v, Input) and not isinstance(v, Reg) and
+                            not isinstance(v, Integer)):
+                        self._raise_error(p)
 
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
@@ -2429,12 +2174,12 @@ class VerilogParser(object):
 
     def p_taskvardecl(self, p):
         'taskvardecl : decl'
-
-        if isinstance(p[1], Decl):
-            for r in p[1].list:
-                if (not isinstance(r, Input) and not isinstance(r, Reg) and
-                        not isinstance(r, Integer)):
-                    self._raise_error(p)
+        if isinstance(p[1], DeclVars):
+            for item in p[1].items:
+                for v in item.items:
+                    if (not isinstance(v, Input) and not isinstance(v, Reg) and
+                            not isinstance(v, Integer)):
+                        self._raise_error(p)
 
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))

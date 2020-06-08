@@ -8,7 +8,7 @@ from optparse import OptionParser
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pyverilog
-from pyverilog.vparser.parser import parse
+from pyverilog.parser.parser import parse
 
 
 def main():
