@@ -435,7 +435,7 @@ class Ioport(Node):
 class Parameter(Node):
     attr_names = ('name', 'ptype', 'signed')
 
-    def __init__(self, name, value, width=None, pdims=None, udims=None, ptype=None, signed=False, lineno=0):
+    def __init__(self, name, value, width=None, pdims=None, udims=None, ptype=None, signed=None, lineno=0):
         self.lineno = lineno
         self.name = name
         self.value = value

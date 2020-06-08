@@ -155,7 +155,7 @@ class ASTCodeGenerator(ConvertVisitor):
     def _paramlist(self, paramlist):
         filename = 'paramlist.txt'
         template = self.get_template(filename)
-        params = [self.visit(param).replace(';', '') for param in paramlist]
+        params = [self.visit(param).replace(';', '') for param in paramlist.items]
         template_dict = {
             'params': params,
             'len_params': len(params),
@@ -166,7 +166,7 @@ class ASTCodeGenerator(ConvertVisitor):
     def _portlist(self, portlist):
         filename = 'portlist.txt'
         template = self.get_template(filename)
-        ports = [self.visit(port) for port in node.ports]
+        ports = [self.visit(port) for port in portlist]
         template_dict = {
             'ports': ports,
             'len_ports': len(ports),
@@ -268,7 +268,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = '_variable4state.txt'
         template = self.get_template(filename)
         template_dict = {
-            'vartype': node.node.__class__.__name__.lower(),
+            'vartype': node.__class__.__name__.lower(),
             'name': escape(node.name),
             'width': '' if node.width is None else self.visit(node.width),
             'signed': get_signed(node),
@@ -282,7 +282,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = '_variable4state_no_width.txt'
         template = self.get_template(filename)
         template_dict = {
-            'vartype': node.node.__class__.__name__.lower(),
+            'vartype': node.__class__.__name__.lower(),
             'name': escape(node.name),
             'width': '',
             'signed': get_signed(node),
@@ -296,7 +296,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = '_variable2state.txt'
         template = self.get_template(filename)
         template_dict = {
-            'vartype': node.node.__class__.__name__.lower(),
+            'vartype': node.__class__.__name__.lower(),
             'name': escape(node.name),
             'width': '' if node.width is None else self.visit(node.width),
             'signed': get_signed(node),
@@ -310,7 +310,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = '_variable4state_no_width.txt'
         template = self.get_template(filename)
         template_dict = {
-            'vartype': node.node.__class__.__name__.lower(),
+            'vartype': node.__class__.__name__.lower(),
             'name': escape(node.name),
             'width': '',
             'signed': get_signed(node),
@@ -324,7 +324,7 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = '_variablereal.txt'
         template = self.get_template(filename)
         template_dict = {
-            'vartype': node.node.__class__.__name__.lower(),
+            'vartype': node.__class__.__name__.lower(),
             'name': escape(node.name),
             'width': '',
             'signed': get_signed(node),
@@ -403,8 +403,8 @@ class ASTCodeGenerator(ConvertVisitor):
     def visit_Ioport(self, node):
         filename = getfilename(node)
         template = self.get_template(filename)
-        signed = (get_signed(node.first.signed) if node.first.signed is not None else
-                  get_signed(node.second.signed) if node.second is not None else '')
+        signed = (get_signed(node.first) if node.first is not None else
+                  get_signed(node.second) if node.second is not None else '')
         template_dict = {
             'first': node.first.__class__.__name__.lower(),
             'second': '' if node.second is None else node.second.__class__.__name__.lower(),

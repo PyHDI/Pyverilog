@@ -28,7 +28,7 @@ module top
         led <= led + 1;
       end else begin
         count <= count + 1;
-      end 
+      end
     end
   end
 
@@ -36,14 +36,15 @@ module top
 endmodule
 """
 
+
 def test():
-    params = vast.Paramlist( [] )
-    clk = vast.Ioport( vast.Input('CLK') )
-    rst = vast.Ioport( vast.Input('RST') )
-    width = vast.Width( vast.IntConst('7'), vast.IntConst('0') )
-    led = vast.Ioport( vast.Output('led', width=width), vast.Reg('led', width=width) )
-    ports = vast.Portlist( (clk, rst, led) )
-    items = [ vast.EmbeddedCode("""
+    params = None
+    clk = vast.Ioport(vast.Input('CLK'))
+    rst = vast.Ioport(vast.Input('RST'))
+    width = vast.Width(vast.IntConst('7'), vast.IntConst('0'))
+    led = vast.Ioport(vast.Output('led', width=width), vast.Reg('led', width=width))
+    ports = (clk, rst, led)
+    items = [vast.EmbeddedCode("""
 // Embedded code
 reg [31:0] count;
 always @(posedge CLK) begin
@@ -56,17 +57,19 @@ always @(posedge CLK) begin
       led <= led + 1;
     end else begin
       count <= count + 1;
-    end 
+    end
   end
 end
-""") ]
-    ast = vast.ModuleDef("top", params, ports, items)
-    
+""")]
+
+    ast = vast.Module("top", params, ports, items)
+
     codegen = ASTCodeGenerator()
     rslt = codegen.visit(ast)
-    
+
     print(rslt)
     assert(expected == rslt)
+
 
 if __name__ == '__main__':
     test()
