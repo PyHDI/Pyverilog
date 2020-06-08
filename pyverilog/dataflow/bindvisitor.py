@@ -109,11 +109,19 @@ class BindVisitor(NodeVisitor):
 
         self.addBind(node.name, node.value, bindtype='localparam')
 
-    def visit_Supply(self, node):
+    def visit_Supply0(self, node):
         self.addTerm(node)
         current = self.frames.getCurrent()
         name = current + ScopeLabel(node.name, 'signal')
-        self.addBind(node.name, node.value, bindtype='parameter')
+        value = vast.IntConst('0')
+        self.addBind(node.name, value, bindtype='parameter')
+
+    def visit_Supply1(self, node):
+        self.addTerm(node)
+        current = self.frames.getCurrent()
+        name = current + ScopeLabel(node.name, 'signal')
+        value = vast.IntConst('1')
+        self.addBind(node.name, value, bindtype='parameter')
 
     def visit_Genvar(self, node):
         self.addTerm(node)

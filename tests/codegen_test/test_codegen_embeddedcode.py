@@ -39,11 +39,12 @@ endmodule
 
 def test():
     params = None
-    clk = vast.Ioport(vast.Input('CLK'))
-    rst = vast.Ioport(vast.Input('RST'))
+    clk = vast.DeclVars([vast.Var([vast.Input('CLK')])])
+    rst = vast.DeclVars([vast.Var([vast.Input('RST')])])
     width = vast.Width(vast.IntConst('7'), vast.IntConst('0'))
-    led = vast.Ioport(vast.Output('led', width=width), vast.Reg('led', width=width))
-    ports = (clk, rst, led)
+    led = vast.DeclVars(
+        [vast.Var([vast.Output('led', width=width), vast.Reg('led', width=width)])])
+    ports = [clk, rst, led]
     items = [vast.EmbeddedCode("""
 // Embedded code
 reg [31:0] count;

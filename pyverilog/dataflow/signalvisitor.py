@@ -79,7 +79,10 @@ class SignalVisitor(NodeVisitor):
             value = self.optimize(self.getTree(node.value, self.frames.getCurrent()))
             self.setConstant(name, value)
 
-    def visit_Supply(self, node):
+    def visit_Supply0(self, node):
+        self.frames.addSignal(node)
+
+    def visit_Supply1(self, node):
         self.frames.addSignal(node)
 
     def visit_Genvar(self, node):

@@ -444,13 +444,13 @@ class VerilogParser(object):
             sigtypes.remove('realtime')
 
         elif 'supply0' in sigtypes:
-            decls.append(Supply(name=name, value=IntConst('0', lineno=lineno),
-                                width=width, signed=signed, lineno=lineno))
+            decls.append(Supply0(name=name,
+                                 width=width, signed=signed, lineno=lineno))
             sigtypes.remove('supply0')
 
         elif 'supply1' in sigtypes:
-            decls.append(Supply(name=name, value=IntConst('1', lineno=lineno),
-                                width=width, signed=signed, lineno=lineno))
+            decls.append(Supply1(name=name,
+                                 width=width, signed=signed, lineno=lineno))
             sigtypes.remove('supply1')
 
         elif 'logic' in sigtypes:
@@ -861,7 +861,7 @@ class VerilogParser(object):
         width = None if p[4] == () else p[4]
         paramlist = [Localparam(rname, rvalue, width, signed=signed, sigtypes=sigtypes, lineno=p.lineno(1))
                      for rname, rvalue in p[5]]
-        p[0] = DeclParameters(tuple(paramlist), lineno=p.lineno(1))
+        p[0] = DeclLocalparams(tuple(paramlist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_param_substitution_list(self, p):

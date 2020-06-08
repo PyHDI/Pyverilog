@@ -36,12 +36,12 @@ endmodule
 
 def test():
     datawid = vast.Parameter('DATAWID', vast.Rvalue(vast.IntConst('32')))
-    params = vast.Decl([datawid])
-    clk = vast.Ioport(vast.Input('CLK'))
-    rst = vast.Ioport(vast.Input('RST'))
+    params = [vast.DeclParameters([datawid])]
+    clk = vast.DeclVars([vast.Var([vast.Input('CLK')])])
+    rst = vast.DeclVars([vast.Var([vast.Input('RST')])])
     width = vast.Width(vast.IntConst('7'), vast.IntConst('0'))
-    led = vast.Ioport(vast.Output('led', width=width))
-    ports = vast.Decl([clk, rst, led])
+    led = vast.DeclVars([vast.Var([vast.Output('led', width=width)])])
+    ports = [clk, rst, led]
 
     width = vast.Width(vast.Minus(vast.Identifier('DATAWID'),
                                   vast.IntConst('1')), vast.IntConst('0'))
@@ -78,7 +78,7 @@ def test():
     always = vast.Always(senslist, statement)
 
     items = []
-    items.append(count)
+    items.append(vast.DeclVars([vast.Var([count])]))
     items.append(assign)
     items.append(always)
 

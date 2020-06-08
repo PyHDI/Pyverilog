@@ -1,0 +1,1 @@
+{{ sigtypes }} {% if signed != '' %}{{ signed }} {% endif %}{% if pdims != '' %}{{ pdims }} {% endif %}{% if width != '' %}{{ width }} {% endif %}{{ var }} = {{ right }};

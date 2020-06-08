@@ -1,0 +1,1 @@
+localparam {% if sigtypes != '' %}{{ sigtypes }} {% endif %}{% if signed != '' %}{{ signed }} {% endif %}{% if pdims != '' %}{{ pdims }} {% endif %}{% if width != '' %}{{ width }} {% endif %}{% for item in items %}{{ item }}{% if loop.index < len_items %}, {% endif %}{% endfor %};

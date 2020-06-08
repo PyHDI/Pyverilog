@@ -104,6 +104,16 @@ def get_signed(node):
     return 'signed'
 
 
+def get_items_signed(items):
+    signed = ''
+    for item in items:
+        s = get_signed(item)
+        if s != '':
+            signed = s
+            break
+    return signed
+
+
 class ASTCodeGenerator(ConvertVisitor):
     def __init__(self, indentsize=2):
         self.env = Environment(loader=FileSystemLoader(DEFAULT_TEMPLATE_DIR))
@@ -155,7 +165,7 @@ class ASTCodeGenerator(ConvertVisitor):
     def _paramlist(self, paramlist):
         filename = 'paramlist.txt'
         template = self.get_template(filename)
-        params = [self.visit(param).replace(';', '') for param in paramlist.items]
+        params = [self.visit(param).replace(';', '') for param in paramlist]
         template_dict = {
             'params': params,
             'len_params': len(params),
@@ -166,7 +176,7 @@ class ASTCodeGenerator(ConvertVisitor):
     def _portlist(self, portlist):
         filename = 'portlist.txt'
         template = self.get_template(filename)
-        ports = [self.visit(port) for port in portlist]
+        ports = [self.visit(port).replace(';', '') for port in portlist]
         template_dict = {
             'ports': ports,
             'len_ports': len(ports),
@@ -174,17 +184,86 @@ class ASTCodeGenerator(ConvertVisitor):
         rslt = template.render(template_dict)
         return rslt
 
-    def visit_Decl(self, node):
+    def visit_DeclParameters(self, node):
         filename = getfilename(node)
         template = self.get_template(filename)
+        var = node.items[0]
+        sigtypes = ' '.join(var.sigtypes) if var.sigtypes is not None else ''
+        signed = get_signed(var)
+        items = [self.visit(item) for item in node.items]
         template_dict = {
-            'items': [self.visit(item) for item in node.items],
+            'sigtypes': sigtypes,
+            'width': ('' if var.width is None or (value.startswith('"') and value.endswith('"')) else
+                      self.visit(var.width)),
+            'signed': signed,
+            'pdims': '' if var.pdims is None else self.visit(var.pdims),
+            'items': items,
+            'len_items': len(items)
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_DeclLocalparams(self, node):
+        return self.visit_DeclParameters(node)
+
+    def visit_DeclVars(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        var = node.items[0]
+        sigtypes = []
+        for item in var.items:
+            if not isinstance(item, CustomType):
+                sigtypes.append(item.__class__.__name__.lower())
+            elif item.modport is not None:
+                sigtypes.append('.'.join([escape(item.typename), escape(item.modport)]))
+            else:
+                sigtypes.append(escape(item.typename))
+        sigtypes = ' '.join(sigtypes)
+        signed = get_items_signed(var.items)
+        items = [self.visit(item) for item in node.items]
+        template_dict = {
+            'sigtypes': sigtypes,
+            'width': '' if var.items[0].width is None else self.visit(var.items[0].width),
+            'signed': signed,
+            'pdims': '' if var.items[0].pdims is None else self.visit(var.items[0].pdims),
+            'items': items,
+            'len_items': len(items)
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_DeclVarAssign(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        var = node.var
+        template_dict = {
+            'sigtypes': ' '.join([item.__class__.__name__.lower() for item in var.items]),
+            'width': '' if var.items[0].width is None else self.visit(var.items[0].width),
+            'signed': signed,
+            'pdims': '' if var.items[0].pdims is None else self.visit(var.items[0].pdims),
+            'var': self.visit(var),
+            'right': self.visit(node.assign.right),
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+    def visit_DeclInstances(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        paramlist = [self.indent(self.visit(param)) for param in node.items[0].paramlist]
+        items = [self.visit(item) for item in node.items]
+        template_dict = {
+            'module': escape(node.module),
+            'paramlist': paramlist,
+            'len_paramlist': len(paramlist),
+            'items': items,
+            'len_items': len(items),
         }
         rslt = template.render(template_dict)
         return rslt
 
     def visit_Port(self, node):
-        # for the old-style I/O port declaration
+        # old-style port declaration
         filename = getfilename(node)
         template = self.get_template(filename)
         template_dict = {
@@ -264,170 +343,165 @@ class ASTCodeGenerator(ConvertVisitor):
         rslt = template.render(template_dict)
         return rslt
 
-    def visit__Variable4State(self, node):
-        filename = '_variable4state.txt'
-        template = self.get_template(filename)
-        template_dict = {
-            'vartype': node.__class__.__name__.lower(),
-            'name': escape(node.name),
-            'width': '' if node.width is None else self.visit(node.width),
-            'signed': get_signed(node),
-            'pdims': '' if node.pdims is None else self.visit(node.pdims),
-            'udims': '' if node.udims is None else self.visit(node.udims),
-        }
-        rslt = template.render(template_dict)
-        return rslt
-
-    def visit__Variable4State_no_width(self, node):
-        filename = '_variable4state_no_width.txt'
-        template = self.get_template(filename)
-        template_dict = {
-            'vartype': node.__class__.__name__.lower(),
-            'name': escape(node.name),
-            'width': '',
-            'signed': get_signed(node),
-            'pdims': '' if node.pdims is None else self.visit(node.pdims),
-            'udims': '' if node.udims is None else self.visit(node.udims),
-        }
-        rslt = template.render(template_dict)
-        return rslt
-
-    def visit__Variable2State(self, node):
-        filename = '_variable2state.txt'
-        template = self.get_template(filename)
-        template_dict = {
-            'vartype': node.__class__.__name__.lower(),
-            'name': escape(node.name),
-            'width': '' if node.width is None else self.visit(node.width),
-            'signed': get_signed(node),
-            'pdims': '' if node.pdims is None else self.visit(node.pdims),
-            'udims': '' if node.udims is None else self.visit(node.udims),
-        }
-        rslt = template.render(template_dict)
-        return rslt
-
-    def visit__Variable2State_no_width(self, node):
-        filename = '_variable4state_no_width.txt'
-        template = self.get_template(filename)
-        template_dict = {
-            'vartype': node.__class__.__name__.lower(),
-            'name': escape(node.name),
-            'width': '',
-            'signed': get_signed(node),
-            'pdims': '' if node.pdims is None else self.visit(node.pdims),
-            'udims': '' if node.udims is None else self.visit(node.udims),
-        }
-        rslt = template.render(template_dict)
-        return rslt
-
-    def visit__VariableReal(self, node):
-        filename = '_variablereal.txt'
-        template = self.get_template(filename)
-        template_dict = {
-            'vartype': node.__class__.__name__.lower(),
-            'name': escape(node.name),
-            'width': '',
-            'signed': get_signed(node),
-            'pdims': '' if node.pdims is None else self.visit(node.pdims),
-            'udims': '' if node.udims is None else self.visit(node.udims),
-        }
-        rslt = template.render(template_dict)
-        return rslt
-
-    def visit_Input(self, node):
-        return self.visit__Variable4State(node)
-
-    def visit_Output(self, node):
-        return self.visit__Variable4State(node)
-
-    def visit_Inout(self, node):
-        return self.visit__Variable4State(node)
-
-    def visit_Tri(self, node):
-        return self.visit__Variable4State(node)
-
-    def visit_Wire(self, node):
-        return self.visit__Variable4State(node)
-
-    def visit_Reg(self, node):
-        return self.visit__Variable4State(node)
-
-    def visit_Integer(self, node):
-        return self.visit__Variable4State_no_width(node)
-
-    def visit_Time(self, node):
-        return self.visit__Variable4State_no_width(node)
-
-    def visit_Real(self, node):
-        return self.visit__VariableReal(node)
-
-    def visit_RealTime(self, node):
-        return self.visit__VariableReal(node)
-
-    def visit_Logic(self, node):
-        return self.visit__Variable4State(node)
-
-    def visit_ShortInt(self, node):
-        return self.visit__Variable2State_no_width(node)
-
-    def visit_Int(self, node):
-        return self.visit__Variable2State_no_width(node)
-
-    def visit_LongInt(self, node):
-        return self.visit__Variable2State_no_width(node)
-
-    def visit_Byte(self, node):
-        return self.visit__Variable2State_no_width(node)
-
-    def visit_Bit(self, node):
-        return self.visit__Variable2State(node)
-
-    def visit_ShortReal(self, node):
-        return self.visit__VariableReal(node)
-
-    def visit_CustomVariable(self, node):
+    def visit_Var(self, node):
         filename = getfilename(node)
         template = self.get_template(filename)
         template_dict = {
-            'vartype': escape(node.typename),
-            'name': escape(node.name),
-            'modportname': escape(node.modportname) if node.modportname is not None else '',
-            'width': '' if node.width is None else self.visit(node.width),
-            'signed': get_signed(node),
-            'pdims': '' if node.pdims is None else self.visit(node.pdims),
-            'udims': '' if node.udims is None else self.visit(node.udims),
+            'name': escape(node.items[0].name),
+            'udims': '' if node.items[0].udims is None else self.visit(node.items[0].udims),
         }
         rslt = template.render(template_dict)
         return rslt
 
-    def visit_Ioport(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        signed = (get_signed(node.first) if node.first is not None else
-                  get_signed(node.second) if node.second is not None else '')
-        template_dict = {
-            'first': node.first.__class__.__name__.lower(),
-            'second': '' if node.second is None else node.second.__class__.__name__.lower(),
-            'name': escape(node.first.name),
-            'width': '' if node.first.width is None else self.visit(node.first.width),
-            'signed': signed,
-            'pdims': '' if node.first.pdims is None else self.visit(node.first.pdims),
-            'udims': '' if node.first.udims is None else self.visit(node.first.udims),
-        }
-        rslt = template.render(template_dict)
-        return rslt
+#    def visit__Variable4State(self, node):
+#        filename = '_variable4state.txt'
+#        template = self.get_template(filename)
+#        template_dict = {
+#            'vartype': node.__class__.__name__.lower(),
+#            'name': escape(node.name),
+#            'width': '' if node.width is None else self.visit(node.width),
+#            'signed': get_signed(node),
+#            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+#            'udims': '' if node.udims is None else self.visit(node.udims),
+#        }
+#        rslt = template.render(template_dict)
+#        return rslt
+#
+#    def visit__Variable4State_no_width(self, node):
+#        filename = '_variable4state_no_width.txt'
+#        template = self.get_template(filename)
+#        template_dict = {
+#            'vartype': node.__class__.__name__.lower(),
+#            'name': escape(node.name),
+#            'width': '',
+#            'signed': get_signed(node),
+#            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+#            'udims': '' if node.udims is None else self.visit(node.udims),
+#        }
+#        rslt = template.render(template_dict)
+#        return rslt
+#
+#    def visit__Variable2State(self, node):
+#        filename = '_variable2state.txt'
+#        template = self.get_template(filename)
+#        template_dict = {
+#            'vartype': node.__class__.__name__.lower(),
+#            'name': escape(node.name),
+#            'width': '' if node.width is None else self.visit(node.width),
+#            'signed': get_signed(node),
+#            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+#            'udims': '' if node.udims is None else self.visit(node.udims),
+#        }
+#        rslt = template.render(template_dict)
+#        return rslt
+#
+#    def visit__Variable2State_no_width(self, node):
+#        filename = '_variable4state_no_width.txt'
+#        template = self.get_template(filename)
+#        template_dict = {
+#            'vartype': node.__class__.__name__.lower(),
+#            'name': escape(node.name),
+#            'width': '',
+#            'signed': get_signed(node),
+#            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+#            'udims': '' if node.udims is None else self.visit(node.udims),
+#        }
+#        rslt = template.render(template_dict)
+#        return rslt
+#
+#    def visit__VariableReal(self, node):
+#        filename = '_variablereal.txt'
+#        template = self.get_template(filename)
+#        template_dict = {
+#            'vartype': node.__class__.__name__.lower(),
+#            'name': escape(node.name),
+#            'width': '',
+#            'signed': get_signed(node),
+#            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+#            'udims': '' if node.udims is None else self.visit(node.udims),
+#        }
+#        rslt = template.render(template_dict)
+#        return rslt
+#
+#    def visit_Input(self, node):
+#        return self.visit__Variable4State(node)
+#
+#    def visit_Output(self, node):
+#        return self.visit__Variable4State(node)
+#
+#    def visit_Inout(self, node):
+#        return self.visit__Variable4State(node)
+#
+#    def visit_Tri(self, node):
+#        return self.visit__Variable4State(node)
+#
+#    def visit_Wire(self, node):
+#        return self.visit__Variable4State(node)
+#
+#    def visit_Reg(self, node):
+#        return self.visit__Variable4State(node)
+#
+#    def visit_Supply0(self, node):
+#        return self.visit__Variable4State(node)
+#
+#    def visit_Supply1(self, node):
+#        return self.visit__Variable4State(node)
+#
+#    def visit_Integer(self, node):
+#        return self.visit__Variable4State_no_width(node)
+#
+#    def visit_Time(self, node):
+#        return self.visit__Variable4State_no_width(node)
+#
+#    def visit_Real(self, node):
+#        return self.visit__VariableReal(node)
+#
+#    def visit_RealTime(self, node):
+#        return self.visit__VariableReal(node)
+#
+#    def visit_Logic(self, node):
+#        return self.visit__Variable4State(node)
+#
+#    def visit_ShortInt(self, node):
+#        return self.visit__Variable2State_no_width(node)
+#
+#    def visit_Int(self, node):
+#        return self.visit__Variable2State_no_width(node)
+#
+#    def visit_LongInt(self, node):
+#        return self.visit__Variable2State_no_width(node)
+#
+#    def visit_Byte(self, node):
+#        return self.visit__Variable2State_no_width(node)
+#
+#    def visit_Bit(self, node):
+#        return self.visit__Variable2State(node)
+#
+#    def visit_ShortReal(self, node):
+#        return self.visit__VariableReal(node)
+#
+#    def visit_CustomType(self, node):
+#        filename = getfilename(node)
+#        template = self.get_template(filename)
+#        template_dict = {
+#            'vartype': escape(node.typename),
+#            'name': escape(node.name),
+#            'modportname': escape(node.modportname) if node.modportname is not None else '',
+#            'width': '' if node.width is None else self.visit(node.width),
+#            'signed': get_signed(node),
+#            'pdims': '' if node.pdims is None else self.visit(node.pdims),
+#            'udims': '' if node.udims is None else self.visit(node.udims),
+#        }
+#        rslt = template.render(template_dict)
+#        return rslt
 
     def visit_Parameter(self, node):
         filename = getfilename(node)
         template = self.get_template(filename)
+        sigtypes = ' '.join(node.sigtypes) if node.sigtypes is not None else '',
         template_dict = {
             'name': escape(node.name),
-            'ptype': node.ptype if node.ptype is not None else '',
-            'width': ('' if node.width is None or (value.startswith('"') and value.endswith('"')) else
-                      self.visit(node.width)),
             'value': self.visit(node.value),
-            'signed': get_signed(node),
-            'pdims': '' if node.pdims is None else self.visit(node.pdims),
             'udims': '' if node.udims is None else self.visit(node.udims),
         }
         rslt = template.render(template_dict)
@@ -435,16 +509,6 @@ class ASTCodeGenerator(ConvertVisitor):
 
     def visit_Localparam(self, node):
         return self.visit_Parameter(node)
-
-    def visit_Supply(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        template_dict = {
-            'name': escape(node.name),
-            'value': self.visit(node.value),
-        }
-        rslt = template.render(template_dict)
-        return rslt
 
     def visit_Concat(self, node):
         filename = getfilename(node)
@@ -941,33 +1005,14 @@ class ASTCodeGenerator(ConvertVisitor):
         rslt = template.render(template_dict)
         return rslt
 
-    def visit_DeclInstances(self, node):
-        filename = getfilename(node)
-        template = self.get_template(filename)
-        paramlist = [self.indent(self.visit(param)) for param in node.items[0].paramlist]
-        items = [self.visit(item) for item in node.items]
-        template_dict = {
-            'module': escape(node.module),
-            'paramlist': paramlist,
-            'len_paramlist': len(paramlist),
-            'items': items,
-            'len_items': len(items),
-        }
-        rslt = template.render(template_dict)
-        return rslt
-
     def visit_Instance(self, node):
         filename = getfilename(node)
         template = self.get_template(filename)
         array = '' if node.array is None else self.visit(node.array)
-        # paramlist = [self.indent(self.visit(param)) for param in node.paramlist]
         portlist = [self.indent(self.visit(port)) for port in node.portlist]
         template_dict = {
-            # 'module': escape(node.module),
             'name': escape(node.name),
             'array': array,
-            # 'paramlist': paramlist,
-            # 'len_paramlist': len(paramlist),
             'portlist': portlist,
             'len_portlist': len(portlist),
         }

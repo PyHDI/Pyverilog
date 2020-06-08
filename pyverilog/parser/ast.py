@@ -153,6 +153,10 @@ class DeclParameters(_Decl):
     pass
 
 
+class DeclLocalparams(DeclParameters):
+    pass
+
+
 class DeclVars(_Decl):
     """
     Variable declarations with a common sigtypes, width, and dims.
@@ -383,6 +387,14 @@ class Reg(_Variable4State):
     pass
 
 
+class Supply0(_Variable4State):
+    pass
+
+
+class Supply1(_Variable4State):
+    pass
+
+
 class Integer(_Variable4State):
 
     def __init__(self, name, signed=None, pdims=None, udims=None, value=None, lineno=0):
@@ -491,10 +503,6 @@ class Parameter(Node):
 
 
 class Localparam(Parameter):
-    pass
-
-
-class Supply(Parameter):
     pass
 
 

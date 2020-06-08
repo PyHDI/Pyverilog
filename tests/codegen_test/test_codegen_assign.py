@@ -22,12 +22,12 @@ endmodule
 
 
 def test():
-    params = vast.Decl([])
-    clk = vast.Ioport(vast.Input('CLK'))
-    rst = vast.Ioport(vast.Input('RST'))
+    params = []
+    clk = vast.DeclVars([vast.Var([vast.Input('CLK')])])
+    rst = vast.DeclVars([vast.Var([vast.Input('RST')])])
     width = vast.Width(vast.IntConst('7'), vast.IntConst('0'))
-    led = vast.Ioport(vast.Output('led', width=width))
-    ports = (clk, rst, led)
+    led = vast.DeclVars([vast.Var([vast.Output('led', width=width)])])
+    ports = [clk, rst, led]
     items = [vast.Assign(vast.Lvalue(vast.Identifier('led')),
                          vast.Rvalue(vast.IntConst('8')))]
     ast = vast.Module("top", params, ports, items)
