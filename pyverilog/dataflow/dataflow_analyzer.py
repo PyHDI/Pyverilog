@@ -11,7 +11,7 @@ from __future__ import print_function
 import sys
 import os
 
-from pyverilog.vparser.parser import VerilogCodeParser
+from pyverilog.parser.parser import VerilogCodeParser
 from pyverilog.dataflow.modulevisitor import ModuleVisitor
 from pyverilog.dataflow.signalvisitor import SignalVisitor
 from pyverilog.dataflow.bindvisitor import BindVisitor

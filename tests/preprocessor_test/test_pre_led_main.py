@@ -2,9 +2,10 @@ from __future__ import absolute_import
 from __future__ import print_function
 import os
 import sys
-from pyverilog.vparser.preprocessor import VerilogPreprocessor
+from pyverilog.parser.preprocessor import VerilogPreprocessor
 
-codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/verilogcode/'
+codedir = os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__)))) + '/verilogcode/'
 
 expected = """\
 `default_nettype none
@@ -56,19 +57,21 @@ module main
 endmodule
 """
 
+
 def test():
     filelist = [codedir + 'led_main.v']
     output = 'preprocess.out'
     include = [codedir]
     define = ['STEP=100']
-    
+
     pre = VerilogPreprocessor(filelist, output, include, define)
     pre.preprocess()
     rslt = open(output).read()
     os.remove(output)
-    
+
     print(rslt)
     assert(expected == rslt)
+
 
 if __name__ == '__main__':
     test()

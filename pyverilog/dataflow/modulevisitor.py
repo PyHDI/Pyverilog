@@ -11,8 +11,6 @@ from __future__ import print_function
 import sys
 import os
 
-import pyverilog.vparser.parser
-from pyverilog.vparser.ast import *
 from pyverilog.dataflow.visit import *
 
 

@@ -12,7 +12,7 @@ from __future__ import print_function
 import sys
 import os
 
-import pyverilog.vparser.ast as vast
+import pyverilog.parser.ast as vast
 import pyverilog.utils.verror as verror
 from pyverilog.utils.scope import ScopeLabel, ScopeChain
 from pyverilog.dataflow.dataflow import *

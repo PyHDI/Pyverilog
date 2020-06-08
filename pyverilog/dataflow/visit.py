@@ -18,7 +18,7 @@ import pyverilog
 import pyverilog.utils.util as util
 import pyverilog.utils.verror as verror
 from pyverilog.utils.scope import ScopeLabel, ScopeChain
-from pyverilog.vparser.ast import *
+from pyverilog.parser.ast import *
 
 
 def map_key(f, d): return collections.OrderedDict([(f(k), v) for k, v in d.items()])

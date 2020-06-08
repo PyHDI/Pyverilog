@@ -21,9 +21,9 @@ import os
 import pathlib
 from ply.yacc import yacc
 
-from pyverilog.vparser.preprocessor import VerilogPreprocessor
-from pyverilog.vparser.lexer import VerilogLexer
-from pyverilog.vparser.ast import *
+from pyverilog.parser.preprocessor import VerilogPreprocessor
+from pyverilog.parser.lexer import VerilogLexer
+from pyverilog.parser.ast import *
 
 
 class VerilogParser(object):
@@ -517,9 +517,9 @@ class VerilogParser(object):
         """standard_item : decl
         | parameter_decl
         | localparam_decl
-        | declassign
+        | decl_assign
         | typedef
-        | genvardecl
+        | genvar_decl
         | assignment
         | always
         | always_ff
@@ -967,11 +967,11 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    def create_declassign(self, p, sigtypes, name, assign, width=None, pdims=None, udims=None, lineno=0):
+    def create_decl_assign(self, p, sigtypes, name, assign, width=None, pdims=None, udims=None, lineno=0):
         signed = None
         decls = []
 
-        self.typecheck_declassign(p, sigtypes)
+        self.typecheck_decl_assign(p, sigtypes)
 
         sigtypes = list(sigtypes)
 
@@ -1037,7 +1037,7 @@ class VerilogParser(object):
         decls.append(assign)
         return decls
 
-    def typecheck_declassign(self, p, sigtypes):
+    def typecheck_decl_assign(self, p, sigtypes):
         if len(sigtypes) > 3:
             self._raise_error(p)
 
@@ -1080,8 +1080,8 @@ class VerilogParser(object):
         if 'supply1' in sigtypes and len(sigtypes) != 1:
             self._raise_error(p)
 
-    def p_declassign(self, p):
-        'declassign : sigtypes pdims_width_or_empty delay_or_empty _id declassign_right SEMICOLON'
+    def p_decl_assign(self, p):
+        'decl_assign : sigtypes pdims_width_or_empty delay_or_empty _id decl_assign_right SEMICOLON'
         pdims, width = (None, None) if p[2] == () else p[2]
         sigtypes = p[1]
         ID = p[4]
@@ -1090,18 +1090,18 @@ class VerilogParser(object):
         ldelay = None if p[4] == () else p[4]
         rdelay = p[5][1]
         assign = Assign(left, right, ldelay, rdelay, lineno=p.lineno(1))
-        decllist = self.create_declassign(p, sigtypes, ID, assign,
+        decllist = self.create_decl_assign(p, sigtypes, ID, assign,
                                           width=width, pdims=pdims, lineno=p.lineno(1))
         p[0] = Decl(tuple(decllist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
-    def p_declassign_right(self, p):
-        'declassign_right : EQUALS rvalue'
+    def p_decl_assign_right(self, p):
+        'decl_assign_right : EQUALS rvalue'
         p[0] = (p[2], None)  # value, delay
         p.set_lineno(0, p.lineno(2))
 
-    def p_declassign_right_delay(self, p):
-        'declassign_right : EQUALS delay rvalue'
+    def p_decl_assign_right_delay(self, p):
+        'decl_assign_right : EQUALS delay rvalue'
         p[0] = (p[3], p[2])  # value, delay
         p.set_lineno(0, p.lineno(3))
 
@@ -2196,8 +2196,8 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
-    def p_genvardecl(self, p):
-        'genvardecl : GENVAR genvarlist SEMICOLON'
+    def p_genvar_decl(self, p):
+        'genvar_decl : GENVAR genvarlist SEMICOLON'
         p[0] = Decl(p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 

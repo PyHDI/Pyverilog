@@ -11,8 +11,8 @@ from __future__ import print_function
 import sys
 import os
 
-import pyverilog.vparser.ast as vast
-from pyverilog.vparser.ast import Node
+import pyverilog.parser.ast as vast
+from pyverilog.parser.ast import Node
 
 
 def replaceIdentifiers(node, ids):

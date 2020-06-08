@@ -23,7 +23,7 @@ import re
 import functools
 from jinja2 import Environment, FileSystemLoader
 
-from pyverilog.vparser.ast import *
+from pyverilog.parser.ast import *
 from pyverilog.utils.op2mark import op2mark
 from pyverilog.utils.op2mark import op2order
 
@@ -1159,7 +1159,8 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.get_template(filename)
         labels = [escape(l) for l, r in node.items] if node.items else ()
-        rvalues = [(self.visit(r) if r is not None else None) for l, r in node.items] if node.items else ()
+        rvalues = [(self.visit(r) if r is not None else None)
+                   for l, r in node.items] if node.items else ()
         items = [('{} = {}'.format(l, r) if r is not None else l) for l, r in zip(labels, rvalues)]
         template_dict = {
             'items': items,

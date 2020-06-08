@@ -14,7 +14,7 @@ import sys
 import os
 import re
 
-import pyverilog.vparser.ast as vast
+import pyverilog.parser.ast as vast
 import pyverilog.utils.verror as verror
 import pyverilog.utils.signaltype as signaltype
 from pyverilog.utils.scope import ScopeLabel, ScopeChain
@@ -209,7 +209,7 @@ class BindVisitor(NodeVisitor):
 
     def visit_Initial(self, node):
         pass
-        # label = self.labels.get( self.frames.getLabelKey('initial') )
+        # label = self.labels.get( self.frames.getLabelKey('initial'))
         # current = self.stackNextFrame(label, 'initial',
         #                              generate=self.frames.isGenerate(),
         #                              initial=True)
@@ -1082,7 +1082,7 @@ class BindVisitor(NodeVisitor):
 
             if (isinstance(var_df, DFTerminal) and
                 (self.getTermPackedDims(var_df.name) is not None or
-                 self.getTermUnpackedDims(var_df.name) is not None)):
+                     self.getTermUnpackedDims(var_df.name) is not None)):
                 return DFPointer(var_df, ptr_df)
 
             return DFPartselect(var_df, ptr_df, copy.deepcopy(ptr_df))
@@ -1148,7 +1148,7 @@ class BindVisitor(NodeVisitor):
             return DFTerminal(varname)
 
         if (isinstance(node, vast.SingleStatement) and
-            isinstance(node.statement, vast.FunctionCall)):
+                isinstance(node.statement, vast.FunctionCall)):
             task = self.searchTask(node.statement.name.name, scope)
             label = self.labels.get(self.frames.getLabelKey('taskcall'))
 
@@ -1275,7 +1275,7 @@ class BindVisitor(NodeVisitor):
             resolved_ptr = self.resolveBlockingAssign(tree.ptr, scope)
             if (isinstance(tree.var, DFTerminal) and
                 (self.getTermPackedDims(tree.var.name) is not None or
-                 self.getTermUnpackedDims(tree.var.name) is not None)):
+                     self.getTermUnpackedDims(tree.var.name) is not None)):
 
                 current_bindlist = self.frames.getBlockingAssign(tree.var.name, scope)
                 if len(current_bindlist) == 0:
@@ -1416,7 +1416,7 @@ class BindVisitor(NodeVisitor):
             ptr = self.optimize(self.makeDFTree(left.ptr, scope))
 
             if (self.getTermPackedDims(name) is not None or
-                self.getTermUnpackedDims(name) is not None):
+                    self.getTermUnpackedDims(name) is not None):
                 return (name, None, None, ptr)
 
             return (name, ptr, copy.deepcopy(ptr), None)
@@ -1513,8 +1513,8 @@ class BindVisitor(NodeVisitor):
         if len(current_bindlist) > 0:
             for current_bind in current_bindlist:
                 if (current_bind.msb == msb and
-                    current_bind.lsb == lsb
-                        and current_bind.ptr == ptr ):
+                    current_bind.lsb == lsb and
+                        current_bind.ptr == ptr):
                     current_tree = current_bind.tree
                     current_msb = current_bind.msb
                     current_lsb = current_bind.lsb
@@ -1527,8 +1527,8 @@ class BindVisitor(NodeVisitor):
 
         match_flowlist = ()
         if (current_msb == msb and
-            current_lsb == lsb
-                and current_ptr == ptr ):
+            current_lsb == lsb and
+                current_ptr == ptr):
             (rest_tree,
              rest_condlist,
              rest_flowlist,
@@ -1536,7 +1536,7 @@ class BindVisitor(NodeVisitor):
 
         add_tree = self.makeBranchTree(rest_condlist, rest_flowlist, raw_tree)
         if rest_flowlist and rest_tree is not None:
-            _rest_flowlist = rest_flowlist[:-1] + (not rest_flowlist[-1], )
+            _rest_flowlist = rest_flowlist[:-1] + (not rest_flowlist[-1],)
             add_tree = self.appendBranchTree(add_tree, _rest_flowlist, rest_tree)
 
         tree = reorder.reorder(

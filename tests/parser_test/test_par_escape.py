@@ -2,14 +2,15 @@ from __future__ import absolute_import
 from __future__ import print_function
 import os
 import sys
-from pyverilog.vparser.parser import VerilogCodeParser
+from pyverilog.parser.parser import VerilogCodeParser
 
 try:
     from StringIO import StringIO
 except:
     from io import StringIO
 
-codedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/verilogcode/'
+codedir = os.path.dirname(os.path.dirname(
+    os.path.dirname(os.path.abspath(__file__)))) + '/verilogcode/'
 
 expected = """\
 Source:  (at 1)
@@ -93,12 +94,13 @@ Source:  (at 1)
             IdentifierScope: \\2ndLoop, 1 (at 20)
 """
 
+
 def test():
     filelist = [codedir + 'escape.v']
     output = 'preprocess.out'
     include = None
     define = None
-    
+
     parser = VerilogCodeParser(filelist,
                                preprocess_include=include,
                                preprocess_define=define)
@@ -110,11 +112,12 @@ def test():
 
     for lineno, directive in directives:
         output.write('Line %d : %s' % (lineno, directive))
-    
+
     rslt = output.getvalue()
 
     print(rslt)
     assert(expected == rslt)
+
 
 if __name__ == '__main__':
     test()

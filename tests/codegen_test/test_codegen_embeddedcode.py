@@ -3,8 +3,8 @@ from __future__ import print_function
 import os
 import sys
 
-import pyverilog.vparser.ast as vast
-from pyverilog.ast_code_generator.codegen import ASTCodeGenerator
+import pyverilog.parser.ast as vast
+from pyverilog.codegen.codegen import ASTCodeGenerator
 
 expected = """\
 
