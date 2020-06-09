@@ -154,7 +154,7 @@ class ASTCodeGenerator(ConvertVisitor):
         portlist = (self.indent(self._portlist(node.portlist))
                     if node.portlist is not None else '')
         template_dict = {
-            'modulename': escape(node.name),
+            'name': escape(node.name),
             'paramlist': paramlist,
             'portlist': portlist,
             'items': [self.indent(self.visit(item)) for item in node.items] if node.items else (),
@@ -214,8 +214,8 @@ class ASTCodeGenerator(ConvertVisitor):
         for item in var.items:
             if not isinstance(item, CustomType):
                 sigtypes.append(item.__class__.__name__.lower())
-            elif item.modport is not None:
-                sigtypes.append('.'.join([escape(item.typename), escape(item.modport)]))
+            elif item.modportname is not None:
+                sigtypes.append('.'.join([escape(item.typename), escape(item.modportname)]))
             else:
                 sigtypes.append(escape(item.typename))
         sigtypes = ' '.join(sigtypes)
@@ -251,9 +251,10 @@ class ASTCodeGenerator(ConvertVisitor):
         filename = getfilename(node)
         template = self.get_template(filename)
         paramlist = [self.indent(self.visit(param)) for param in node.items[0].paramlist]
+        inst = node.items[0]
         items = [self.visit(item) for item in node.items]
         template_dict = {
-            'module': escape(node.module),
+            'module': escape(inst.module),
             'paramlist': paramlist,
             'len_paramlist': len(paramlist),
             'items': items,

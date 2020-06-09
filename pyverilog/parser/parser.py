@@ -489,11 +489,11 @@ class VerilogParser(object):
             sigtypes.remove('shortreal')
 
         if len(sigtypes) > 0:
-            if isinstance(sigtypes[0], tuple):
+            if isinstance(sigtypes[0], (tuple, list)):
                 typename = sigtypes[0][0]
                 modportname = sigtypes[0][1]
             else:
-                typename = sigtypes[0][0]
+                typename = sigtypes[0]
                 modportname = None
             decls.append(CustomType(typename=typename, name=name, modportname=modportname,
                                     width=width, signed=signed,
@@ -677,7 +677,7 @@ class VerilogParser(object):
         modulename = sigtypes[0]
         instance_param_list = ()
         udims, length = (None, None) if p[2] == () else (p[2].dims[:-1], p[2].dims[-1])
-        if isinstance(udims, tuple) and len(udims) > 0:
+        if isinstance(udims, (tuple, list)) and len(udims) > 0:
             self._raise_error(p)
         instance_body = (ID, p[3], length)
         instance_body_list = (instance_body,) + p[4]
