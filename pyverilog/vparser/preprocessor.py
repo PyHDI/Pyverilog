@@ -24,6 +24,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 import sys
 import os
+import tempfile
 import subprocess
 
 
@@ -33,7 +34,28 @@ class VerilogPreprocessor(object):
         if not isinstance(filelist, (tuple, list)):
             filelist = list(filelist)
 
-        self.filelist = filelist
+        # Elements in `filelist` can either be raw Verilog files, or Verilog code
+        # in python string. The following loop iterates through these `sources`,
+        # and normalizes all of them into files.
+        #
+        # For Verilog code in python string, the contents of the string is stored
+        # in a temporary file for further use with `iverilog`.
+        self.temp_files_paths = []
+        self.filelist = []
+
+        for source in filelist:
+            # If `source` is verilog code in python strings
+            if not os.path.isfile(source):
+                temp_fd, temp_path = tempfile.mkstemp(prefix="pyverilog_temp_", suffix=".v")
+                with open(temp_fd, 'w') as f:
+                    f.write(source)
+
+                self.temp_files_paths.append(temp_path)
+
+            else: # else if it is normal verilog file path
+                self.filelist.append(source)
+
+        self.filelist += self.temp_files_paths
 
         iverilog = os.environ.get('PYVERILOG_IVERILOG')
         if iverilog is None:
@@ -62,6 +84,10 @@ class VerilogPreprocessor(object):
     def preprocess(self):
         cmd = self.iv + list(self.filelist)
         subprocess.call(cmd)
+
+        # Removing the temporary files that were created
+        for temp_file_path in self.temp_files_paths:
+            os.remove(temp_file_path)
 
 
 def preprocess(
