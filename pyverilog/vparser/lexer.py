@@ -20,7 +20,7 @@ import sys
 import os
 import re
 
-from pyverilog.vparser.ply.lex import *
+from ply.lex import *
 
 
 class VerilogLexer(object):

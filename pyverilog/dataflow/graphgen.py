@@ -54,18 +54,18 @@ class VerilogGraphGenerator(object):
                                                 self.resolved_binddict, constlist)
         self.optimizer = VerilogOptimizer(terms, constlist)
 
-    def generate(self, signalname, identical=False, walk=True, step=1, reorder=False, delay=False):
+    def generate(self, signalname, identical=False, walk=True, step=1, do_reorder=False, delay=False):
         termname = util.toTermname(signalname)
         tree = self.treewalker.getTree(termname)
         if tree is None:
             raise verror.DefinitionError('No such signals: %s' % str(signalname))
         if walk:
             tree = self.treewalker.walkTree(tree, visited=set(), step=step, delay=delay)
-            if reorder:
+            if do_reorder:
                 tree = reorder.reorder(tree)
 
         tree = self.optimizer.optimize(tree)
-        if reorder:
+        if do_reorder:
             tree = reorder.reorder(tree)
 
         tree = replace.replaceUndefined(tree, termname)
