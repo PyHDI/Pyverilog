@@ -75,7 +75,7 @@ Installation
 Requirements
 --------------------
 
-- Python3: 3.6 or later
+- Python3: 3.7 or later
 - Icarus Verilog: 10.1 or later
 
 ```
