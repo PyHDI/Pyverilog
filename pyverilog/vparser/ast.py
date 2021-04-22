@@ -42,7 +42,10 @@ class Node(object):
             buf.write(attrstr)
 
         if showlineno:
-            buf.write(' (at %s)' % self.lineno)
+            try:
+                buf.write(' (from %s to %s)' %(self.lineno, self.end_lineno))
+            except:
+                buf.write(' (at %s)' % self.lineno)
 
         buf.write('\n')
 
