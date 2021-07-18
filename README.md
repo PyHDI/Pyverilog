@@ -1,7 +1,8 @@
 Pyverilog
 ==============================
 
-[![Build Status](https://travis-ci.org/PyHDI/Pyverilog.svg)](https://travis-ci.org/PyHDI/Pyverilog)
+[![CI](https://github.com/PyHDI/Pyverilog/actions/workflows/main.yml/badge.svg)](https://github.com/PyHDI/Pyverilog/actions/workflows/main.yml)
+[![Build Status](https://www.travis-ci.com/PyHDI/Pyverilog.svg?branch=develop)](https://www.travis-ci.com/PyHDI/Pyverilog)
 
 Python-based Hardware Design Processing Toolkit for Verilog HDL
 
