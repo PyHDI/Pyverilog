@@ -691,6 +691,32 @@ class Cond(Operator):
             nodelist.append(self.false_value)
         return tuple(nodelist)
 
+class Assert(Node):
+    attr_names = ()
+
+    def __init__(self, expr, lineno=0):
+        self.lineno = lineno
+        self.expr = expr
+
+    def children(self):
+        nodelist = []
+        if self.expr:
+            nodelist.append(self.expr)
+        return tuple(nodelist)
+
+class Assume(Node):
+    attr_names = ()
+
+    def __init__(self, expr, lineno=0):
+        self.lineno = lineno
+        self.expr = expr
+
+    def children(self):
+        nodelist = []
+        if self.expr:
+            nodelist.append(self.expr)
+        return tuple(nodelist)
+
 
 class Assign(Node):
     attr_names = ()
