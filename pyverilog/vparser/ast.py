@@ -1304,6 +1304,33 @@ class SingleStatement(Node):
         return tuple(nodelist)
 
 
+class AssumeStatement(Node):
+    attr_names = ()
+
+    def __init__(self, statement, lineno=0):
+        self.lineno = lineno
+        self.statement = statement
+
+    def children(self):
+        nodelist = []
+        if self.statement:
+            nodelist.append(self.statement)
+        return tuple(nodelist)
+
+class AssertStatement(Node):
+    attr_names = ()
+
+    def __init__(self, statement, lineno=0):
+        self.lineno = lineno
+        self.statement = statement
+
+    def children(self):
+        nodelist = []
+        if self.statement:
+            nodelist.append(self.statement)
+        return tuple(nodelist)
+
+
 class EmbeddedCode(Node):
     attr_names = ('code',)
 
