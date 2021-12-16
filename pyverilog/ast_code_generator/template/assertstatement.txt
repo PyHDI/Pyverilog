@@ -1,1 +1,1 @@
-assert ( {{ expr }} );
+assert ( {{ statement }} );
