@@ -847,8 +847,6 @@ class BindVisitor(NodeVisitor):
         return Term(name, termtypes, msb, lsb)
 
     def addTerm(self, node, rscope=None):
-        if self.frames.isFunctiondef() and not self.frames.isFunctioncall():
-            return
         if self.frames.isTaskdef() and not self.frames.isTaskcall():
             return
         scope = self.frames.getCurrent() if rscope is None else rscope
