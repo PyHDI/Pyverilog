@@ -2060,25 +2060,27 @@ class VerilogParser(object):
 
     # --------------------------------------------------------------------------
     def p_function(self, p):
-        'function : FUNCTION width ID SEMICOLON function_statement ENDFUNCTION'
-        p[0] = Function(p[3], p[2], p[5], lineno=p.lineno(1))
+        'function : FUNCTION width ID portlist function_statement ENDFUNCTION'
+        p[0] = Function(p[3], p[2], p[4], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_function_nowidth(self, p):
-        'function : FUNCTION ID SEMICOLON function_statement ENDFUNCTION'
+        'function : FUNCTION ID portlist function_statement ENDFUNCTION'
         p[0] = Function(p[2],
                         Width(IntConst('0', lineno=p.lineno(1)),
                               IntConst('0', lineno=p.lineno(1)),
                               lineno=p.lineno(1)),
+                        p[3],
                         p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_function_integer(self, p):
-        'function : FUNCTION INTEGER ID SEMICOLON function_statement ENDFUNCTION'
+        'function : FUNCTION INTEGER ID portlist function_statement ENDFUNCTION'
         p[0] = Function(p[3],
                         Width(IntConst('31', lineno=p.lineno(1)),
                               IntConst('0', lineno=p.lineno(1)),
                               lineno=p.lineno(1)),
+                        p[4],
                         p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
@@ -2096,6 +2098,10 @@ class VerilogParser(object):
         'funcvardecls : funcvardecl'
         p[0] = (p[1],)
         p.set_lineno(0, p.lineno(1))
+
+    def p_funcvardecls_empty(self, p):
+        'funcvardecls : empty'
+        p[0] = ()
 
     def p_funcvardecl(self, p):
         """funcvardecl : decl

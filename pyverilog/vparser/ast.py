@@ -1071,9 +1071,10 @@ class PortArg(Node):
 class Function(Node):
     attr_names = ('name',)
 
-    def __init__(self, name, retwidth, statement, lineno=0):
+    def __init__(self, name, retwidth, portlist, statement, lineno=0):
         self.lineno = lineno
         self.name = name
+        self.portlist = portlist
         self.retwidth = retwidth
         self.statement = statement
 
@@ -1081,6 +1082,8 @@ class Function(Node):
         nodelist = []
         if self.retwidth:
             nodelist.append(self.retwidth)
+        if self.portlist:
+            nodelist.append(self.portlist)
         if self.statement:
             nodelist.extend(self.statement)
         return tuple(nodelist)
