@@ -644,6 +644,43 @@ class ASTCodeGenerator(ConvertVisitor):
         rslt = template.render(template_dict)
         rslt = indent_multiline_assign(rslt)
         return rslt
+        
+    def visit_Assert(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        template_dict = {
+            'expr': self.visit(node.expr)
+        }
+        rslt = template.render(template_dict)
+        return rslt
+        
+    def visit_Assume(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        template_dict = {
+            'expr': self.visit(node.expr)
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
+
+    def visit_AssertStatement(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        template_dict = {
+            'statement': self.visit(node.statement)
+        }
+        rslt = template.render(template_dict)
+        return rslt
+        
+    def visit_AssumeStatement(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        template_dict = {
+            'statement': self.visit(node.statement)
+        }
+        rslt = template.render(template_dict)
+        return rslt
 
     def visit_Always(self, node):
         filename = getfilename(node)

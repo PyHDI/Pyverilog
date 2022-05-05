@@ -1,0 +1,1 @@
+assume property ( {{ expr }} );

@@ -510,6 +510,8 @@ class VerilogParser(object):
         | function
         | task
         | pragma
+        | assert
+        | assume
         """
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
@@ -844,6 +846,16 @@ class VerilogParser(object):
     def p_assignment_delay(self, p):
         'assignment : ASSIGN delays lvalue EQUALS delays rvalue SEMICOLON'
         p[0] = Assign(p[3], p[6], p[2], p[5], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+        
+    def p_assert(self, p):
+        'assert : ASSERT PROPERTY LPAREN rvalue RPAREN SEMICOLON'
+        p[0] = Assert(p[4], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_assume(self, p):
+        'assume : ASSUME PROPERTY LPAREN rvalue RPAREN SEMICOLON'
+        p[0] = Assume(p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------
@@ -1435,6 +1447,8 @@ class VerilogParser(object):
         | blocking_substitution
         | nonblocking_substitution
         | single_statement
+        | assert_statement
+        | assume_statement
         """
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
@@ -2242,6 +2256,17 @@ class VerilogParser(object):
         p[0] = SingleStatement(p[1], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
+    def p_assert_statement_disable(self, p):
+        'assert_statement : ASSERT LPAREN expression RPAREN SEMICOLON'
+        p[0] = AssertStatement(p[3], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+        
+    def p_assume_statement_disable(self, p):
+        'assume_statement : ASSUME LPAREN expression RPAREN SEMICOLON'
+        p[0] = AssumeStatement(p[3], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+        
+    
     # fix me: to support task-call-statement
     # def p_single_statement_taskcall(self, p):
     #    'single_statement : functioncall SEMICOLON'
