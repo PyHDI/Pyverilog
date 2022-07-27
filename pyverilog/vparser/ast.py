@@ -744,6 +744,26 @@ class AlwaysLatch(Always):
     pass
 
 
+class Defparam(Node):
+    attr_names = ()
+
+    def __init__(self, instance, parameter, value, lineno=0):
+        self.lineno = lineno
+        self.instance = instance
+        self.parameter = parameter
+        self.value = value
+
+    def children(self):
+        nodelist = []
+        if self.instance:
+            nodelist.append(self.instance)
+        if self.parameter:
+            nodelist.append(self.parameter)
+        if self.value:
+            nodelist.append(self.value)
+        return tuple(nodelist)
+
+
 class SensList(Node):
     attr_names = ()
 

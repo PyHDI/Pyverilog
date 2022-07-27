@@ -510,6 +510,7 @@ class VerilogParser(object):
         | function
         | task
         | pragma
+        | defparam
         """
         p[0] = p[1]
         p.set_lineno(0, p.lineno(1))
@@ -844,6 +845,11 @@ class VerilogParser(object):
     def p_assignment_delay(self, p):
         'assignment : ASSIGN delays lvalue EQUALS delays rvalue SEMICOLON'
         p[0] = Assign(p[3], p[6], p[2], p[5], lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
+    def p_defparam(self, p):
+        'defparam : DEFPARAM identifier DOT identifier EQUALS rvalue SEMICOLON'
+        p[0] = Defparam(p[2], p[4], p[6], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     # --------------------------------------------------------------------------

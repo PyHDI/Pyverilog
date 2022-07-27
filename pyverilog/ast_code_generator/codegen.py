@@ -655,6 +655,17 @@ class ASTCodeGenerator(ConvertVisitor):
         rslt = template.render(template_dict)
         return rslt
 
+    def visit_Defparam(self, node):
+        filename = getfilename(node)
+        template = self.get_template(filename)
+        template_dict = {
+            'instance': self.visit(node.instance),
+            'parameter': self.visit(node.parameter),
+            'value': self.visit(node.value),
+        }
+        rslt = template.render(template_dict)
+        return rslt
+
     def visit_SensList(self, node):
         filename = getfilename(node)
         template = self.get_template(filename)
