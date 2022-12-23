@@ -840,11 +840,13 @@ class VerilogParser(object):
         'assignment : ASSIGN lvalue EQUALS rvalue SEMICOLON'
         p[0] = Assign(p[2], p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(5)
 
     def p_assignment_delay(self, p):
         'assignment : ASSIGN delays lvalue EQUALS delays rvalue SEMICOLON'
         p[0] = Assign(p[3], p[6], p[2], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(7)
 
     # --------------------------------------------------------------------------
     def p_lpartselect_lpointer(self, p):
@@ -1299,21 +1301,25 @@ class VerilogParser(object):
         'always : ALWAYS senslist always_statement'
         p[0] = Always(p[2], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p[3].end_lineno
 
     def p_always_ff(self, p):
         'always_ff : ALWAYS_FF senslist always_statement'
         p[0] = AlwaysFF(p[2], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p[3].end_lineno
 
     def p_always_comb(self, p):
         'always_comb : ALWAYS_COMB senslist always_statement'
         p[0] = AlwaysComb(p[2], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p[3].end_lineno
 
     def p_always_latch(self, p):
         'always_latch : ALWAYS_LATCH senslist always_statement'
         p[0] = AlwaysLatch(p[2], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p[3].end_lineno
 
     def p_sens_egde_paren(self, p):
         'senslist : AT LPAREN edgesigs RPAREN'
@@ -1449,6 +1455,7 @@ class VerilogParser(object):
         'blocking_substitution : delays lvalue EQUALS delays rvalue SEMICOLON'
         p[0] = BlockingSubstitution(p[2], p[5], p[1], p[4], lineno=p.lineno(2))
         p.set_lineno(0, p.lineno(2))
+        p[0].end_lineno = p.lineno(6)
 
     def p_blocking_substitution_base(self, p):
         'blocking_substitution_base : delays lvalue EQUALS delays rvalue'
@@ -1460,6 +1467,7 @@ class VerilogParser(object):
         p[0] = NonblockingSubstitution(
             p[2], p[5], p[1], p[4], lineno=p.lineno(2))
         p.set_lineno(0, p.lineno(2))
+        p[0].end_lineno = p.lineno(6)
 
     # --------------------------------------------------------------------------
     def p_delays(self, p):
@@ -1493,11 +1501,13 @@ class VerilogParser(object):
         'block : BEGIN block_statements END'
         p[0] = Block(p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(3)
 
     def p_block_empty(self, p):
         'block : BEGIN END'
         p[0] = Block((), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(2)
 
     def p_block_statements(self, p):
         'block_statements : block_statements block_statement'
@@ -1519,11 +1529,13 @@ class VerilogParser(object):
         'namedblock : BEGIN COLON ID namedblock_statements END'
         p[0] = Block(p[4], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(5)
 
     def p_namedblock_empty(self, p):
         'namedblock : BEGIN COLON ID END'
         p[0] = Block((), p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(4)
 
     def p_namedblock_statements(self, p):
         'namedblock_statements : namedblock_statements namedblock_statement'
@@ -1568,21 +1580,25 @@ class VerilogParser(object):
         'if_statement : IF LPAREN cond RPAREN true_statement ELSE else_statement'
         p[0] = IfStatement(p[3], p[5], p[7], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p[7].end_lineno
 
     def p_if_statement_woelse(self, p):
         'if_statement : IF LPAREN cond RPAREN true_statement'
         p[0] = IfStatement(p[3], p[5], None, lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p[5].end_lineno
 
     def p_if_statement_delay(self, p):
         'if_statement : delays IF LPAREN cond RPAREN true_statement ELSE else_statement'
         p[0] = IfStatement(p[4], p[6], p[8], lineno=p.lineno(2))
         p.set_lineno(0, p.lineno(2))
+        p[0].end_lineno = p[8].end_lineno
 
     def p_if_statement_woelse_delay(self, p):
         'if_statement : delays IF LPAREN cond RPAREN true_statement'
         p[0] = IfStatement(p[4], p[6], None, lineno=p.lineno(2))
         p.set_lineno(0, p.lineno(2))
+        p[0].end_lineno = p[6].end_lineno
 
     def p_cond(self, p):
         'cond : expression'
@@ -1660,21 +1676,25 @@ class VerilogParser(object):
         'case_statement : CASE LPAREN case_comp RPAREN casecontent_statements ENDCASE'
         p[0] = CaseStatement(p[3], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(6)
 
     def p_casex_statement(self, p):
         'casex_statement : CASEX LPAREN case_comp RPAREN casecontent_statements ENDCASE'
         p[0] = CasexStatement(p[3], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(6)
 
     def p_casez_statement(self, p):
         'casez_statement : CASEZ LPAREN case_comp RPAREN casecontent_statements ENDCASE'
         p[0] = CasezStatement(p[3], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(6)
 
     def p_unique_case_statement(self, p):
         'unique_case_statement : UNIQUE CASE LPAREN case_comp RPAREN casecontent_statements ENDCASE'
         p[0] = UniqueCaseStatement(p[3], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(7)
 
     def p_case_comp(self, p):
         'case_comp : expression'
@@ -1760,6 +1780,7 @@ class VerilogParser(object):
         p[0] = InstanceList(p[1], p[2], tuple(
             instancelist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(4)
 
     def p_instance_or(self, p):
         'instance : SENS_OR parameterlist instance_bodylist SEMICOLON'
@@ -1770,6 +1791,7 @@ class VerilogParser(object):
         p[0] = InstanceList(p[1], p[2], tuple(
             instancelist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(4)
 
     def p_instance_bodylist(self, p):
         'instance_bodylist : instance_bodylist COMMA instance_body'
@@ -1799,6 +1821,7 @@ class VerilogParser(object):
                                          (), instance_array, lineno=p.lineno(1)))
         p[0] = InstanceList(p[1], (), tuple(instancelist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(3)
 
     def p_instance_or_noname(self, p):
         'instance : SENS_OR instance_bodylist_noname SEMICOLON'
@@ -1808,6 +1831,7 @@ class VerilogParser(object):
                                          (), instance_array, lineno=p.lineno(1)))
         p[0] = InstanceList(p[1], (), tuple(instancelist), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(3)
 
     def p_instance_bodylist_noname(self, p):
         'instance_bodylist_noname : instance_bodylist_noname COMMA instance_body_noname'
@@ -1953,6 +1977,7 @@ class VerilogParser(object):
         'generate : GENERATE generate_items ENDGENERATE'
         p[0] = GenerateStatement(p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(3)
 
     def p_generate_items_empty(self, p):
         'generate_items : empty'
@@ -1981,11 +2006,13 @@ class VerilogParser(object):
         'generate_block : BEGIN generate_items END'
         p[0] = Block(p[2], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(3)
 
     def p_generate_named_block(self, p):
         'generate_block : BEGIN COLON ID generate_items END'
         p[0] = Block(p[4], p[3], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(5)
 
     def p_generate_if(self, p):
         'generate_if : IF LPAREN cond RPAREN gif_true_item ELSE gif_false_item'
@@ -2063,6 +2090,7 @@ class VerilogParser(object):
         'function : FUNCTION width ID SEMICOLON function_statement ENDFUNCTION'
         p[0] = Function(p[3], p[2], p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(6)
 
     def p_function_nowidth(self, p):
         'function : FUNCTION ID SEMICOLON function_statement ENDFUNCTION'
@@ -2072,6 +2100,7 @@ class VerilogParser(object):
                               lineno=p.lineno(1)),
                         p[4], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(5)
 
     def p_function_integer(self, p):
         'function : FUNCTION INTEGER ID SEMICOLON function_statement ENDFUNCTION'
@@ -2081,6 +2110,7 @@ class VerilogParser(object):
                               lineno=p.lineno(1)),
                         p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(6)
 
     def p_function_statement(self, p):
         'function_statement : funcvardecls function_calc'
@@ -2231,16 +2261,19 @@ class VerilogParser(object):
         p[0] = SingleStatement(DelayStatement(
             p[2], lineno=p.lineno(1)), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(3)
 
     def p_single_statement_systemcall(self, p):
         'single_statement : systemcall SEMICOLON'
         p[0] = SingleStatement(p[1], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(2)
 
     def p_single_statement_disable(self, p):
         'single_statement : disable SEMICOLON'
         p[0] = SingleStatement(p[1], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
+        p[0].end_lineno = p.lineno(2)
 
     # fix me: to support task-call-statement
     # def p_single_statement_taskcall(self, p):
