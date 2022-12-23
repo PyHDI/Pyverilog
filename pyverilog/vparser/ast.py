@@ -42,9 +42,9 @@ class Node(object):
             buf.write(attrstr)
 
         if showlineno:
-            try:
-                buf.write(' (from %s to %s)' %(self.lineno, self.end_lineno))
-            except:
+            if hasattr(self, 'end_lineno'):
+                buf.write(' (from %s to %s)' % (self.lineno, self.end_lineno))
+            else:
                 buf.write(' (at %s)' % self.lineno)
 
         buf.write('\n')
