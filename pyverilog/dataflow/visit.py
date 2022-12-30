@@ -238,7 +238,7 @@ class DefinitionInfo(object):
     def addPorts(self, ports):
         for p in ports:
             if isinstance(p, Ioport):
-                self.ioports.append(p.first.name)
+                self.ioports.append(p.first)
             else:
                 self.ioports.append(p.name)
 
@@ -449,6 +449,9 @@ class Frame(object):
 
     def addFunctionPort(self, node):
         self.functions.addPort(node)
+
+    def addFunctionPorts(self, portlist):
+        self.functions.addPorts(portlist)
 
     def addTaskPort(self, node):
         self.tasks.addPort(node)
@@ -684,6 +687,9 @@ class FrameTable(object):
 
     def addFunction(self, var):
         self.dict[self.current].addFunction(var)
+
+    def addFunctionPorts(self, ports):
+        self.dict[self.current].addFunctionPorts(ports)
 
     def addTask(self, var):
         self.dict[self.current].addTask(var)
