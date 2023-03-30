@@ -899,6 +899,7 @@ class ASTCodeGenerator(ConvertVisitor):
             'name': escape(node.name),
             'retwidth': self.visit(node.retwidth),
             'statement': statement,
+            'automatic': 'automatic' if node.automatic else ''
         }
         rslt = template.render(template_dict)
         return rslt

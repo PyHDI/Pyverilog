@@ -2092,6 +2092,11 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
         p[0].end_lineno = p.lineno(6)
 
+    def p_function_automatic(self, p):
+        'function : FUNCTION AUTOMATIC width ID SEMICOLON function_statement ENDFUNCTION'
+        p[0] = Function(p[4], p[3], p[6], automatic=True, lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
     def p_function_nowidth(self, p):
         'function : FUNCTION ID SEMICOLON function_statement ENDFUNCTION'
         p[0] = Function(p[2],
@@ -2102,6 +2107,15 @@ class VerilogParser(object):
         p.set_lineno(0, p.lineno(1))
         p[0].end_lineno = p.lineno(5)
 
+    def p_function_automatic_nowidth(self, p):
+        'function : FUNCTION AUTOMATIC ID SEMICOLON function_statement ENDFUNCTION'
+        p[0] = Function(p[3],
+                        Width(IntConst('0', lineno=p.lineno(1)),
+                              IntConst('0', lineno=p.lineno(1)),
+                              lineno=p.lineno(1)),
+                        p[5], automatic=True, lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
+
     def p_function_integer(self, p):
         'function : FUNCTION INTEGER ID SEMICOLON function_statement ENDFUNCTION'
         p[0] = Function(p[3],
@@ -2111,6 +2125,15 @@ class VerilogParser(object):
                         p[5], lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
         p[0].end_lineno = p.lineno(6)
+
+    def p_function_integer_automatic(self, p):
+        'function : FUNCTION AUTOMATIC INTEGER ID SEMICOLON function_statement ENDFUNCTION'
+        p[0] = Function(p[4],
+                        Width(IntConst('31', lineno=p.lineno(1)),
+                              IntConst('0', lineno=p.lineno(1)),
+                              lineno=p.lineno(1)),
+                        p[6], automatic=True, lineno=p.lineno(1))
+        p.set_lineno(0, p.lineno(1))
 
     def p_function_statement(self, p):
         'function_statement : funcvardecls function_calc'
