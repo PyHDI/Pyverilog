@@ -98,7 +98,7 @@ def main():
 
     for target in options.searchtarget:
         graphgen.generate(target, walk=options.walk, identical=options.identical,
-                          step=options.step, reorder=options.reorder, delay=options.delay)
+                          step=options.step, do_reorder=options.reorder, delay=options.delay)
 
     graphgen.draw()
 
