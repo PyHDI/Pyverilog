@@ -856,12 +856,14 @@ class VerilogParser(object):
 
     def p_lpartselect_lpointer_plus(self, p):
         'lpartselect : pointer LBRACKET expression PLUSCOLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], Plus(p[3], p[5]), lineno=p.lineno(1))
+        inc_value = Minus(p[5], IntConst('1'))
+        p[0] = Partselect(p[1], p[3], Plus(p[3], inc_value), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_lpartselect_lpointer_minus(self, p):
         'lpartselect : pointer LBRACKET expression MINUSCOLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], Minus(p[3], p[5]), lineno=p.lineno(1))
+        dec_value = Minus(p[5], IntConst('1'))
+        p[0] = Partselect(p[1], p[3], Minus(p[3], dec_value), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_lpartselect(self, p):
@@ -871,12 +873,14 @@ class VerilogParser(object):
 
     def p_lpartselect_plus(self, p):
         'lpartselect : identifier LBRACKET expression PLUSCOLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], Plus(p[3], p[5]), lineno=p.lineno(1))
+        inc_value = Minus(p[5], IntConst('1'))
+        p[0] = Partselect(p[1], p[3], Plus(p[3], inc_value), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_lpartselect_minus(self, p):
         'lpartselect : identifier LBRACKET expression MINUSCOLON expression RBRACKET'
-        p[0] = Partselect(p[1], p[3], Minus(p[3], p[5]), lineno=p.lineno(1))
+        dec_value = Minus(p[5], IntConst('1'))
+        p[0] = Partselect(p[1], p[3], Minus(p[3], dec_value), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_lpointer(self, p):
@@ -1217,14 +1221,16 @@ class VerilogParser(object):
 
     def p_partselect_plus(self, p):
         'partselect : identifier LBRACKET expression PLUSCOLON expression RBRACKET'
+        inc_value = Minus(p[5], IntConst('1'))
         p[0] = Partselect(p[1], p[3], Plus(
-            p[3], p[5], lineno=p.lineno(1)), lineno=p.lineno(1))
+            p[3], inc_value, lineno=p.lineno(1)), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_partselect_minus(self, p):
         'partselect : identifier LBRACKET expression MINUSCOLON expression RBRACKET'
+        dec_value = Minus(p[5], IntConst('1'))
         p[0] = Partselect(p[1], p[3], Minus(
-            p[3], p[5], lineno=p.lineno(1)), lineno=p.lineno(1))
+            p[3], dec_value, lineno=p.lineno(1)), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_partselect_pointer(self, p):
@@ -1234,14 +1240,16 @@ class VerilogParser(object):
 
     def p_partselect_pointer_plus(self, p):
         'partselect : pointer LBRACKET expression PLUSCOLON expression RBRACKET'
+        inc_value = Minus(p[5], IntConst('1'))
         p[0] = Partselect(p[1], p[3], Plus(
-            p[3], p[5], lineno=p.lineno(1)), lineno=p.lineno(1))
+            p[3], inc_value, lineno=p.lineno(1)), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_partselect_pointer_minus(self, p):
         'partselect : pointer LBRACKET expression MINUSCOLON expression RBRACKET'
+        dec_value = Minus(p[5], IntConst('1'))
         p[0] = Partselect(p[1], p[3], Minus(
-            p[3], p[5], lineno=p.lineno(1)), lineno=p.lineno(1))
+            p[3], dec_value, lineno=p.lineno(1)), lineno=p.lineno(1))
         p.set_lineno(0, p.lineno(1))
 
     def p_pointer(self, p):
