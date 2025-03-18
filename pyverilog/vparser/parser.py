@@ -628,7 +628,13 @@ class VerilogParser(object):
         if 'reg' in sigtypes:
             decls.append(Reg(name=name, width=width,
                              signed=signed, lineno=lineno))
-        decls.append(assign)
+
+        # Declassign of reg is the same as an initial block with blocking
+        # assignment.
+        if 'reg' in sigtypes:
+            decls.append(Initial(BlockingSubstitution(*(assign.children()))))
+        else:
+            decls.append(assign)
         return decls
 
     def typecheck_declassign(self, sigtypes):
