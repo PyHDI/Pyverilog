@@ -770,6 +770,9 @@ class ASTCodeGenerator(ConvertVisitor):
         rslt = template.render(template_dict)
         return rslt
 
+    def visit_CasezStatement(self, node):
+        return self.visit_CaseStatement(node)
+
     def visit_Case(self, node):
         filename = getfilename(node)
         template = self.get_template(filename)
